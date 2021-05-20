@@ -10,6 +10,7 @@ A window is build up of Components and the components correspond exactly to the 
 When the user does something you can execute your code based on callbacks. (See: simple greeter app.)
 
 **Hello world:**
+
 ```python
 import quasargui
 from quasargui.components import Layout
@@ -17,7 +18,9 @@ from quasargui.components import Layout
 layout = Layout(children=["Hello World!"])
 quasargui.run(layout)
 ```
+
 **Simple greeter app:**
+
 This app demonstrates how you can build up a simple form and use the form's data to run your code.
 
 ```python
