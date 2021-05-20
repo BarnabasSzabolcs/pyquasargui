@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Program</title>
+  <link href="material-icons.css" rel="stylesheet" type="text/css" />
+  <link href="quasar.min.css" rel="stylesheet" type="text/css" />
+  <link href="styles.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+  <div id="q-app">
+    <dynamic-component :descriptor="mainComponent"></dynamic-component>
+<!--    <component-->
+<!--            :is="mainComponent.component"-->
+<!--            v-bind="mainComponent.props"-->
+<!--            v-on="mainComponent.events"-->
+<!--            v-model="data[mainComponent.modelId]"-->
+<!--    ></component>-->
+    <div v-if="debug">
+      data: {{data}}<br>
+      components: {{ component }}<br>
+      main component: {{ mainComponent }}<br>
+    </div>
+  </div>
+  <script src="lodash.min.js"></script>
+  <script src="vue.min.js"></script>
+  <script src="quasar.umd.min.js"></script>
+  <script src="script.js"></script>
+</body>
+
+</html>
