@@ -4,25 +4,15 @@ function createEventCB(id) {
   }
 }
 
-function setupReferences(component, props, events) {
-  const propKeys = Object.getOwnPropertyNames(props || {})
-  propKeys.forEach(k => {
-    const v = props[k]
-    if (_.isObject(v) && '@' in v) {
-      const refId = v['@']
-      //            app._data.data[refId] = v.value
-      events['input'] = function(value) {}
-      //            Vue.set(props, k, app._data.data[refId])
-    }
-  })
-}
-
 // ref. https://symfonycasts.com/screencast/vue/vue-instance
 // problem: this solution keeps rerendering unnecessarily when used with q-input  
 Vue.component('dynamic-component', {
-  props: ['descriptor'],
+  props: ['id'],
   render: function(h) {
-    const d = this.descriptor
+    if (this.id === undefined || this.id === null) {
+      return ''
+    }
+    const d = this.$root.componentStore[this.id]
     console.log('descriptor:', d)
     if (_.isString(d)) {
       console.log('rendering:', d)
@@ -69,7 +59,7 @@ Vue.component('dynamic-component', {
         } else {
           const childComponent = 'dynamic-component'
           child = JSON.stringify(child).replace("'", "&#39;")
-          return `<${childComponent} :descriptor='${child}'></${childComponent}>`
+          return `<${childComponent} :id='${child}'></${childComponent}>`
         }
       }
     ).join('')
@@ -86,14 +76,26 @@ const app = new Vue({
   el: '#q-app',
   data: function() {
     return {
-      mainComponent: {},
+      mainComponentId: null,
       data: {},
-      debug: false
+      componentStore: {},
+      debug: false,
     }
   },
   methods: {
     setMainComponent(component) {
-      this.mainComponent = component
+      const id = this.registerComponent(component)
+      this.mainComponentId = id
+    },
+    registerComponent(component) {
+      if (component.id in this.componentStore === false) {
+        this.$set(this.componentStore, component.id, component)
+      }
+      const children = component.children || []
+      component.children = children.map(child => {
+        return _.isObject(child) ? this.registerComponent(child) : child
+      })
+      return component.id
     },
     getData(id) {
       return this.data[id]
@@ -101,7 +103,7 @@ const app = new Vue({
     setData(id, value) {
       this.data[id] = value
     },
-    showNotification(params){
+    showNotification(params) {
       const longTimeOut = 7000
       defaults = {
         type: '',

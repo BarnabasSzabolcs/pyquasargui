@@ -105,6 +105,7 @@ class Component:
         if styles:
             props.update({'style': styles})
         return {
+            'id': self.id,
             'events': self.events,
             'props': props,
             'children': [child if isinstance(child, str) else child.vue for child in self.children]
