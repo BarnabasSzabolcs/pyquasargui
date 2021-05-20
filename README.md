@@ -50,7 +50,7 @@ quasargui.run(layout)  # Shows a window with the layout.
 ```
 
 
-See further examples in the (/examples) folder.
+[See further examples](examples) in the [examples](examples) folder.
 
 
 ### Installation:
