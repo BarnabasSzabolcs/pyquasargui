@@ -4,6 +4,11 @@ function createEventCB(id) {
   }
 }
 
+function sendLog() {
+  if (app.debug)
+    window.pywebview.api.print_log(arguments)
+}
+
 // ref. https://symfonycasts.com/screencast/vue/vue-instance
 // problem: this solution keeps rerendering unnecessarily when used with q-input  
 Vue.component('dynamic-component', {
@@ -13,16 +18,16 @@ Vue.component('dynamic-component', {
       return ''
     }
     const d = this.$root.componentStore[this.id]
-    console.log('descriptor:', d)
+    sendLog('descriptor:', d)
     if (_.isString(d)) {
-      console.log('rendering:', d)
+      //   sendLog('rendering:', d)
       return d
     }
     if (!d.component) {
-      console.log('rendering:', '(empty)')
+      //   sendLog('rendering:', '(empty)')
       return ''
     }
-    // console.log(JSON.stringify(d))
+    // sendLog(JSON.stringify(d))
     if (('value' in d.props) && !('input' in d.events)) {
       inputEvent = `@input="$root.data['${d.props.value['@']}']=$event"`
     } else {
@@ -64,10 +69,10 @@ Vue.component('dynamic-component', {
       }
     ).join('')
 
-    template = `<${d.component} ${props} ${events} ${inputEvent}>${children}</${d.component}>`
-    // console.log(Vue.compile(template).render)
-    console.log('rendering:')
-    console.log(template)
+    const template = `<${d.component} ${props} ${events} ${inputEvent}>${children}</${d.component}>`
+    // sendLog(Vue.compile(template).render)
+    // sendLog('rendering:')
+    // sendLog(template)
     return Vue.compile(template).render.call(this, h)
   }
 })
@@ -79,10 +84,13 @@ const app = new Vue({
       mainComponentId: null,
       data: {},
       componentStore: {},
-      debug: false,
+      debug: true,
     }
   },
   methods: {
+    setDebug(debug) {
+      this.debug = debug
+    },
     setMainComponent(component) {
       const id = this.registerComponent(component)
       this.mainComponentId = id

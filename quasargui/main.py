@@ -7,15 +7,21 @@ from .components import Component, EventCallbacks
 
 
 class Api:
-    def __init__(self, main_component: Component):
+    def __init__(self, main_component: Component, debug: bool = False):
         self.main_component = main_component
         self.window = None
+        self.debug = debug
 
     def init(self, window):
         self.window = window
-        json_str = json.dumps(self.main_component.vue)
-        cmd = f'app.setMainComponent({json_str})'
-        print(cmd)
+        window.evaluate_js('app.setDebug({debug})'.format(
+            debug=json.dumps(self.debug)
+        ))
+        cmd = 'app.setMainComponent({component})'.format(
+            component=json.dumps(self.main_component.vue)
+        )
+        if self.debug:
+            print(cmd)
         window.evaluate_js(cmd)
         self.main_component.set_api(self)
 
@@ -33,6 +39,9 @@ class Api:
             print("ERROR:", e)
             raise e
 
+    def print_log(self, args):
+        print(*args.values(), sep=' ', end='\n', flush=True)
+
     def get_data(self, data_id: str):
         return self.window.evaluate_js(f'app.getData({data_id})')
 
@@ -45,11 +54,11 @@ class Api:
         return self.window.evaluate_js(f'app.showNotification({message})')
 
 
-def run(component: Component):
-    api = Api(component)
+def run(component: Component, debug: bool = False):
+    api = Api(component, debug=debug)
     window = webview.create_window(
         'Program',
         QUASAR_GUI_INDEX_PATH,
         js_api=api,
         min_size=(600, 450))
-    webview.start(api.init, window, debug=True)
+    webview.start(api.init, window)
