@@ -3,11 +3,11 @@ A modern, easy-to-use package for making Python GUI desktop apps.
 
 ### Usage:
 
-This GUI library builds up a window with a html view, in which Quasar Vue system is running. But don't worry, you can build up everything in python.
+This GUI library creates a window with a html view, in which Quasar Vue system is running. But don't worry, you can build up everything in python.
 
-A window is build up of Components and the components correspond exactly to the components described in (https://quasar.dev/vue-components/). Quasar is very well-documented and so it makes this project well-documented. From Quasar's help page you can use all props, classes, as well as you can easily customize the look of your Components using CSS.
+A window is built up of Component's and the components correspond to components described in (https://quasar.dev/vue-components/). Quasar is very well-documented and so it makes this project well-documented. From Quasar's help page you can use all props, classes, as well as you can easily customize the look of your Components using CSS.
 
-When the user does something you can execute your code based on callbacks. (See: simple greeter app.)
+You can react to user events using callbacks. (See: simple greeter app.)
 
 **Hello world:**
 
