@@ -3,7 +3,13 @@ A modern, easy-to-use package for making Python GUI desktop apps.
 
 ### Usage:
 
-**Hello world:** the minimal implementation.
+This GUI library builds up a window with a html view, in which Quasar Vue system is running. But don't worry, you can build up everything in python.
+
+A window is build up of Components and the components correspond exactly to the components described in (https://quasar.dev/vue-components/). Quasar is very well-documented and so it makes this project well-documented. From Quasar's help page you can use all props, classes, as well as you can easily customize the look of your Components using CSS.
+
+When the user does something you can execute your code based on callbacks. (See: simple greeter app.)
+
+**Hello world:**
 ```python
 import quasargui
 from quasargui.components import Layout
@@ -11,7 +17,8 @@ from quasargui.components import Layout
 layout = Layout(children=["Hello World!"])
 quasargui.run(layout)
 ```
-**Simple greeter app:** Note that for all the components you can use all the classes and props described in (https://quasar.dev). AND you can also use css styling.
+**Simple greeter app:**
+This app demonstrates how you can build up a simple form and use the form's data to run your code.
 
 ```python
 import quasargui
@@ -45,9 +52,8 @@ See further examples in the (/examples) folder.
 
 ### Installation:
 
-This project is available via pip:
-
-    pip install quasargui
+At the moment this project is just a demo, featuring only a few components,
+but it will be available on pip soon.
 
 #### Dependencies: 
 
