@@ -50,14 +50,16 @@ ok_btn = Button(
     label='ok',
     props={'unelevated': True, 'color': 'primary'},
     events={'click': update_text_list})
-text_list = Layout()
 
 layout = Rows(
     classes='text-center',
     children=[
         '<h5>Dynamic components</h5>',
         input_number,
-        text_list,
+        Layout(
+            props={'v-if': input_number.ref},
+            classes="text-left q-ml-sm",
+            children=["You have entered: ", input_number.ref]),
         ok_btn
     ])
 

@@ -7,7 +7,7 @@ EventsType = Dict[str, Callable[[...], Any]]
 ClassesType = Union[str, List[str]]
 StylesType = Dict[str, str]
 PropsType = Dict[str, Any]
-ChildrenType = List[Union['Component', str]]
+ChildrenType = List[Union['Component', str, 'Data']]
 
 
 class Data:
@@ -47,6 +47,9 @@ class Data:
 
     def render(self):
         return {'@': self.id, 'value': self.value}
+
+    def render_mustache(self) -> str:
+        return "{{$root.data['" + self.id + "']}}"
 
 
 class EventCallbacks:
@@ -97,7 +100,8 @@ class Component:
 
     @property
     def vue(self) -> dict:
-        props = {k: v for k, v in self.props.items()}
+        props = {k: v.render() if isinstance(v, Data) else v
+            for k, v in self.props.items()}
         classes = self.classes if isinstance(self.classes, str) else " ".join(cs for cs in self.classes)
         if classes:
             props.update({'class': classes})
@@ -108,7 +112,10 @@ class Component:
             'id': self.id,
             'events': self.events,
             'props': props,
-            'children': [child if isinstance(child, str) else child.vue for child in self.children]
+            'children': [child if isinstance(child, str) else
+                         child.render_mustache() if isinstance(child, Data)
+                         else child.vue
+                         for child in self.children]
         }
 
     def _merge_vue(self, d: dict) -> dict:
@@ -215,6 +222,10 @@ class Input(Component):
     def set_api(self, api: 'Api'):
         super().set_api(api)
         self._value_ref.set_api(api)
+
+    @property
+    def ref(self):
+        return self._value_ref
 
     @property
     def value(self):

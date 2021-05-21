@@ -48,7 +48,8 @@ Vue.component('dynamic-component', {
           if (ref in this.$root.data === false) {
             this.$root.$set(this.$root.data, ref, prop.value)
           }
-          return `:${propName}="$root.data['${ref}']"`
+          colon = propName.startsWith('v-') ? '': ':'
+          return `${colon}${propName}="$root.data['${ref}']"`
         } else if (_.isString(prop)) {
           return `${propName}="${prop}"`
         } else {
