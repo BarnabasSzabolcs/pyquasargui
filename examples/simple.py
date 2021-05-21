@@ -3,7 +3,9 @@ from quasargui.components import Layout, Input, Button
 
 
 def run_program():
-    layout.notify(f'Hello, {input_name.value}!')
+    layout.notify('Hello, {name}!'.format(
+        name=input_name.value
+    ))
 
 
 input_name = Input(

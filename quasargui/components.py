@@ -7,7 +7,7 @@ EventsType = Dict[str, Callable[[...], Any]]
 ClassesType = Union[str, List[str]]
 StylesType = Dict[str, str]
 PropsType = Dict[str, Any]
-ChildrenType = List['Component']
+ChildrenType = List[Union['Component', str]]
 
 
 class Data:
@@ -101,7 +101,7 @@ class Component:
         classes = self.classes if isinstance(self.classes, str) else " ".join(cs for cs in self.classes)
         if classes:
             props.update({'class': classes})
-        styles = ";".join(f'{k}:{v}' for k, v in self.styles.items())
+        styles = ";".join('{k}:{v}'.format(k=k, v=v) for k, v in self.styles.items())
         if styles:
             props.update({'style': styles})
         return {
@@ -125,8 +125,15 @@ class Component:
             if isinstance(child, Component):
                 child.set_api(self.api)
 
-    def notify(self, message: str):
-        self.api.send_notification(message)
+    def notify(self, message: str, **kwargs):
+        params = {'message': message}
+        if kwargs:
+            params.update(kwargs)
+        self.api.send_notification(params)
+
+    def set_children(self, children: ChildrenType):
+        self.children = children
+        self.api.set_component(self.vue)
 
 
 class Layout(Component):
@@ -143,6 +150,54 @@ class Layout(Component):
         return self._merge_vue({
             'component': 'div'
         })
+
+
+class Rows(Layout):
+    def __init__(self,
+                 classes: ClassesType = None,
+                 row_classes: ClassesType = None,
+                 styles: StylesType = None,
+                 props: PropsType = None,
+                 events: EventsType = None,
+                 children: ChildrenType = None):
+        classes = classes.split(' ') if isinstance(classes, str) else classes or []
+        classes.append('col')
+        self.row_classes = row_classes or 'row q-ma-sm'
+        children = self._wrap_children(children)
+        super().__init__(classes, styles, props, events, children)
+
+    def _wrap_children(self, children):
+        return [
+            Layout(children=[child], classes=self.row_classes)
+              if not isinstance(child, Layout) else child
+            for child in children or []]
+
+    def set_children(self, children: ChildrenType):
+        super().set_children(self._wrap_children(children))
+
+
+class Columns(Layout):
+    def __init__(self,
+                 classes: ClassesType = None,
+                 row_classes: ClassesType = None,
+                 styles: StylesType = None,
+                 props: PropsType = None,
+                 events: EventsType = None,
+                 children: ChildrenType = None):
+        classes = classes.split(' ') if isinstance(classes, str) else classes or []
+        classes.append('row')
+        self.row_classes = row_classes or 'col q-ma-sm'
+        children = self._wrap_children(children)
+        super().__init__(classes, styles, props, events, children)
+
+    def _wrap_children(self, children):
+        return [
+            Layout(children=[child], classes=self.row_classes)
+              if not isinstance(child, Layout) else child
+            for child in children or []]
+
+    def set_children(self, children: ChildrenType):
+        super().set_children(self._wrap_children(children))
 
 
 class Input(Component):
@@ -164,6 +219,10 @@ class Input(Component):
     @property
     def value(self):
         return self._value_ref.value
+
+    @value.setter
+    def value(self, value):
+        self._value_ref.value = value
 
     @property
     def vue(self) -> dict:

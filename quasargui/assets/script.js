@@ -106,8 +106,8 @@ const app = new Vue({
       const id = this.registerComponent(component)
       this.mainComponentId = id
     },
-    registerComponent(component) {
-      if (component.id in this.componentStore === false) {
+    registerComponent(component, refresh = false) {
+      if (refresh || (component.id in this.componentStore === false)) {
         this.$set(this.componentStore, component.id, component)
       }
       const children = component.children || []
@@ -115,6 +115,9 @@ const app = new Vue({
         return _.isObject(child) ? this.registerComponent(child) : child
       })
       return component.id
+    },
+    refreshComponent(component) {
+      this.registerComponent(component, refresh = true)
     },
     getData(id) {
       return this.data[id]
