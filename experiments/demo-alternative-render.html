@@ -1,0 +1,79 @@
+<!-- ref. https://jsfiddle.net/Justineo/y239e76m/ -->
+<html>
+<body>
+<div id="app"></div>
+
+<script type="text/x-template" id="foo">
+  <div>
+ 	 	<p>Hello Foo</p>
+  	<em>I am fine as I am based on static html</em>
+  </div>
+</script>
+
+<script type="text/x-template" id="bar">
+  <div>
+  <p>Hello Bar</p>
+  <em>{{ templateId }}</em>
+  </div>
+</script>
+
+<script type="text/x-template" id="vuecan">
+  <div style="border: #000 1px dashed; background-color: #eee; padding: 5px;">
+  <p>Planet of the Vuecans</p>
+  <em>{{ templateId }}</em>
+  <button v-on:click="simpleClickHandler">Greet</button>
+  <p v-if="message">{{ message }}<p>
+  </div>
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js"></script>
+<script>
+const DynamicRenderer = {
+  props: {
+    templateId: String,
+    message: String
+  },
+  methods: {
+  	simpleClickHandler () {
+    	this.message = 'Live long and prosper!'
+    }
+  },
+  render (h) {
+    const template = document.getElementById(this.templateId)
+    return h({
+    	template,
+      props: DynamicRenderer.props,
+      methods: DynamicRenderer.methods
+    })
+  }
+}
+
+new Vue({
+  el: '#app',
+  data: {
+    id: 'foo'
+  },
+  render (h) {
+    return h('div', [
+    	h('button', {
+      	on: {
+          click: () => {
+            this.id = this.id === 'foo' ? 'bar' : 'foo'
+          }
+        }
+      }, 'Toggle'),
+    	h(DynamicRenderer, {
+      	props: {
+        	templateId: this.id
+      	}
+      }),
+      h(DynamicRenderer, {
+        props: {
+          templateId: 'vuecan'
+        }
+      })
+    ])
+  }
+})
+</script>
+</body>
+</html>

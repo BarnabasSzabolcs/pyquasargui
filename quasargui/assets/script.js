@@ -10,7 +10,10 @@ function sendLog() {
 }
 
 // ref. https://symfonycasts.com/screencast/vue/vue-instance
-// problem: this solution keeps rerendering unnecessarily when used with q-input  
+// problem: this solution keeps rerendering unnecessarily when used with q-input
+// alternative solution is to send html code and add it within script tags
+// ref. https://jsfiddle.net/Justineo/y239e76m/
+// ref. https://github.com/vuejs/vue/issues/9911
 Vue.component('dynamic-component', {
   props: ['id'],
   render: function(h) {

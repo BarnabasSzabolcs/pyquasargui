@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+  <div id="q-app">
+    <dynamic-component :descriptor="mainComponent"></dynamic-component>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/vue@^2.0.0/dist/vue.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/quasar@1.15.15/dist/quasar.umd.min.js"></script>
+  <script>
+Vue.component('dynamic-component', {
+    props: ['descriptor'],
+    render: function (createElement) {
+		const attributes = {
+	        on: this.descriptor.events,
+	        props: this.descriptor.props
+      	}
+	    const children = this.descriptor.children
+	    return createElement(
+	        this.descriptor.component,
+	        attributes,
+	        children)
+	}
+})
+const app = new Vue({
+    el: '#q-app',
+    data: function(){
+    return {
+        mainComponent: {
+           component: 'q-input',
+           props: {
+               value: 'values.value1'
+           },
+           events: {
+               input: value => this.value1 = value
+           }
+        },
+        values: {
+        	value1: 'hello'
+        }
+    }
+  }
+})
+  </script>
+</body>
