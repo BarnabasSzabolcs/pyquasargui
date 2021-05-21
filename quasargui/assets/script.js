@@ -20,11 +20,11 @@ Vue.component('dynamic-component', {
     const d = this.$root.componentStore[this.id]
     sendLog('descriptor:', d)
     if (_.isString(d)) {
-      //   sendLog('rendering:', d)
-      return d
+      sendLog('rendering:', d)
+      return this.renderTemplate(d)
     }
     if (!d.component) {
-      //   sendLog('rendering:', '(empty)')
+      sendLog('rendering:', '(empty)')
       return ''
     }
     // sendLog(JSON.stringify(d))
@@ -71,9 +71,20 @@ Vue.component('dynamic-component', {
 
     const template = `<${d.component} ${props} ${events} ${inputEvent}>${children}</${d.component}>`
     // sendLog(Vue.compile(template).render)
-    // sendLog('rendering:')
-    // sendLog(template)
-    return Vue.compile(template).render.call(this, h)
+    sendLog('rendering:')
+    sendLog(template)
+    return this.renderTemplate(template)
+  },
+  methods: {
+    renderTemplate(template) {
+      // This works even if the template does not have any reactive variables.
+      // ref. https://github.com/vuejs/vue/issues/9911
+      const compiled = Vue.compile(template)
+      this.$options.staticRenderFns = [];
+      this._staticTrees = [];
+      compiled.staticRenderFns.map(fn => (this.$options.staticRenderFns.push(fn)))
+      return compiled.render.call(this)
+    }
   }
 })
 
