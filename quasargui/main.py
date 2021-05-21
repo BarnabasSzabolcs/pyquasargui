@@ -1,55 +1,109 @@
 import json
+import traceback
+from typing import List, Tuple
 
 import webview
+from webview import Window
 
 from quasargui import QUASAR_GUI_INDEX_PATH
 from .components import Component, EventCallbacks
 
 
+def _print_error(e):
+    print("\n\nERROR {}: {}".format(e.__class__.__name__, e))
+    print(traceback.format_exc())
+
+
 class Api:
-    def __init__(self, main_component: Component):
+    def __init__(self, main_component: Component, debug: bool = False):
         self.main_component = main_component
         self.window = None
+        self.debug = debug
 
     def init(self, window):
         self.window = window
-        json_str = json.dumps(self.main_component.vue)
-        cmd = f'app.setMainComponent({json_str})'
-        print(cmd)
-        window.evaluate_js(cmd)
-        self.main_component.set_api(self)
+        window.evaluate_js('app.setDebug({debug})'.format(
+            debug=json.dumps(self.debug)
+        ))
+        self.set_main_component(self.main_component)
+
+    def set_main_component(self, component: Component):
+        cmd = 'app.setMainComponent({component})'.format(
+            component=json.dumps(component.vue)
+        )
+        if self.debug:
+            print(cmd)
+        self.window.evaluate_js(cmd)
+        component.set_api(self)
 
     # noinspection PyMethodMayBeStatic
     def call_cb(self, cb_id: int, params):
-        try:
-            EventCallbacks.get(cb_id)(params)
-        except TypeError as e:
+        fun = EventCallbacks.get(cb_id)
+        nargs = fun.__code__.co_argcount
+        if nargs == 0:
             try:
-                EventCallbacks.get(cb_id)()
-            except TypeError:
-                print("ERROR:", e)
+                fun()
+            except Exception as e:
+                _print_error(e)
                 raise e
-        except Exception as e:
-            print("ERROR:", e)
-            raise e
+        elif nargs == 1:
+            try:
+                fun(params)
+            except Exception as e:
+                _print_error(e)
+                raise e
+        else:
+            raise AssertionError('Callback {name} has wrong number of parameters ({n})'.format(
+                name=fun.__name__,
+                n=nargs
+            ))
+
+    def print_log(self, args):
+        print(*args.values(), sep=' ', end='\n', flush=True)
 
     def get_data(self, data_id: str):
-        return self.window.evaluate_js(f'app.getData({data_id})')
+        return self.window.evaluate_js('app.getData({data_id})'.format(
+            data_id=data_id
+        ))
 
     def set_data(self, data_id: str, value):
         print('set_data', data_id, value)
-        return self.window.evaluate_js(f'app.setData({data_id}, {json.dumps(value)})')
+        return self.window.evaluate_js(
+            'app.setData({data_id}, {value})'.format(
+                data_id=data_id,
+                value=json.dumps(value)
+            ))
 
-    def send_notification(self, message: str):
-        message = json.dumps({'message': message})
-        return self.window.evaluate_js(f'app.showNotification({message})')
+    def set_component(self, component_vue):
+        print('set_component', component_vue)
+        return self.window.evaluate_js(
+            'app.refreshComponent({component_vue})'.format(
+                component_vue=json.dumps(component_vue)))
+
+    def send_notification(self, params: dict):
+        return self.window.evaluate_js('app.showNotification({params})'.format(
+            params=json.dumps(params)))
 
 
-def run(component: Component):
-    api = Api(component)
+WINDOW = 0
+API = 1
+window_api_list: List[Tuple[Window, Api]] = []
+
+
+def run(component: Component, debug: bool = False):
+    api = Api(component, debug=debug)
     window = webview.create_window(
         'Program',
         QUASAR_GUI_INDEX_PATH,
         js_api=api,
         min_size=(600, 450))
-    webview.start(api.init, window, debug=True)
+    window_api_list.append((window, api))
+    webview.start(api.init, window, debug=debug)
+
+
+def set_main_component(component: Component):
+    if len(window_api_list) != 1:
+        raise AssertionError(
+            'This function only works for a single window. '
+            'Otherwise use layout.api.set_main_component()')
+    window_api_list[0][API].set_main_component(component)

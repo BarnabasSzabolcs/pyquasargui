@@ -11,7 +11,7 @@
 
 <body>
   <div id="q-app">
-    <dynamic-component :descriptor="mainComponent"></dynamic-component>
+    <dynamic-component :id="mainComponentId"></dynamic-component>
 <!--    <component-->
 <!--            :is="mainComponent.component"-->
 <!--            v-bind="mainComponent.props"-->
@@ -20,8 +20,8 @@
 <!--    ></component>-->
     <div v-if="debug">
       data: {{data}}<br>
-      components: {{ component }}<br>
-      main component: {{ mainComponent }}<br>
+      components: {{ componentStore }}<br>
+      main component: {{ mainComponentId }}<br>
     </div>
   </div>
   <script src="lodash.min.js"></script>

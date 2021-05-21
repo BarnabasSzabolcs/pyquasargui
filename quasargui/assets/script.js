@@ -4,35 +4,30 @@ function createEventCB(id) {
   }
 }
 
-function setupReferences(component, props, events) {
-  const propKeys = Object.getOwnPropertyNames(props || {})
-  propKeys.forEach(k => {
-    const v = props[k]
-    if (_.isObject(v) && '@' in v) {
-      const refId = v['@']
-      //            app._data.data[refId] = v.value
-      events['input'] = function(value) {}
-      //            Vue.set(props, k, app._data.data[refId])
-    }
-  })
+function sendLog() {
+  if (app.debug)
+    window.pywebview.api.print_log(arguments)
 }
 
 // ref. https://symfonycasts.com/screencast/vue/vue-instance
 // problem: this solution keeps rerendering unnecessarily when used with q-input  
 Vue.component('dynamic-component', {
-  props: ['descriptor'],
+  props: ['id'],
   render: function(h) {
-    const d = this.descriptor
-    console.log('descriptor:', d)
-    if (_.isString(d)) {
-      console.log('rendering:', d)
-      return d
-    }
-    if (!d.component) {
-      console.log('rendering:', '(empty)')
+    if (this.id === undefined || this.id === null) {
       return ''
     }
-    // console.log(JSON.stringify(d))
+    const d = this.$root.componentStore[this.id]
+    sendLog('descriptor:', d)
+    if (_.isString(d)) {
+      sendLog('rendering:', d)
+      return this.renderTemplate(d)
+    }
+    if (!d.component) {
+      sendLog('rendering:', '(empty)')
+      return ''
+    }
+    // sendLog(JSON.stringify(d))
     if (('value' in d.props) && !('input' in d.events)) {
       inputEvent = `@input="$root.data['${d.props.value['@']}']=$event"`
     } else {
@@ -53,7 +48,8 @@ Vue.component('dynamic-component', {
           if (ref in this.$root.data === false) {
             this.$root.$set(this.$root.data, ref, prop.value)
           }
-          return `:${propName}="$root.data['${ref}']"`
+          colon = propName.startsWith('v-') ? '': ':'
+          return `${colon}${propName}="$root.data['${ref}']"`
         } else if (_.isString(prop)) {
           return `${propName}="${prop}"`
         } else {
@@ -69,16 +65,27 @@ Vue.component('dynamic-component', {
         } else {
           const childComponent = 'dynamic-component'
           child = JSON.stringify(child).replace("'", "&#39;")
-          return `<${childComponent} :descriptor='${child}'></${childComponent}>`
+          return `<${childComponent} :id='${child}'></${childComponent}>`
         }
       }
     ).join('')
 
-    template = `<${d.component} ${props} ${events} ${inputEvent}>${children}</${d.component}>`
-    // console.log(Vue.compile(template).render)
-    console.log('rendering:')
-    console.log(template)
-    return Vue.compile(template).render.call(this, h)
+    const template = `<${d.component} ${props} ${events} ${inputEvent}>${children}</${d.component}>`
+    // sendLog(Vue.compile(template).render)
+    sendLog('rendering:')
+    sendLog(template)
+    return this.renderTemplate(template)
+  },
+  methods: {
+    renderTemplate(template) {
+      // This works even if the template does not have any reactive variables.
+      // ref. https://github.com/vuejs/vue/issues/9911
+      const compiled = Vue.compile(template)
+      this.$options.staticRenderFns = [];
+      this._staticTrees = [];
+      compiled.staticRenderFns.map(fn => (this.$options.staticRenderFns.push(fn)))
+      return compiled.render.call(this)
+    }
   }
 })
 
@@ -86,14 +93,32 @@ const app = new Vue({
   el: '#q-app',
   data: function() {
     return {
-      mainComponent: {},
+      mainComponentId: null,
       data: {},
-      debug: false
+      componentStore: {},
+      debug: true,
     }
   },
   methods: {
+    setDebug(debug) {
+      this.debug = debug
+    },
     setMainComponent(component) {
-      this.mainComponent = component
+      const id = this.registerComponent(component)
+      this.mainComponentId = id
+    },
+    registerComponent(component, refresh = false) {
+      if (refresh || (component.id in this.componentStore === false)) {
+        this.$set(this.componentStore, component.id, component)
+      }
+      const children = component.children || []
+      component.children = children.map(child => {
+        return _.isObject(child) ? this.registerComponent(child) : child
+      })
+      return component.id
+    },
+    refreshComponent(component) {
+      this.registerComponent(component, refresh = true)
     },
     getData(id) {
       return this.data[id]
@@ -101,7 +126,7 @@ const app = new Vue({
     setData(id, value) {
       this.data[id] = value
     },
-    showNotification(params){
+    showNotification(params) {
       const longTimeOut = 7000
       defaults = {
         type: '',
