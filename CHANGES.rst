@@ -4,9 +4,7 @@ Changelog
 
 Planned features:
 =================
-
- - dynamic children via Data
- - v-if
+ - Data watches for another Data's changes and updates on change.
 
  - Dialog, Banner
  - FilePicker (make good defaults!), Uploader
@@ -39,4 +37,7 @@ Planned features:
 =====
 
  - Initial release
- - able to build gui of any combination of Button, Input and Layout components
+ - builds gui of any combination of Button, Input, Layout, Rows and Columns components
+ - Enables dynamic children
+ - v-if as props
+
