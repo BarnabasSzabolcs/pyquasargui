@@ -43,7 +43,7 @@ def update_text_list():
 
 
 input_number = Input(
-    styles={'min-width':"100%"},
+    styles={'min-width': "30em"},
     props={'label': 'Enter a number between 1 and 10'},
     events={'change': update_text_list})
 ok_btn = Button(
@@ -52,15 +52,13 @@ ok_btn = Button(
     events={'click': update_text_list})
 text_list = Layout()
 
-main_children = [
-    '<h5>Dynamic components</h5>',
-    input_number,
-    text_list,
-    ok_btn
-]
-
 layout = Rows(
     classes='text-center',
-    children=main_children)
+    children=[
+        '<h5>Dynamic components</h5>',
+        input_number,
+        text_list,
+        ok_btn
+    ])
 
 quasargui.run(layout, debug=True)
