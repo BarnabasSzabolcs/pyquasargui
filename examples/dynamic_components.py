@@ -1,3 +1,9 @@
+"""
+This example showcases
+ - how the window layout can be replaced,
+ - how one can create rows and columns
+"""
+
 import quasargui
 from quasargui import set_main_component
 from quasargui.components import Layout, Input, Rows, Button, Columns
@@ -31,8 +37,10 @@ def update_text_list():
         input_number.value = ''
         return
 
-    result_layout = Layout(children=[
-        Columns(children=[Rows(children=row) for row in chunks(buttons[:i], 3)]),
+    result_layout = Layout([
+        Columns([
+            Rows(rows) for rows in chunks(buttons[:i], 3)
+        ]),
         Button(
             label='back',
             classes='q-ma-sm',

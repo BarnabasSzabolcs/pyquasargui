@@ -82,11 +82,11 @@ class Component:
     max_id = 0
 
     def __init__(self,
+                 children: ChildrenType = None,
                  classes: ClassesType = None,
                  styles: StylesType = None,
                  props: PropsType = None,
-                 events: EventsType = None,
-                 children: ChildrenType = None):
+                 events: EventsType = None):
         self.classes = classes or {}
         self.styles = styles or {}
         self.props = props or {}
@@ -145,12 +145,12 @@ class Component:
 
 class Layout(Component):
     def __init__(self,
+                 children: ChildrenType = None,
                  classes: ClassesType = None,
                  styles: StylesType = None,
                  props: PropsType = None,
-                 events: EventsType = None,
-                 children: ChildrenType = None):
-        super().__init__(classes, styles, props, events, children)
+                 events: EventsType = None):
+        super().__init__(children, classes, styles, props, events)
 
     @property
     def vue(self) -> dict:
@@ -161,17 +161,17 @@ class Layout(Component):
 
 class Rows(Layout):
     def __init__(self,
+                 children: ChildrenType = None,
                  classes: ClassesType = None,
                  row_classes: ClassesType = None,
                  styles: StylesType = None,
                  props: PropsType = None,
-                 events: EventsType = None,
-                 children: ChildrenType = None):
+                 events: EventsType = None):
         classes = classes.split(' ') if isinstance(classes, str) else classes or []
         classes.append('col')
         self.row_classes = row_classes or 'row q-ma-sm'
         children = self._wrap_children(children)
-        super().__init__(classes, styles, props, events, children)
+        super().__init__(children, classes, styles, props, events)
 
     def _wrap_children(self, children):
         return [
@@ -185,17 +185,17 @@ class Rows(Layout):
 
 class Columns(Layout):
     def __init__(self,
+                 children: ChildrenType = None,
                  classes: ClassesType = None,
                  row_classes: ClassesType = None,
                  styles: StylesType = None,
                  props: PropsType = None,
-                 events: EventsType = None,
-                 children: ChildrenType = None):
+                 events: EventsType = None):
         classes = classes.split(' ') if isinstance(classes, str) else classes or []
         classes.append('row')
         self.row_classes = row_classes or 'col q-ma-sm'
         children = self._wrap_children(children)
-        super().__init__(classes, styles, props, events, children)
+        super().__init__(children, classes, styles, props, events)
 
     def _wrap_children(self, children):
         return [
@@ -217,7 +217,7 @@ class Input(Component):
         self._value_ref = Data(value)
         props = props or {}
         props['value'] = self._value_ref.render()
-        super().__init__(classes, styles, props, events)
+        super().__init__(classes=classes, styles=styles, props=props, events=events)
 
     def set_api(self, api: 'Api'):
         super().set_api(api)
@@ -255,10 +255,14 @@ class Button(Component):
             props['label'] = label
         if icon and 'icon' not in props:
             props['icon'] = icon
-        super().__init__(classes, styles, props, events)
+        super().__init__(classes=classes, styles=styles, props=props, events=events)
 
     @property
     def vue(self) -> dict:
         return self._merge_vue({
             'component': 'q-btn'
         })
+
+
+class Plot(Component):
+    pass
