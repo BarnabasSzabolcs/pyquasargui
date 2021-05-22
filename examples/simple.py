@@ -1,5 +1,5 @@
 import quasargui
-from quasargui.components import Layout, Input, Button
+from quasargui.components import Div, Input, Button
 
 
 def run_program():
@@ -19,7 +19,7 @@ btn_submit = Button(
     props={'unelevated': True, 'size': 'lg'},
     events={'click': run_program})
 
-layout = Layout(
+layout = Div(
     styles={
         'max-width': '30em',
         'margin-left': 'auto',

@@ -6,8 +6,8 @@ This example showcases
 """
 
 import quasargui
-from quasargui import set_main_component
-from quasargui.components import Layout, Input, Rows, Button, Columns, Model
+from quasargui import set_main_component, Model
+from quasargui.components import Div, Input, Rows, Button, Columns
 
 
 def chunks(lst, n):
@@ -81,27 +81,22 @@ def show_buttons_table():
 n_buttons = Model('')
 
 
-input_number = Input(
-    model=n_buttons,
-    styles={'min-width': "30em"},
-    props={'label': 'Enter a number between 1 and 100'},
-    # events={'change': update_text_list}
-)
-ok_btn = Button(
-    label='ok',
-    props={'unelevated': True, 'color': 'primary'},
-    events={'click': show_buttons_table})
-
 form_layout = Rows(
     classes='q-ma-lg q-gutter-md',
     children=[
         '<h5>Dynamic components</h5>',
-        input_number,
-        Layout(
+        Input(
+            model=n_buttons,
+            styles={'min-width': "30em"},
+            props={'label': 'Enter a number between 1 and 100'}),
+        Div(
             props={'v-if': n_buttons},
             classes="q-ml-sm",
             children=["You have entered: ", n_buttons]),
-        ok_btn
+        Button(
+            label='ok',
+            props={'unelevated': True, 'color': 'primary'},
+            events={'click': show_buttons_table})
     ])
 
 quasargui.run(form_layout, debug=False)

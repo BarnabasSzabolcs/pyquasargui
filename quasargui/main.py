@@ -6,7 +6,8 @@ import webview
 from webview import Window
 
 from quasargui import QUASAR_GUI_INDEX_PATH
-from .components import Component, EventCallbacks
+from ._base import EventCallbacks
+from .components import Component
 
 
 def _print_error(e):
@@ -35,7 +36,6 @@ class Api:
         if self.debug:
             print(cmd)
         self.window.evaluate_js(cmd)
-
 
     # noinspection PyMethodMayBeStatic
     def call_cb(self, cb_id: int, params):
