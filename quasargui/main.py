@@ -59,6 +59,13 @@ class Api:
                 n=nargs
             ))
 
+    # noinspection PyMethodMayBeStatic
+    def print_log(self, args):
+        """
+        callback for app for debug purposes
+        """
+        print(*args.values(), sep=' ', end='\n', flush=True)
+
     def get_data(self, data_id: int):
         return self.window.evaluate_js('app.getData({data_id})'.format(
             data_id=data_id
