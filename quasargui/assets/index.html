@@ -19,9 +19,15 @@
 <!--            v-model="data[mainComponent.modelId]"-->
 <!--    ></component>-->
     <div v-if="debug">
-      data: {{data}}<br>
-      components: {{ componentStore }}<br>
-      main component: {{ mainComponentId }}<br>
+      main component id: {{ mainComponentId }}<br>
+      data: <br>
+      <div v-for="(value, data_id) of data">
+        {{ data_id }}: {{ value }}
+      </div>
+      components:
+      <div v-for="(value, component_id) of componentStore">
+        {{ component_id }}: {{ value }}
+      </div>
     </div>
   </div>
   <script src="lodash.min.js"></script>
