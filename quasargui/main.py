@@ -28,13 +28,14 @@ class Api:
         self.set_main_component(self.main_component)
 
     def set_main_component(self, component: Component):
+        component.set_api(self)
         cmd = 'app.setMainComponent({component})'.format(
             component=json.dumps(component.vue)
         )
         if self.debug:
             print(cmd)
         self.window.evaluate_js(cmd)
-        component.set_api(self)
+
 
     # noinspection PyMethodMayBeStatic
     def call_cb(self, cb_id: int, params):
@@ -58,24 +59,23 @@ class Api:
                 n=nargs
             ))
 
-    def print_log(self, args):
-        print(*args.values(), sep=' ', end='\n', flush=True)
-
-    def get_data(self, data_id: str):
+    def get_data(self, data_id: int):
         return self.window.evaluate_js('app.getData({data_id})'.format(
             data_id=data_id
         ))
 
-    def set_data(self, data_id: str, value):
-        print('set_data', data_id, value)
+    def set_data(self, data_id: int, value):
+        if self.debug:
+            print('set_data', data_id, value)
         return self.window.evaluate_js(
             'app.setData({data_id}, {value})'.format(
-                data_id=data_id,
+                data_id=json.dumps(data_id),
                 value=json.dumps(value)
             ))
 
     def set_component(self, component_vue):
-        print('set_component', component_vue)
+        if self.debug:
+            print('set_component', component_vue)
         return self.window.evaluate_js(
             'app.refreshComponent({component_vue})'.format(
                 component_vue=json.dumps(component_vue)))

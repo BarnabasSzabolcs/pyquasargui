@@ -4,13 +4,26 @@ if TYPE_CHECKING:
     from .main import Api
 
 EventsType = Dict[str, Callable[[...], Any]]
-ClassesType = Union[str, List[str]]
+ClassesType = str
 StylesType = Dict[str, str]
 PropsType = Dict[str, Any]
 ChildrenType = List[Union['Component', str, 'Data']]
 
 
-class Data:
+def flatten(lst) -> list:
+    return [item for sublist in lst for item in sublist]
+
+
+def merge_classes(*args) -> str:
+    if len(args) == 1:
+        return ' '.join(args[0]) if isinstance(args[0], list) else args[0]
+    elif len(args) == 0:
+        return ''
+    else:
+        return (merge_classes(args[0]) + ' ' + merge_classes(*args[1:])).strip()
+
+
+class Model:
     """
     Data is all the data that can change
     in both the GUI and on the backend
@@ -20,8 +33,8 @@ class Data:
     data_dic = {}
 
     def __init__(self, value):
-        self.id = str(Data.max_id)
-        Data.max_id += 1
+        self.id = Model.max_id
+        Model.max_id += 1
         self.data_dic[self.id] = self
         self._value = value
         self.api = None
@@ -30,8 +43,9 @@ class Data:
         del self.data_dic[self.id]
 
     def set_api(self, api: 'Api'):
-        self.api = api
-        self.api.set_data(self.id, self._value)
+        if self.api != api:
+            self.api = api
+            api.set_data(self.id, self._value)
 
     @property
     def value(self) -> str:
@@ -42,14 +56,17 @@ class Data:
 
     @value.setter
     def value(self, value):
+        if self._value == value:
+            return
         self._value = value
-        self.api.set_data(self.id, self._value)
+        if self.api is not None:
+            self.api.set_data(self.id, self._value)
 
     def render(self):
         return {'@': self.id, 'value': self.value}
 
     def render_mustache(self) -> str:
-        return "{{$root.data['" + self.id + "']}}"
+        return "{{$root.data[" + str(self.id) + "]}}"
 
 
 class EventCallbacks:
@@ -87,21 +104,24 @@ class Component:
                  styles: StylesType = None,
                  props: PropsType = None,
                  events: EventsType = None):
-        self.classes = classes or {}
+        self.classes = classes or ''
         self.styles = styles or {}
         self.props = props or {}
         events = events or {}
         self.events = {event: EventCallbacks.register(cb)
                        for event, cb in events.items()}
-        self.children = children or []
+        self._children = children or []
         self.api: Optional[Api] = None
         Component.max_id += 1
         self.id = Component.max_id
+        self.dependent_models = [v for v in self.props.values() if isinstance(v, Model)]
 
     @property
     def vue(self) -> dict:
-        props = {k: v.render() if isinstance(v, Data) else v
-            for k, v in self.props.items()}
+        props = {
+            k: v.render() if isinstance(v, Model) else v
+            for k, v in self.props.items()
+        }
         classes = self.classes if isinstance(self.classes, str) else " ".join(cs for cs in self.classes)
         if classes:
             props.update({'class': classes})
@@ -113,9 +133,9 @@ class Component:
             'events': self.events,
             'props': props,
             'children': [child if isinstance(child, str) else
-                         child.render_mustache() if isinstance(child, Data)
+                         child.render_mustache() if isinstance(child, Model)
                          else child.vue
-                         for child in self.children]
+                         for child in self._children]
         }
 
     def _merge_vue(self, d: dict) -> dict:
@@ -128,9 +148,11 @@ class Component:
     def set_api(self, api: 'Api'):
         # noinspection PyAttributeOutsideInit
         self.api = api
-        for child in self.children:
+        for child in self._children:
             if isinstance(child, Component):
-                child.set_api(self.api)
+                child.set_api(api)
+        for model in self.dependent_models:
+            model.set_api(api)
 
     def notify(self, message: str, **kwargs):
         params = {'message': message}
@@ -138,9 +160,17 @@ class Component:
             params.update(kwargs)
         self.api.send_notification(params)
 
+    @property
+    def children(self):
+        return self._children
+
     def set_children(self, children: ChildrenType):
-        self.children = children
-        self.api.set_component(self.vue)
+        self._children = children
+        if self.api is not None:
+            for child in children:
+                if isinstance(child, Component):
+                    child.set_api(self.api)
+            self.api.set_component(self.vue)
 
 
 class Layout(Component):
@@ -160,6 +190,11 @@ class Layout(Component):
 
 
 class Rows(Layout):
+    defaults = {
+        'classes': 'q-gutter-y-xs',
+        'row_classes': 'justify-center'
+    }
+
     def __init__(self,
                  children: ChildrenType = None,
                  classes: ClassesType = None,
@@ -167,41 +202,75 @@ class Rows(Layout):
                  styles: StylesType = None,
                  props: PropsType = None,
                  events: EventsType = None):
-        classes = classes.split(' ') if isinstance(classes, str) else classes or []
-        classes.append('col')
-        self.row_classes = row_classes or 'row q-ma-sm'
+        classes = merge_classes(
+            'column',
+            classes or self.defaults.get('classes', '')
+        )
+        self.row_classes = merge_classes(
+            'row',
+            row_classes or self.defaults.get('row_classes', ''))
         children = self._wrap_children(children)
         super().__init__(children, classes, styles, props, events)
 
     def _wrap_children(self, children):
-        return [
-            Layout(children=[child], classes=self.row_classes)
-              if not isinstance(child, Layout) else child
-            for child in children or []]
+        result = []
+        for child in children or []:
+            if isinstance(child, Columns):
+                wrapped_child = child
+                wrapped_child.classes = merge_classes(
+                    wrapped_child.classes,
+                    self.row_classes)
+            else:
+                wrapped_child = Layout(children=[child], classes=self.row_classes)
+            result.append(wrapped_child)
+        return result
+
+    @property
+    def children(self):
+        return self._children
 
     def set_children(self, children: ChildrenType):
         super().set_children(self._wrap_children(children))
 
 
 class Columns(Layout):
+    defaults = {
+        'classes': 'q-gutter-x-xs'
+    }
+
     def __init__(self,
                  children: ChildrenType = None,
                  classes: ClassesType = None,
-                 row_classes: ClassesType = None,
+                 column_classes: ClassesType = None,
                  styles: StylesType = None,
                  props: PropsType = None,
                  events: EventsType = None):
-        classes = classes.split(' ') if isinstance(classes, str) else classes or []
-        classes.append('row')
-        self.row_classes = row_classes or 'col q-ma-sm'
+        classes = merge_classes(
+            'row',
+            classes or self.defaults.get('classes', '')
+        )
+        self.column_classes = merge_classes(
+            'column',
+            column_classes or self.defaults.get('column_classes', ''))
         children = self._wrap_children(children)
         super().__init__(children, classes, styles, props, events)
 
     def _wrap_children(self, children):
-        return [
-            Layout(children=[child], classes=self.row_classes)
-              if not isinstance(child, Layout) else child
-            for child in children or []]
+        result = []
+        for child in children or []:
+            if isinstance(child, Rows):
+                wrapped_child = child
+                wrapped_child.classes = merge_classes(
+                    wrapped_child.classes,
+                    self.column_classes)
+            else:
+                wrapped_child = Layout(children=[child], classes=self.column_classes)
+            result.append(wrapped_child)
+        return result
+
+    @property
+    def children(self):
+        return self._children
 
     def set_children(self, children: ChildrenType):
         super().set_children(self._wrap_children(children))
@@ -209,31 +278,35 @@ class Columns(Layout):
 
 class Input(Component):
     def __init__(self,
-                 value: str = '',
+                 value: str = None,
+                 model: Model = None,
                  classes: ClassesType = None,
                  styles: StylesType = None,
                  props: PropsType = None,
                  events: EventsType = None):
-        self._value_ref = Data(value)
+        if model is not None and value is not None:
+            raise AssertionError("Cannot set both model and value.")
+        value = value or ''
+        self._model = model or Model(value)
         props = props or {}
-        props['value'] = self._value_ref.render()
+        props['value'] = self._model.render()
         super().__init__(classes=classes, styles=styles, props=props, events=events)
 
     def set_api(self, api: 'Api'):
         super().set_api(api)
-        self._value_ref.set_api(api)
+        self._model.set_api(api)
 
     @property
-    def ref(self):
-        return self._value_ref
+    def model(self):
+        return self._model
 
     @property
     def value(self):
-        return self._value_ref.value
+        return self._model.value
 
     @value.setter
     def value(self, value):
-        self._value_ref.value = value
+        self._model.value = value
 
     @property
     def vue(self) -> dict:

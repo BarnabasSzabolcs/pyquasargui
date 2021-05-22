@@ -52,7 +52,7 @@ Vue.component('dynamic-component', {
             this.$root.$set(this.$root.data, ref, prop.value)
           }
           colon = propName.startsWith('v-') ? '': ':'
-          return `${colon}${propName}="$root.data['${ref}']"`
+          return `${colon}${propName}="$root.data[${ref}]"`
         } else if (_.isString(prop)) {
           return `${propName}="${prop}"`
         } else {
@@ -97,8 +97,8 @@ const app = new Vue({
   data: function() {
     return {
       mainComponentId: null,
-      data: {},
-      componentStore: {},
+      data: {}, // holds the Model values {id: value}
+      componentStore: {},  // holds the Component specifications {id: descriptor}
       debug: true,
     }
   },
@@ -116,7 +116,7 @@ const app = new Vue({
       }
       const children = component.children || []
       component.children = children.map(child => {
-        return _.isObject(child) ? this.registerComponent(child) : child
+        return _.isObject(child) ? this.registerComponent(child, refresh) : child
       })
       return component.id
     },
@@ -127,7 +127,7 @@ const app = new Vue({
       return this.data[id]
     },
     setData(id, value) {
-      this.data[id] = value
+      this.$set(this.data, id, value)
     },
     showNotification(params) {
       const longTimeOut = 7000

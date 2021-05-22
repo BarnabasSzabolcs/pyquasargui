@@ -1,12 +1,13 @@
 """
 This example showcases
- - how the window layout can be replaced,
- - how one can create rows and columns
+ - form submission and error checking,
+ - replacing the window layout,
+ - creating rows and columns.
 """
 
 import quasargui
 from quasargui import set_main_component
-from quasargui.components import Layout, Input, Rows, Button, Columns
+from quasargui.components import Layout, Input, Rows, Button, Columns, Model
 
 
 def chunks(lst, n):
@@ -15,60 +16,92 @@ def chunks(lst, n):
         yield lst[i:i + n]
 
 
+MAX_BUTTONS = 100
+colors = [Model('primary') for i in range(MAX_BUTTONS)]
+
+
+def set_color(i):
+    color = colors[i]
+
+    def fn():
+        color.value = 'positive' if color.value == 'primary' else 'primary'
+
+    return fn
+
+
+def reset_colors():
+    for color in colors:
+        color.value = 'primary'
+
+
 buttons = [
     Button(
-        text,
-        props={'unelevated': True, 'color': 'primary'},
-        styles={'min-width': '100px'},
+        label=str(i),
+        props={'unelevated': True, 'color': colors[i], 'padding': 'xs xs'},
+        styles={'min-width': '3em'},
+        events={'click': set_color(i)}
     )
-    for text in ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten']
+    for i in range(MAX_BUTTONS)
 ]
 
 
-def update_text_list():
-    try:
-        i = int(input_number.value)
-    except ValueError:
-        layout.notify("Please enter digits", type='negative', icon='warning')
-        input_number.value = ''
-        return
-    if i < 1 or i > 10:
-        layout.notify("Number not in range", type='negative', icon='warning')
-        input_number.value = ''
-        return
-
-    result_layout = Layout([
-        Columns([
-            Rows(rows) for rows in chunks(buttons[:i], 3)
-        ]),
+result_layout = Rows(classes='q-ma-lg', children=[
+    "(placeholder for the buttons)",
+    Columns(classes='q-gutter-x-xs q-my-md', children=[
         Button(
-            label='back',
-            classes='q-ma-sm',
+            label='Back',
             props={'unelevated': True, 'color': 'grey-7'},
-            events={'click': lambda: set_main_component(layout)})
+            events={'click': lambda: set_main_component(form_layout)}),
+        Button(
+            label='Reset',
+            props={'unelevated': True, 'color': 'grey-7'},
+            events={'click': lambda: reset_colors()})
+    ])
+])
+
+
+def show_buttons_table():
+    try:
+        i = int(n_buttons.value)
+    except ValueError:
+        form_layout.notify("Please enter digits", type='negative', icon='warning')
+        n_buttons.value = ''
+        return
+    if i < 1 or i > 100:
+        form_layout.notify("Number not in range", type='negative', icon='warning')
+        n_buttons.value = ''
+        return
+    result_layout.set_children([
+        Columns([Rows(rows) for rows in chunks(buttons[:i], 10)]),
+        *result_layout.children[1:]
     ])
     set_main_component(result_layout)
 
 
+n_buttons = Model('')
+
+
 input_number = Input(
+    model=n_buttons,
     styles={'min-width': "30em"},
-    props={'label': 'Enter a number between 1 and 10'},
-    events={'change': update_text_list})
+    props={'label': 'Enter a number between 1 and 100'},
+    # events={'change': update_text_list}
+)
 ok_btn = Button(
     label='ok',
     props={'unelevated': True, 'color': 'primary'},
-    events={'click': update_text_list})
+    events={'click': show_buttons_table})
 
-layout = Rows(
-    classes='text-center',
+form_layout = Rows(
+    classes='q-ma-lg q-gutter-md',
     children=[
         '<h5>Dynamic components</h5>',
         input_number,
         Layout(
-            props={'v-if': input_number.ref},
-            classes="text-left q-ml-sm",
-            children=["You have entered: ", input_number.ref]),
+            props={'v-if': n_buttons},
+            classes="q-ml-sm",
+            children=["You have entered: ", n_buttons]),
         ok_btn
     ])
 
-quasargui.run(layout, debug=True)
+quasargui.run(form_layout, debug=False)
