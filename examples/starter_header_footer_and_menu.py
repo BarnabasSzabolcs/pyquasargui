@@ -34,7 +34,7 @@ layout = Layout([
         'Your right drawer.'
         '</b>'
         '<div class="q-mt-md">'
-        'If you comment out the right drawer, the right sandwich menu disappears'
+        'If you delete a drawer,its sandwich menu disappears'
         '</div>'
     ]),
     Page([
