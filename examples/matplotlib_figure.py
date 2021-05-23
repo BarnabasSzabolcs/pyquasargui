@@ -21,8 +21,7 @@ n_processes = Model(10)
 start = Model(10.0)
 drift = Model(0.002)
 variance = Model(0.04)
-interactive = Model(False)
-plot = Plot(interactive=bool(interactive.value))
+interactive = Model(True)
 
 
 def calculate_plot():
@@ -67,6 +66,7 @@ def calculate_plot():
 
 
 # This example loads the plot on load.
+plot = Plot(interactive=bool(interactive.value))
 layout = Layout(events={'load': calculate_plot}, children=[
     Header([
         Toolbar([ToolbarTitle(['Interactive plot demo - stock simulation by coin flip'])])

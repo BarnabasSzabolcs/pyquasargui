@@ -61,7 +61,8 @@ Vue.component('dynamic-component', {
           colon = propName.startsWith('v-') ? '': ':'
           return `${colon}${propName}="$root.data[${ref}]"`
         } else if (_.isString(prop)) {
-          return `${propName}="${prop}"`
+          quotedProp = prop.replace(/"/g, '&quot;')
+          return `${propName}="${quotedProp}"`
         } else {
           return `:${propName}="${prop}"`
         }
@@ -74,7 +75,7 @@ Vue.component('dynamic-component', {
           return child
         } else {
           const childComponent = 'dynamic-component'
-          child = JSON.stringify(child).replace("'", "&#39;")
+          child = JSON.stringify(child).replace(/'/g, "&#39;")
           return `<${childComponent} :id='${child}'></${childComponent}>`
         }
       }
@@ -96,6 +97,30 @@ Vue.component('dynamic-component', {
       compiled.staticRenderFns.map(fn => (this.$options.staticRenderFns.push(fn)))
       return compiled.render.call(this)
     }
+  }
+})
+
+Vue.component('mpld3-figure', {
+  props: ['id', 'script', 'style', 'figId'],
+  render: function(h){
+    const script = document.createElement('script')
+    script.id = this.id + '_script'
+    script.innerHTML = this.script
+    const style = document.createElement('style')
+    style.innerHTML = this.style
+    style.id = this.id + '_style'
+    if(this.$el){
+      this.$el.innerHTML = ''
+    }
+    setTimeout(()=>{
+      var styleObj = document.getElementById(style.id)
+      if (styleObj) { styleObj.remove()}
+      var scriptObj = document.getElementById(script.id)
+      if (scriptObj) { scriptObj.remove()}
+      document.head.appendChild(style)
+      document.body.appendChild(script)
+    })
+    return h('div', {attrs: {id: this.figId }})
   }
 })
 

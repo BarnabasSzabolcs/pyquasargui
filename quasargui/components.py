@@ -1,7 +1,10 @@
 # noinspection PyUnresolvedReferences
 import base64
 from io import BytesIO
+from os.path import join
 from typing import TYPE_CHECKING
+
+from . import QUASAR_GUI_ASSETS_PATH
 
 try:
     # noinspection PyPackageRequirements
@@ -136,6 +139,16 @@ class Columns(Div):
 
 
 class Plot(Component):
+    """
+    This component is not a quasar component.
+    If interactive=False, it can be styled, it shows a png image.
+    However, if interactive=True, it can *not* be styled as it shows an interactive svg,
+    created by mpld3.
+
+    "Different sizes can be created using `plt.figure(figsize=(width,height))`
+    where width and height are in inches."
+    ref. https://stackoverflow.com/a/31843288/1031191
+    """
     def __init__(self,
                  interactive: bool = True,
                  classes: ClassesType = None,
@@ -153,12 +166,16 @@ class Plot(Component):
         self.img_base64 = ''
         super().__init__(classes=classes, styles=styles)
 
-    def set_figure(self, fig: 'Figure', ax):
+    def set_figure(self, fig: 'Figure'):
         self.html = {}
         self.img_base64 = ''
         if self.interactive:
-            raw_html = mpld3.fig_to_html(fig)
-            self.html['div'] = str_between(raw_html, "<div>", "</div>")
+            raw_html = mpld3.fig_to_html(
+                fig,
+                d3_url='file://' + join(QUASAR_GUI_ASSETS_PATH, 'd3.v5.js'),
+                mpld3_url='file://' + join(QUASAR_GUI_ASSETS_PATH, 'mpld3.v0.5.2.js'),
+            )
+            self.html['figId'] = str_between(raw_html, '<div id="', '"></div>')
             self.html['script'] = str_between(raw_html, "<script>", "</script>")
             self.html['style'] = str_between(raw_html, "<style>", "</style>")
         else:
@@ -173,10 +190,10 @@ class Plot(Component):
         if self.html:
             return self._merge_vue({
                 'component': 'mpld3-figure',
-                'children': [self.html['div']],
                 'props': {
                     'script': self.html['script'],
-                    'style': self.html['style']
+                    'style': self.html['style'],
+                    'figId': self.html['figId']
                 }
             })
         elif self.img_base64:
