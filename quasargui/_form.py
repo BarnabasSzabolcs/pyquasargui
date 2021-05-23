@@ -7,12 +7,14 @@ from quasargui.typing import ClassesType, StylesType, PropsType, EventsType
 
 class Input(ComponentWithModel):
     def __init__(self,
+                 label: str = None,
                  value: str = None,
                  model: Model = None,
                  classes: ClassesType = None,
                  styles: StylesType = None,
                  props: PropsType = None,
                  events: EventsType = None):
+        props = build_props({}, props, {'label': label})
         super().__init__(model=model, value=value, classes=classes, styles=styles, props=props, events=events)
 
     @property

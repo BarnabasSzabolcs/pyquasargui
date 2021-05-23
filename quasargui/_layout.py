@@ -15,7 +15,8 @@ class Layout(Component):
     def __init__(self,
                  children: List[Union['Header', 'Drawer', 'Page', 'Footer']] = None,
                  view: str = "hHh lpR fFf",
-                 props: PropsType = None
+                 props: PropsType = None,
+                 events: EventsType = None
                  ):
         """
         :param view: see layout-builder, the default value is good for most cases
@@ -24,7 +25,7 @@ class Layout(Component):
         props = props or {}
         props['view'] = props.get('view', view)
         children = self.build_children(children)
-        super().__init__(children=children, props=props)
+        super().__init__(children=children, props=props, events=events)
 
     @property
     def vue(self) -> dict:

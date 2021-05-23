@@ -83,9 +83,9 @@ form_layout = Rows(
     children=[
         '<h5>Dynamic components</h5>',
         Input(
+            label='Enter a number between 1 and 100',
             model=n_buttons,
-            styles={'min-width': "30em"},
-            props={'label': 'Enter a number between 1 and 100'}),
+            styles={'min-width': "30em"}),
         Div(
             props={'v-if': n_buttons},
             classes="q-ml-sm",

@@ -1,4 +1,7 @@
-def flatten(lst) -> list:
+from typing import List
+
+
+def flatten(lst: List[list]) -> list:
     return [item for sublist in lst for item in sublist]
 
 
@@ -25,3 +28,14 @@ def build_props(defaults: dict, props: dict, specials: dict = None) -> dict:
         if value is not None
     })
     return my_props
+
+
+def str_between(source: str, from_str: str, to_str: str) -> str:
+    if not from_str or not to_str:
+        raise ValueError('from_str or to_str is empty (called with {})'.format(
+            {'source': source, 'from_str': from_str, 'to_str': to_str}
+        ))
+    try:
+        return source.split(from_str, 1)[1].split(to_str, 1)[0]
+    except IndexError:
+        return ''
