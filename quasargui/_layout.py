@@ -271,3 +271,20 @@ class ToolbarTitle(Component):
 
 class Space(Component):
     component = 'q-space'
+
+
+class Avatar(Component):
+    component = 'q-avatar'
+
+
+class Icon(Component):
+    component = 'q-icon'
+
+    def __init__(self,
+                 name: Union[str, Model],
+                 size: Union[str, Model] = None,
+                 color: Union[str, Model] = None,
+                 classes: ClassesType = None,
+                 styles: StylesType = None):
+        props = build_props({}, {}, {'name': name, 'size': size, 'color': color})
+        super().__init__(props=props, classes=classes, styles=styles)

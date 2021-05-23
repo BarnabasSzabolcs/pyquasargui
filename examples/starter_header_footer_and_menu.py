@@ -4,9 +4,8 @@ This is a starter template.
 
 import quasargui
 from quasargui import Model
-from quasargui._layout import Toolbar, ToolbarTitle
 from quasargui.callbacks import toggle
-from quasargui.components import Layout, Header, Footer, Page, Drawer, Button
+from quasargui.components import Layout, Header, Footer, Page, Drawer, Button, Toolbar, ToolbarTitle, Icon
 
 loading = Model(True)
 
@@ -17,18 +16,23 @@ def set_loaded():
 
 layout = Layout([
     Header([
-        Toolbar([ToolbarTitle(['Your Program Title'])])
+        Toolbar([ToolbarTitle([
+            Icon('ramen_dining', 'lg', classes='q-mx-md'),
+            'Your Program Title'
+        ])])
     ]),
     Drawer([
-        '<b class="q-mt-md">'
-        '   Your drawer'
+        '<b>'
+        'Your drawer'
         '</b>'
         '<div class="q-mt-md">'
         'for your parameters.'
         '</div>'
     ]),
     Drawer(side=Drawer.RIGHT, show=False, children=[
-        '<b class="q-mt-md">Your right drawer.</b>'
+        '<b>'
+        'Your right drawer.'
+        '</b>'
         '<div class="q-mt-md">'
         'If you comment out the right drawer, the right sandwich menu disappears'
         '</div>'
@@ -42,4 +46,4 @@ layout = Layout([
     ])
 ])
 
-quasargui.run(layout, debug=True)
+quasargui.run(layout, debug=False)

@@ -1,7 +1,7 @@
 # noinspection PyUnresolvedReferences
 from ._base import Model, Component, ComponentWithModel
 # noinspection PyUnresolvedReferences
-from ._layout import Layout, Header, Drawer, Page, Footer
+from ._layout import Layout, Header, Drawer, Page, Footer, Toolbar, ToolbarTitle, Icon, Space
 # noinspection PyUnresolvedReferences
 from ._form import Button, Input
 from ._tools import merge_classes
