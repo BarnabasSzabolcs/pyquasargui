@@ -1,6 +1,9 @@
 from typing import List, Union
 
 from ._base import Component, Model, ComponentWithModel
+from ._form import Button
+from ._tools import merge_classes, build_props
+from .callbacks import toggle
 from .typing import EventsType, ClassesType, StylesType, PropsType, ChildrenType
 
 
@@ -10,8 +13,8 @@ class Layout(Component):
     see: https://quasar.dev/layout-builder
     """
     def __init__(self,
-                 view: str = "hHh lpR fFf",
                  children: List[Union['Header', 'Drawer', 'Page', 'Footer']] = None,
+                 view: str = "hHh lpR fFf",
                  props: PropsType = None
                  ):
         """
@@ -20,13 +23,39 @@ class Layout(Component):
         """
         props = props or {}
         props['view'] = props.get('view', view)
+        children = self.build_children(children)
         super().__init__(children=children, props=props)
 
+    @property
     def vue(self) -> dict:
         return self._merge_vue({
             'component': 'q-layout'
         })
 
+    @staticmethod
+    def build_children(children):
+        sandwich_menus = {}
+        header = None
+        for child in children:
+            if isinstance(child, Drawer):
+                if child.menu_in_header:
+                    sandwich_menus[child.props['side']] = child.model
+            if isinstance(child, Header):
+                header = child
+
+        if header is not None and sandwich_menus:
+            target = header.children[0] if isinstance(header.children[0], Toolbar) else header
+            for side, model in sandwich_menus.items():
+                menu_btn = Button(
+                    icon='menu',
+                    classes='float-right' if side == Drawer.RIGHT else '',
+                    props={'dense': True},
+                    events={'click': toggle(model)}
+                )
+                target.set_children(
+                    [menu_btn, *target.children] if side == Drawer.LEFT
+                    else [*target.children, menu_btn])
+        return children
     # TODO: we could have here a set_page() function that corresponds to the route's on a webpage.
 
 
@@ -34,27 +63,41 @@ class Header(ComponentWithModel):
     """
     q-header
     Use it within a Layout.
+    ref. https://quasar.dev/layout/header-and-footer#qheader-api
     """
-    primary = 'bg-primary text-white'  # convenience class
+    PRIMARY = 'bg-primary text-white'  # convenience constant
+
+    defaults = {
+        'props': {
+            'reveal': False,  # this is hide_on_scroll
+            'elevated': False,
+            'bordered': False,
+        }
+    }
 
     def __init__(self,
                  children: ChildrenType = None,
-                 hide_on_scroll: bool = False,  # this is the reveal prop
-                 elevated: bool = True,
-                 bordered: bool = False,
+                 hide_on_scroll: bool = None,  # this is the reveal prop
+                 elevated: bool = None,
+                 bordered: bool = None,
                  show: Union[Model, bool] = True,
                  classes: ClassesType = None,
                  styles: StylesType = None,
                  props: PropsType = None
                  ):
         children = children
-        props = props or {}
-        props['reveal'] = props.get('reveal', hide_on_scroll)
-        props['elevated'] = props.get('elevated', elevated)
-        props['bordered'] = props.get('bordered', bordered)
+        props = build_props(
+            defaults=self.defaults['props'],
+            props=props,
+            specials={
+                'reveal': hide_on_scroll,
+                'elevated': elevated,
+                'bordered': bordered,
+            })
         model = show if isinstance(show, Model) else Model(show)
         super().__init__(model=model, children=children, classes=classes, styles=styles, props=props)
 
+    @property
     def vue(self) -> dict:
         return self._merge_vue({
             'component': 'q-header'
@@ -65,28 +108,53 @@ class Drawer(ComponentWithModel):
     """
     q-drawer
     Use it within a Layout.
+    ref. https://quasar.dev/layout/drawer#qdrawer-api
     """
     # side constants
     LEFT = 'left'
     RIGHT = 'right'
+    # behavior constants
+    DESKTOP = 'desktop'
+    MOBILE = 'mobile'
+    RESPONSIVE = 'default'
+
+    defaults = {
+        'props': {
+            'behavior': DESKTOP,
+            'overlay': False,
+            'bordered': True,
+            'side': LEFT,
+            'width': 200,
+        }
+    }
 
     def __init__(self,
-                 side: str = LEFT,
                  children: ChildrenType = None,
-                 show: Union[Model, bool] = None,
-                 bordered: bool = True,
+                 menu_in_header: bool = True,
+                 side: str = None,
+                 show: Union[Model, bool] = True,
+                 bordered: bool = None,
                  classes: ClassesType = None,
                  styles: StylesType = None,
                  props: PropsType = None,
                  events: EventsType = None
                  ):
+        """
+        :menu_in_header: if used together with Layout, it instructs to put a close menu into the header.
+        """
+        self.menu_in_header = menu_in_header
         children = children
-        props = props or {}
+        props = build_props(
+            defaults=self.defaults['props'],
+            props=props,
+            specials={
+                'side': side,
+                'bordered': bordered,
+            })
         model = show if isinstance(show, Model) else Model(show)
-        props['side'] = props.get('side', side)
-        props['bordered'] = props.get('bordered', bordered)
         super().__init__(model=model, children=children, classes=classes, styles=styles, props=props, events=events)
 
+    @property
     def vue(self) -> dict:
         return self._merge_vue({
             'component': 'q-drawer'
@@ -99,16 +167,25 @@ class Page(Component):
     Use it within a Layout.
     every parameter applies to the q-page.
     """
+    defaults = {
+        'props': {
+            'padding': True,
+        }
+    }
+
     def __init__(self,
                  children: ChildrenType = None,
+                 padding: bool = None,
                  classes: ClassesType = None,
                  styles: StylesType = None,
                  props: PropsType = None,
                  events: EventsType = None
                  ):
+        props = build_props(self.defaults['props'], props, {'padding': padding})
         self.page = _Page(children=children, classes=classes, styles=styles, props=props, events=events)
         super().__init__(children=[self.page])
 
+    @property
     def vue(self) -> dict:
         return self._merge_vue({
             'component': 'q-page-container'
@@ -129,6 +206,7 @@ class _Page(Component):
                  ):
         super().__init__(children=children, classes=classes, styles=styles, props=props, events=events)
 
+    @property
     def vue(self) -> dict:
         return self._merge_vue({
             'component': 'q-page'
@@ -136,26 +214,60 @@ class _Page(Component):
 
 
 class Footer(ComponentWithModel):
+    """
+    q-footer
+    ref. https://quasar.dev/layout/header-and-footer#qfooter-api
+    """
+    defaults = {
+        'props': {
+            'reveal': False,
+            'elevated': False,
+            'bordered': True,
+            'show': True,
+        },
+        'classes': 'bg-white text-black'
+    }
+
     def __init__(self,
                  children: ChildrenType = None,
-                 show: Union[Model, bool] = True,
-                 hide_on_scroll: bool = False,  # this is the reveal prop
-                 elevated: bool = True,
-                 bordered: bool = False,
+                 show: Union[Model, bool] = None,
+                 hide_on_scroll: bool = None,  # this is the reveal prop
+                 elevated: bool = None,
+                 bordered: bool = None,
                  classes: ClassesType = None,
                  styles: StylesType = None,
                  props: PropsType = None,
                  events: EventsType = None
                  ):
         children = children
-        props = props or {}
-        props['reveal'] = props.get('reveal', hide_on_scroll)
-        props['elevated'] = props.get('elevated', elevated)
-        props['bordered'] = props.get('bordered', bordered)
+        props = build_props(
+            defaults=self.defaults['props'],
+            props=props,
+            specials={
+                'reveal': hide_on_scroll,
+                'elevated': elevated,
+                'bordered': bordered,
+                'show': show,
+            })
+        classes = merge_classes(self.defaults['classes'], classes or '')
+        show = props['show']
         model = show if isinstance(show, Model) else Model(show)
         super().__init__(model=model, children=children, classes=classes, styles=styles, props=props, events=events)
 
+    @property
     def vue(self) -> dict:
         return self._merge_vue({
             'component': 'q-footer'
         })
+
+
+class Toolbar(Component):
+    component = 'q-toolbar'
+
+
+class ToolbarTitle(Component):
+    component = 'q-toolbar-title'
+
+
+class Space(Component):
+    component = 'q-space'

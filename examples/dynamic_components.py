@@ -7,7 +7,8 @@ This example showcases
 
 import quasargui
 from quasargui import set_main_component, Model
-from quasargui.components import Div, Input, Rows, Button, Columns
+from quasargui.callbacks import bind
+from quasargui.components import Div, Rows, Columns, Input, Button
 
 
 def chunks(lst, n):
@@ -20,13 +21,8 @@ MAX_BUTTONS = 100
 colors = [Model('primary') for i in range(MAX_BUTTONS)]
 
 
-def set_color(i):
-    color = colors[i]
-
-    def fn():
-        color.value = 'positive' if color.value == 'primary' else 'primary'
-
-    return fn
+def set_color(color):
+    color.value = 'positive' if color.value == 'primary' else 'primary'
 
 
 def reset_colors():
@@ -37,9 +33,10 @@ def reset_colors():
 buttons = [
     Button(
         label=str(i),
-        props={'unelevated': True, 'color': colors[i], 'padding': 'xs xs'},
+        color=colors[i],
+        props={'padding': 'xs xs'},
         styles={'min-width': '3em'},
-        events={'click': set_color(i)}
+        events={'click': bind(set_color, colors[i])}
     )
     for i in range(MAX_BUTTONS)
 ]
@@ -50,11 +47,11 @@ result_layout = Rows(classes='q-ma-lg', children=[
     Columns(classes='q-gutter-x-xs q-my-md', children=[
         Button(
             label='Back',
-            props={'unelevated': True, 'color': 'grey-7'},
+            color='grey-7',
             events={'click': lambda: set_main_component(form_layout)}),
         Button(
             label='Reset',
-            props={'unelevated': True, 'color': 'grey-7'},
+            color='grey-7',
             events={'click': lambda: reset_colors()})
     ])
 ])
@@ -95,8 +92,8 @@ form_layout = Rows(
             children=["You have entered: ", n_buttons]),
         Button(
             label='ok',
-            props={'unelevated': True, 'color': 'primary'},
+            props={'color': 'primary'},
             events={'click': show_buttons_table})
     ])
 
-quasargui.run(form_layout, debug=False)
+quasargui.run(form_layout)

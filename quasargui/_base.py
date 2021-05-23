@@ -113,6 +113,7 @@ class Component:
             props.update({'style': styles})
         return {
             'id': self.id,
+            'component': getattr(self, 'component', None),
             'events': self.events,
             'props': props,
             'children': [child if isinstance(child, str) else
