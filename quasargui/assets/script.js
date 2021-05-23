@@ -99,12 +99,17 @@ const app = new Vue({
       mainComponentId: null,
       data: {}, // holds the Model values {id: value}
       componentStore: {},  // holds the Component specifications {id: descriptor}
-      debug: true,
+      debug: false,
     }
   },
   methods: {
     setDebug(debug) {
       this.debug = debug
+      if (debug){
+        setTimeout(()=>{
+            document.getElementById('debug').style.display='block'
+        }, 50)
+      }
     },
     setMainComponent(component) {
       const id = this.registerComponent(component)
