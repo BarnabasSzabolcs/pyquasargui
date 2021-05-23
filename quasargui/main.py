@@ -38,7 +38,7 @@ class Api:
         self.window.evaluate_js(cmd)
 
     # noinspection PyMethodMayBeStatic
-    def call_cb(self, cb_id: int, params):
+    def call_cb(self, cb_id: int, params=None):
         fun = EventCallbacks.get(cb_id)
         nargs = fun.__code__.co_argcount
         if nargs == 0:

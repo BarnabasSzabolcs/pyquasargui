@@ -4,5 +4,5 @@ EventsType = Dict[str, Callable[[...], Any]]
 ClassesType = str
 StylesType = Dict[str, str]
 PropsType = Dict[str, Any]
-ChildrenType = List[Union['Component', str, 'Data']]
+ChildrenType = List[Union['Component', str, 'Model']]
 ValueType = Union[bool, int, float, str, list, dict, None]

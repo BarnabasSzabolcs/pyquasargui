@@ -16,6 +16,9 @@ function sendLog() {
 // ref. https://github.com/vuejs/vue/issues/9911
 Vue.component('dynamic-component', {
   props: ['id'],
+  data: {
+    loadEventFired: false,
+  },
   render: function(h) {
     if (this.id === undefined || this.id === null) {
       return ''
@@ -35,6 +38,10 @@ Vue.component('dynamic-component', {
       inputEvent = `@input="$root.data['${d.props.value['@']}']=$event"`
     } else {
       inputEvent = ''
+    }
+    if('load' in d.events && !this.loadEventFired){
+        window.pywebview.api.call_cb(d.events.load)
+        this.loadEventFired = true
     }
     const events = _.map(_.toPairs(d.events),
       pair => {
