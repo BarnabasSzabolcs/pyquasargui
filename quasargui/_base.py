@@ -133,7 +133,7 @@ class Component:
         # noinspection PyAttributeOutsideInit
         self.api = api
         for child in self._children:
-            if isinstance(child, Component):
+            if isinstance(child, Component) or isinstance(child, Model):
                 child.set_api(api)
         for model in self.dependent_models:
             model.set_api(api)
@@ -154,6 +154,10 @@ class Component:
             for child in children:
                 if isinstance(child, Component):
                     child.set_api(self.api)
+            self.update()
+
+    def update(self):
+        if self.api is not None:
             self.api.set_component(self.vue)
 
 
