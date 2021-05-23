@@ -148,6 +148,10 @@ class Plot(Component):
     "Different sizes can be created using `plt.figure(figsize=(width,height))`
     where width and height are in inches."
     ref. https://stackoverflow.com/a/31843288/1031191
+
+    TODO: Bokeh integration, probably via file_html
+    ref. https://docs.bokeh.org/en/latest/docs/reference/embed.html#bokeh.embed.file_html
+    otherwise a bokeh server needs to start in the background - which is also not impossible...
     """
     def __init__(self,
                  interactive: bool = True,
