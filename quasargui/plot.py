@@ -4,7 +4,7 @@ from os.path import join
 from typing import TYPE_CHECKING
 
 from quasargui import QUASAR_GUI_ASSETS_PATH
-from quasargui.base import Component
+from quasargui.base import Component, Model
 from quasargui.tools import str_between
 from quasargui.typing import ClassesType, StylesType, PropValueType
 
@@ -51,22 +51,26 @@ class Plot(Component):
                  classes: ClassesType = None,
                  styles: StylesType = None
                  ):
-        self.interactive = interactive
-        if interactive:
+        self.interactive = Model(interactive) if isinstance(interactive, bool) else interactive
+        self._check_imports()
+
+        self.html = {}
+        self.img_base64 = ''
+        super().__init__(classes=classes, styles=styles)
+
+    def _check_imports(self):
+        if self.interactive.value:
             if not MPLD3:
                 raise ImportError("Please install mpld3 package to use interactive plots")
         else:
             if not MATPLOTLIB:
                 raise ImportError("Please install matplotlib package to use interactive plots")
 
-        self.html = {}
-        self.img_base64 = ''
-        super().__init__(classes=classes, styles=styles)
-
     def set_figure(self, fig: 'Figure'):
         self.html = {}
         self.img_base64 = ''
-        if self.interactive:
+        self._check_imports()
+        if self.interactive.value:
             raw_html = mpld3.fig_to_html(
                 fig,
                 d3_url='file://' + join(QUASAR_GUI_ASSETS_PATH, 'd3.v5.js'),
