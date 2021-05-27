@@ -1,6 +1,6 @@
 from typing import Dict, Callable, TYPE_CHECKING, Optional
 
-from .typing import EventsType, ClassesType, StylesType, PropsType, ChildrenType, ValueType
+from quasargui.typing import *
 
 if TYPE_CHECKING:
     from .main import Api

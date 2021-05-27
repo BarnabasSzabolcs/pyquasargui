@@ -46,4 +46,4 @@ layout = Layout([
     ])
 ])
 
-quasargui.run(layout, debug=False)
+quasargui.run(layout, debug=True)

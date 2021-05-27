@@ -6,8 +6,8 @@ import webview
 from webview import Window
 
 from quasargui import QUASAR_GUI_INDEX_PATH
-from ._base import EventCallbacks
-from .components import Component
+from quasargui.base import EventCallbacks
+from quasargui.components import Component
 
 
 def _print_error(e):

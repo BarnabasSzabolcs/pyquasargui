@@ -36,8 +36,9 @@ Planned features:
 =====
 
 - Initial release
-- builds gui of any combination of Button, Input, Layout, Rows and Columns components
-- supports matplotlib plots (both non-interactive and interactive via mpld3)
+- builds gui of any combination of quasar components
+- supports matplotlib plots via Plot 
+  (both non-interactive aka displaying png and interactive via mpld3)
 - Enables dynamic children
 - v-if as props
 

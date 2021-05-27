@@ -1,10 +1,10 @@
 from typing import List, Union
 
-from ._base import Component, Model, ComponentWithModel
-from ._form import Button
-from ._tools import merge_classes, build_props
-from .callbacks import toggle
-from .typing import EventsType, ClassesType, StylesType, PropsType, ChildrenType
+from quasargui.base import Component, Model, ComponentWithModel
+from quasargui.form import Button
+from quasargui.tools import merge_classes, build_props
+from quasargui.callbacks import toggle
+from quasargui.typing import EventsType, ClassesType, StylesType, PropsType, ChildrenType
 
 
 class Layout(Component):

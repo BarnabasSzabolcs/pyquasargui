@@ -11,8 +11,9 @@ import time
 from mpld3 import plugins
 
 import quasargui
-from quasargui import Model
 from quasargui.components import *
+
+import matplotlib.pyplot as plt
 
 loading = Model(False)
 calculation_time = Model(0.0)
@@ -21,7 +22,7 @@ n_processes = Model(10)
 start = Model(10.0)
 drift = Model(0.002)
 variance = Model(0.04)
-interactive = Model(True)
+interactive = Model(False)
 
 
 def calculate_plot():
@@ -66,10 +67,13 @@ def calculate_plot():
 
 
 # This example loads the plot on load.
-plot = Plot(interactive=bool(interactive.value))
+plot = Plot(interactive=interactive)
 layout = Layout(events={'load': calculate_plot}, children=[
     Header([
-        Toolbar([ToolbarTitle(['Interactive plot demo - stock simulation by coin flip'])])
+        Toolbar([ToolbarTitle([
+            Icon('insights', 'lg', classes='q-mx-md'),
+            'Interactive plot demo <small>- stock simulation by coin flip</small>'
+        ])])
     ]),
     Page([
         plot
@@ -80,7 +84,8 @@ layout = Layout(events={'load': calculate_plot}, children=[
         Input(label='start value (S_0)', model=start),
         Input(label='drift (μ)', model=drift),
         Input(label='variance (σ)', model=variance),
-        Button(label='calculate', events={'click': calculate_plot}, props={'loading': loading})
+        Toggle(label='interactive', model=interactive),
+        Button(label='calculate', events={'click': calculate_plot}, props={'loading': loading}),
     ])]),
     Footer(props={'v-if': calculation_time}, children=[
         'Plotting took ',
