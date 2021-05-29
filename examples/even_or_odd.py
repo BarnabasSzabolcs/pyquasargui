@@ -1,19 +1,22 @@
 import quasargui
-from quasargui.callbacks import bind
 from quasargui.components import *
+from quasargui.model import Computed
 
 a = Model(0)
 b = Model(0)
+even = Computed(lambda x, y: (int(x)+int(y)) % 2 == 0, a, b)
+odd = Computed(lambda x: not(bool(x)), even)
 
 layout = Rows([
     Input('a', model=a),
+    '+',
     Input('b', model=b),
-    Div(props={'v-if': bind(lambda x, y: x+y % 2 == 0, a, b)}, children=[
-        'even'
+    Div(props={'v-if': even}, children=[
+        'is even'
     ]),
-    Div(props={'v-if': bind(lambda x, y: x+y % 2 != 0, a, b)}, children=[
-        'odd'
+    Div(props={'v-if': odd}, children=[
+        'is odd'
     ]),
 ])
 
-quasargui.run(layout)
+quasargui.run(layout, debug=True)

@@ -1,6 +1,7 @@
 from typing import List, Union
 
-from quasargui.base import Component, Model, ComponentWithModel
+from quasargui.components import Component, ComponentWithModel
+from quasargui.model import Model
 from quasargui.form import Button
 from quasargui.tools import merge_classes, build_props
 from quasargui.callbacks import toggle

@@ -1,55 +1,10 @@
-from typing import Dict, Callable, TYPE_CHECKING, Optional
+from typing import Optional
 
+from quasargui.model import Model, Renderable
 from quasargui.typing import *
 
 if TYPE_CHECKING:
-    from .main import Api
-
-
-class Model:
-    """
-    Data is all the data that can change
-    in both the GUI and on the backend
-    (typically the value of an Input)
-    """
-    max_id = 1
-    data_dic = {}
-
-    def __init__(self, value):
-        self.id = Model.max_id
-        Model.max_id += 1
-        self.data_dic[self.id] = self
-        self._value = value
-        self.api = None
-
-    def __del__(self):
-        del self.data_dic[self.id]
-
-    def set_api(self, api: 'Api'):
-        if self.api != api:
-            self.api = api
-            api.set_data(self.id, self._value)
-
-    @property
-    def value(self) -> str:
-        if self.api is not None:
-            return self.api.get_data(self.id)
-        else:
-            return self._value
-
-    @value.setter
-    def value(self, value):
-        if self._value == value:
-            return
-        self._value = value
-        if self.api is not None:
-            self.api.set_data(self.id, self._value)
-
-    def render(self):
-        return {'@': self.id, 'value': self.value}
-
-    def render_mustache(self) -> str:
-        return "{{$root.data[" + str(self.id) + "]}}"
+    from quasargui.main import Api
 
 
 class EventCallbacks:
@@ -102,7 +57,7 @@ class Component:
     @property
     def vue(self) -> dict:
         props = {
-            k: v.render() if isinstance(v, Model) else v
+            k: v.render() if isinstance(v, Renderable) else v
             for k, v in self.props.items()
         }
         classes = self.classes if isinstance(self.classes, str) else " ".join(cs for cs in self.classes)
@@ -117,8 +72,8 @@ class Component:
             'events': self.events,
             'props': props,
             'children': [child if isinstance(child, str) else
-                         child.render_mustache() if isinstance(child, Model)
-                         else child.vue
+                         child.vue if isinstance(child, Renderable) else
+                         child.vue
                          for child in self._children]
         }
 
@@ -133,8 +88,11 @@ class Component:
         # noinspection PyAttributeOutsideInit
         self.api = api
         for child in self._children:
-            if isinstance(child, Component) or isinstance(child, Model):
+            if isinstance(child, Component) or isinstance(child, Renderable):
                 child.set_api(api)
+        for prop in self.props.values():
+            if isinstance(prop, Renderable):
+                prop.set_api(api)
         for model in self.dependent_models:
             model.set_api(api)
 

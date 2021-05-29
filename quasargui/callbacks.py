@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Callable, Any
 
 if TYPE_CHECKING:
-    from .base import Model
+    from quasargui.model import Model
 
 
 def toggle(model: 'Model'):

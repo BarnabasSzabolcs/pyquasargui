@@ -8,6 +8,7 @@ from webview import Window
 from quasargui import QUASAR_GUI_INDEX_PATH
 from quasargui.base import EventCallbacks
 from quasargui.components import Component
+from quasargui.model import Model
 
 
 def _print_error(e):
@@ -16,6 +17,9 @@ def _print_error(e):
 
 
 class Api:
+    """
+    python -> js
+    """
     def __init__(self, main_component: Component, debug: bool = False):
         self.main_component = main_component
         self.window = None
@@ -36,35 +40,6 @@ class Api:
         if self.debug:
             print(cmd)
         self.window.evaluate_js(cmd)
-
-    # noinspection PyMethodMayBeStatic
-    def call_cb(self, cb_id: int, params=None):
-        fun = EventCallbacks.get(cb_id)
-        nargs = fun.__code__.co_argcount
-        if nargs == 0:
-            try:
-                fun()
-            except Exception as e:
-                _print_error(e)
-                raise e
-        elif nargs == 1:
-            try:
-                fun(params)
-            except Exception as e:
-                _print_error(e)
-                raise e
-        else:
-            raise AssertionError('Callback {name} has wrong number of parameters ({n})'.format(
-                name=fun.__name__,
-                n=nargs
-            ))
-
-    # noinspection PyMethodMayBeStatic
-    def print_log(self, args):
-        """
-        callback for app for debug purposes
-        """
-        print(*args.values(), sep=' ', end='\n', flush=True)
 
     def get_data(self, data_id: int):
         return self.window.evaluate_js('app.getData({data_id})'.format(
@@ -92,6 +67,42 @@ class Api:
             params=json.dumps(params)))
 
 
+# noinspection PyMethodMayBeStatic
+class JsApi:
+    """
+    js -> python
+    """
+    def call_cb(self, cb_id: int, params=None):
+        fun = EventCallbacks.get(cb_id)
+        nargs = fun.__code__.co_argcount
+        if nargs == 0:
+            try:
+                fun()
+            except Exception as e:
+                _print_error(e)
+                raise e
+        elif nargs == 1:
+            try:
+                fun(params)
+            except Exception as e:
+                _print_error(e)
+                raise e
+        else:
+            raise AssertionError('Callback {name} has wrong number of parameters ({n})'.format(
+                name=fun.__name__,
+                n=nargs
+            ))
+
+    def print_log(self, args):
+        """
+        callback for app for debug purposes
+        """
+        print(*args.values(), sep=' ', end='\n', flush=True)
+
+    def set_model_value(self, model_id, value):
+        Model.model_dic[int(model_id)].set_value(value, _jsapi=True)
+
+
 WINDOW = 0
 API = 1
 window_api_list: List[Tuple[Window, Api]] = []
@@ -102,7 +113,7 @@ def run(component: Component, debug: bool = False):
     window = webview.create_window(
         'Program',
         QUASAR_GUI_INDEX_PATH,
-        js_api=api,
+        js_api=JsApi(),
         min_size=(600, 450))
     window_api_list.append((window, api))
     webview.start(api.init, window, debug=debug)

@@ -164,6 +164,11 @@ const app = new Vue({
       return this.data[id]
     },
     setData(id, value) {
+      if(id in this.data===false){
+        this.$watch(`data.${id}`, v=>{
+          window.pywebview.api.set_model_value(id, v)
+        })
+      }
       this.$set(this.data, id, value)
     },
     showNotification(params) {

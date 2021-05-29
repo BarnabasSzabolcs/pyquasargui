@@ -4,7 +4,8 @@ from os.path import join
 from typing import TYPE_CHECKING
 
 from quasargui import QUASAR_GUI_ASSETS_PATH
-from quasargui.base import Component, Model
+from quasargui.model import Model
+from quasargui.base import Component
 from quasargui.tools import str_between
 from quasargui.typing import ClassesType, StylesType, PropValueType
 
