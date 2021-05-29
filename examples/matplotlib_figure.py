@@ -7,13 +7,11 @@ import math
 import random
 import time
 
-# noinspection PyPackageRequirements
-from mpld3 import plugins
+# noinspection PyPackageRequirements, PyUnresolvedReferences
+import matplotlib.pyplot as plt
 
 import quasargui
 from quasargui.components import *
-
-import matplotlib.pyplot as plt
 
 loading = Model(False)
 calculation_time = Model(0.0)
@@ -44,20 +42,9 @@ def calculate_plot():
     for _ in range(int(n_processes.value)):
         ax.plot(create_random_process())
 
-    # adjust figure
     ax.grid(True, alpha=0.3)
-    handles, labels = ax.get_legend_handles_labels()  # return lines and labels
-    interactive_legend = plugins.InteractiveLegendPlugin(zip(handles,
-                                                             ax.collections),
-                                                         labels,
-                                                         alpha_unsel=0.5,
-                                                         alpha_over=1.5,
-                                                         start_visible=True)
-    plugins.connect(fig, interactive_legend)
     ax.set_xlabel('x')
     ax.set_ylabel('y')
-    if bool(interactive.value):
-        ax.set_title('Interactive legend', size=20)
 
     # update the gui
     plot.set_figure(fig)
