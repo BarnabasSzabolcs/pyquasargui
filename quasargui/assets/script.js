@@ -39,9 +39,9 @@ Vue.component('dynamic-component', {
     } else {
       inputEvent = ''
     }
-    if('load' in d.events && !this.loadEventFired){
-        window.pywebview.api.call_cb(d.events.load)
-        this.loadEventFired = true
+    if ('load' in d.events && !this.loadEventFired) {
+      window.pywebview.api.call_cb(d.events.load)
+      this.loadEventFired = true
     }
     const events = _.map(_.toPairs(d.events),
       pair => {
@@ -58,7 +58,7 @@ Vue.component('dynamic-component', {
           if (ref in this.$root.data === false) {
             this.$root.$set(this.$root.data, ref, prop.value)
           }
-          colon = propName.startsWith('v-') ? '': ':'
+          colon = propName.startsWith('v-') ? '' : ':'
           return `${colon}${propName}="$root.data[${ref}]"`
         } else if (_.isString(prop)) {
           quotedProp = prop.replace(/"/g, '&quot;')
@@ -102,25 +102,33 @@ Vue.component('dynamic-component', {
 
 Vue.component('mpld3-figure', {
   props: ['id', 'script', 'style', 'figId'],
-  render: function(h){
+  render: function(h) {
     const script = document.createElement('script')
     script.id = this.id + '_script'
     script.innerHTML = this.script
     const style = document.createElement('style')
     style.innerHTML = this.style
     style.id = this.id + '_style'
-    if(this.$el){
+    if (this.$el) {
       this.$el.innerHTML = ''
     }
-    setTimeout(()=>{
+    setTimeout(() => {
       var styleObj = document.getElementById(style.id)
-      if (styleObj) { styleObj.remove()}
+      if (styleObj) {
+        styleObj.remove()
+      }
       var scriptObj = document.getElementById(script.id)
-      if (scriptObj) { scriptObj.remove()}
+      if (scriptObj) {
+        scriptObj.remove()
+      }
       document.head.appendChild(style)
       document.body.appendChild(script)
     })
-    return h('div', {attrs: {id: this.figId }})
+    return h('div', {
+      attrs: {
+        id: this.figId
+      }
+    })
   }
 })
 
@@ -130,16 +138,16 @@ const app = new Vue({
     return {
       mainComponentId: null,
       data: {}, // holds the Model values {id: value}
-      componentStore: {},  // holds the Component specifications {id: descriptor}
+      componentStore: {}, // holds the Component specifications {id: descriptor}
       debug: false,
     }
   },
   methods: {
     setDebug(debug) {
       this.debug = debug
-      if (debug){
-        setTimeout(()=>{
-            document.getElementById('debug').style.display='block'
+      if (debug) {
+        setTimeout(() => {
+          document.getElementById('debug').style.display = 'block'
         }, 50)
       }
     },
