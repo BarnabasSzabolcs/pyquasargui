@@ -7,7 +7,7 @@ This example showcases
 
 import quasargui
 from quasargui import set_main_component, Model
-from quasargui.callbacks import bind
+from quasargui.callbacks import call
 from quasargui.components import Div, Rows, Columns, Input, Button
 
 
@@ -36,7 +36,7 @@ buttons = [
         color=colors[i],
         props={'padding': 'xs xs'},
         styles={'min-width': '3em'},
-        events={'click': bind(set_color, colors[i])}
+        events={'click': call(set_color, colors[i])}
     )
     for i in range(MAX_BUTTONS)
 ]

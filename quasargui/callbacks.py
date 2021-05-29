@@ -16,7 +16,10 @@ def toggle(model: 'Model'):
     return f
 
 
-def bind(fun: Callable[['Model'], Any], *args) -> Callable:
+def call(fun: Callable[['Model'], Any], *args) -> Callable:
+    """
+    Executes a function on the current value(s) of :args:.
+    """
     def f():
         fun(*args)
     return f
