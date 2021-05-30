@@ -19,8 +19,7 @@ class Reactive(Generic[T]):
     def render_as_data(self) -> dict:
         raise NotImplementedError
 
-    @property
-    def vue(self) -> str:
+    def render_mustache(self) -> str:
         raise NotImplementedError
 
     def set_api(self, api: 'Api', _flush: bool = True):
@@ -106,8 +105,7 @@ class Model(Reactive, Generic[T]):
     def render_as_data(self) -> dict:
         return {'@': self.id, 'value': self.value}
 
-    @property
-    def vue(self) -> str:
+    def render_mustache(self) -> str:
         return "{{$root.data[" + str(self.id) + "]}}"
 
     def add_callback(self, fun: CallbackType):
@@ -143,9 +141,8 @@ class Computed(Reactive, Generic[T]):
     def render_as_data(self) -> dict:
         return self.model.render_as_data()
 
-    @property
-    def vue(self) -> str:
-        return self.model.vue
+    def render_mustache(self) -> str:
+        return self.model.render_mustache()
 
     def set_api(self, api: 'Api', _flush: bool = True):
         self.model.set_api(api, _flush=_flush)

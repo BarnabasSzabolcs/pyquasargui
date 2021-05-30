@@ -71,7 +71,7 @@ class Component:
             'events': self.events,
             'props': props,
             'children': [child if isinstance(child, str) else
-                         child.vue if isinstance(child, Reactive) else
+                         child.render_mustache() if isinstance(child, Reactive) else
                          child.vue
                          for child in self._children]
         }
