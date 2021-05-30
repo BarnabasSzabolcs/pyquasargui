@@ -65,6 +65,7 @@ class Component:
         styles = ";".join('{k}:{v}'.format(k=k, v=v) for k, v in self.styles.items())
         if styles:
             props.update({'style': styles})
+        slots = {slot.name: slot.vue for slot in self._children if isinstance(slot, Slot)}
         return {
             'id': self.id,
             'component': getattr(self, 'component', None),
@@ -73,7 +74,8 @@ class Component:
             'children': [child if isinstance(child, str) else
                          child.render_mustache() if isinstance(child, Reactive) else
                          child.vue
-                         for child in self._children]
+                         for child in self._children if not isinstance(child, Slot)],
+            'slots': slots
         }
 
     def _merge_vue(self, d: dict) -> dict:
@@ -156,3 +158,14 @@ class ComponentWithModel(Component):
         if not isinstance(self._model, Model):
             raise AssertionError('Cannot change value if instance\'s value is not Model')
         self._model.value = value
+
+
+class Slot(Component):
+    component = 'template'
+
+    def __init__(self,
+                 name: str,
+                 children: ChildrenType = None,
+                 props: PropsType = None):
+        self.name = name
+        super().__init__(props=props, children=children)
