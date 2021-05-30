@@ -56,6 +56,7 @@ class Model(Reactive, Generic[T]):
         self._type = type_ or type(value)
         self.api = None
         self._callbacks: List[CallbackType] = []
+        self.modifiers = set()
 
     def __del__(self):
         del self.model_dic[self.id]
@@ -103,7 +104,10 @@ class Model(Reactive, Generic[T]):
         self._type = type_
 
     def render_as_data(self) -> dict:
-        return {'@': self.id, 'value': self.value}
+        data = {'@': self.id, 'value': self.value}
+        if self.modifiers:
+            data['modifiers'] = list(self.modifiers)
+        return data
 
     def render_mustache(self) -> str:
         return "{{$root.data[" + str(self.id) + "]}}"
@@ -168,3 +172,8 @@ class And(Computed):
 class Or(Computed):
     def __init__(self, *arguments: Reactive):
         super().__init__(lambda *args: any(args), *arguments)
+
+
+class TrueFalse(Computed):
+    def __init__(self, true_value, false_value, argument: Reactive):
+        super().__init__(lambda a: true_value if a else false_value, argument)

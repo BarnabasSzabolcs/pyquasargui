@@ -35,7 +35,8 @@ Vue.component('dynamic-component', {
     }
     // sendLog(JSON.stringify(d))
     if (('value' in d.props) && !('input' in d.events)) {
-      inputEvent = `@input="$root.data['${d.props.value['@']}']=$event"`
+      const value = d.props.value
+      inputEvent = `@input="$root.data['${value['@']}']=$event"`
     } else {
       inputEvent = ''
     }
@@ -70,8 +71,12 @@ Vue.component('dynamic-component', {
           if (ref in this.$root.data === false) {
             this.$root.$set(this.$root.data, ref, prop.value)
           }
-          colon = propName.startsWith('v-') ? '' : ':'
-          return `${colon}${propName}="$root.data[${ref}]"`
+          const colon = propName.startsWith('v-') ? '' : ':'
+          const modifiers = 'modifiers' in prop ? '.' + prop.modifiers.join('.') : ''
+          return `${colon}${propName}${modifiers}="$root.data[${ref}]"`
+        } else if (_.isObject(prop) && '$' in prop) {
+          const colon = propName.startsWith('v-') ? '' : ':'
+          return `${colon}${propName}="${prop['$']}"`
         } else if (_.isString(prop)) {
           quotedProp = prop.replace(/"/g, '&quot;')
           return `${propName}="${quotedProp}"`
@@ -86,14 +91,12 @@ Vue.component('dynamic-component', {
           return child
         } else {
           const childComponent = 'dynamic-component'
-          console.log(child)
           child = JSON.stringify(child).replace(/'/g, "&#39;")
           return `<${childComponent} :id='${child}'></${childComponent}>`
         }
       }).join('')
     },
     renderSlots(slots) {
-      console.log('slot:', JSON.stringify(slots))
       return _.map(slots, (d, name) => {
         const events = this.renderEvents(d.events)
         const props = this.renderProps(d.props)

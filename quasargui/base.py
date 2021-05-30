@@ -30,6 +30,16 @@ class EventCallbacks:
         del cls.callbacks[cb_id]
 
 
+class JSFunction:
+    def __init__(self, code: str):
+        if '"' in code:
+            raise AssertionError('JSFunction code cannot contain \'"\'.')
+        self.code = code
+
+    def render_as_data(self) -> dict:
+        return {'$': self.code}
+
+
 class Component:
     """
     A renderable GUI component.
@@ -56,7 +66,7 @@ class Component:
     @property
     def vue(self) -> dict:
         props = {
-            k: v.render_as_data() if isinstance(v, Reactive) else v
+            k: v.render_as_data() if isinstance(v, Reactive) or isinstance(v, JSFunction) else v
             for k, v in self.props.items()
         }
         classes = self.classes if isinstance(self.classes, str) else " ".join(cs for cs in self.classes)

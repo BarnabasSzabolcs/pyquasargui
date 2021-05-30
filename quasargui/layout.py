@@ -260,6 +260,7 @@ class Icon(Component):
                  size: PropValueType[str] = None,
                  color: PropValueType[str] = None,
                  classes: ClassesType = None,
-                 styles: StylesType = None):
+                 styles: StylesType = None,
+                 events: EventsType = None):
         props = build_props({}, {}, {'name': name, 'size': size, 'color': color})
-        super().__init__(props=props, classes=classes, styles=styles)
+        super().__init__(props=props, classes=classes, styles=styles, events=events)

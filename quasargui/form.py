@@ -13,16 +13,31 @@ class Input(ComponentWithModel):
     component = 'q-input'
     defaults = {'props': {}}
 
+    # noinspection PyShadowingBuiltins
     def __init__(self,
                  label: str = None,
                  value: str = None,
                  model: Model = None,
+                 type: PropValueType[str] = None,
                  classes: ClassesType = None,
                  styles: StylesType = None,
                  props: PropsType = None,
                  events: EventsType = None,
                  children: List[Slot] = None):
-        props = build_props(self.defaults['props'], props, {'label': label})
+        props = build_props(self.defaults['props'], props, {
+            'label': label,
+            'type': type,
+        })
+        if props.get('type', '') == 'number':
+            model = model or Model('')
+            model.modifiers.add('number')
+        used_slots = {slot.name for slot in children or []}
+        bottom_slots = {'error', 'hint', 'counter'}
+        bottom_slots_used = used_slots & bottom_slots
+        if bottom_slots_used and 'bottom-slots' not in props:
+            props['bottom-slots'] = True
+        if 'label' in used_slots and 'label-slot' not in props:
+            props['label-slot'] = True
         super().__init__(
             model=model,
             value=value,
