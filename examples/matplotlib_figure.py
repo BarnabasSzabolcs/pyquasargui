@@ -12,15 +12,15 @@ import matplotlib.pyplot as plt
 
 import quasargui
 from quasargui.components import *
-from quasargui.model import Model, Computed
+from quasargui.model import Model, Computed, Not, And
 
-loading = Model[bool](False)
+loading = Model[bool](True)
 calculation_time = Model(0.0)
 n = Model(1000)
 n_processes = Model(10)
 start = Model(10.0)
 drift = Model(0.001)
-variance = Model(0.05)
+variance = Model(0.02)
 interactive = Model(False)
 animated = Model(False)
 fig, ax = plt.subplots(1, 1)
@@ -69,6 +69,11 @@ def redraw_plot():
 
 # This example loads the plot on load.
 plot = Plot(renderer=Computed(lambda i: 'mpld3' if bool(i) else 'png', interactive))
+Toggle.defaults['props'] = {
+    'color': 'white',
+    'keep-color': True,
+    'left-label': True
+}
 layout = Layout(events={'load': redraw_plot}, children=[
     Header([
         Toolbar([
@@ -76,20 +81,24 @@ layout = Layout(events={'load': redraw_plot}, children=[
                 Icon('insights', 'lg', classes='q-mx-md'),
                 'Plot demo <small>- Stock simulation by coin flip</small>'
             ]),
-            Toggle(label='Interactive', model=interactive, props={
-                'color': 'white',
-                'keep-color': True,
-                'left-label': True
-            }),
-            Toggle(label='Animated', model=animated, props={
-                'color': 'white',
-                'keep-color': True,
-                'left-label': True
-            })
+            Toggle(label='Interactive', model=interactive),
+            Toggle(label='Animated', model=animated)
         ])
     ]),
     Page([
-        plot
+        plot,
+        Div(props={'v-if': interactive}, children=[
+            """
+            Interactive plot is rendered by 
+            <a class="text-primary" style="text-decoration:none" target="_blank" href="https://mpld3.github.io/">
+                mpld3
+                <q-icon name="open_in_new"></q-icon>
+            </a>
+            .
+            """
+        ]),
+        Div(props={'v-if': And(Not(interactive), Not(loading))},
+            children=['Non-interactive plot is rendered by matplotlib as png.'])
     ]),
     Drawer([Rows([
         Input(label='Number of coinflips', model=n),
@@ -99,8 +108,6 @@ layout = Layout(events={'load': redraw_plot}, children=[
         Input(label='Variance (σ)', model=variance),
         Button(label='Redraw', events={'click': redraw_plot}, props={'loading': loading}),
         Button(label='Add scenario', events={'click': add_scenario}, props={'disable': loading}),
-        '',
-
     ])]),
     Footer(props={'v-if': calculation_time}, children=['Plotting took ', calculation_time, ' seconds.'])
 ])

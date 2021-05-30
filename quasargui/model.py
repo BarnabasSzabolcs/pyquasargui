@@ -137,3 +137,13 @@ class Computed(Reactive, Generic[T]):
 class Not(Computed):
     def __init__(self, var: Reactive):
         super().__init__(lambda x: not x, var)
+
+
+class And(Computed):
+    def __init__(self, *vars: Reactive):
+        super().__init__(lambda *args: all(args), *vars)
+
+
+class Or(Computed):
+    def __init__(self, *vars: Reactive):
+        super().__init__(lambda *args: any(args), *vars)

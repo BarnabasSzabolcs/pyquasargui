@@ -6,6 +6,7 @@ from quasargui.typing import ClassesType, StylesType, PropsType, EventsType, Pro
 
 class Input(ComponentWithModel):
     component = 'q-input'
+    defaults = {'props': {}}
 
     def __init__(self,
                  label: str = None,
@@ -15,7 +16,7 @@ class Input(ComponentWithModel):
                  styles: StylesType = None,
                  props: PropsType = None,
                  events: EventsType = None):
-        props = build_props({}, props, {'label': label})
+        props = build_props(self.defaults['props'], props, {'label': label})
         super().__init__(model=model, value=value, classes=classes, styles=styles, props=props, events=events)
 
 
@@ -47,6 +48,7 @@ class Toggle(ComponentWithModel):
     ref. https://quasar.dev/vue-components/toggle#qtoggle-api
     """
     component = 'q-toggle'
+    defaults = {'props': {}}
 
     def __init__(self,
                  label: str = None,
@@ -55,6 +57,6 @@ class Toggle(ComponentWithModel):
                  styles: StylesType = None,
                  props: PropsType = None,
                  events: EventsType = None):
-        props = build_props({}, props, {
+        props = build_props(self.defaults['props'], props, {
             'label': label})
         super().__init__(model=model, classes=classes, styles=styles, props=props, events=events)
