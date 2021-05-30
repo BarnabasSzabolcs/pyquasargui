@@ -1,34 +1,38 @@
-from typing import TYPE_CHECKING, Any, Callable, List, Dict
+from typing import TYPE_CHECKING, Callable, List, Dict, Generic, TypeVar, Type
 
 if TYPE_CHECKING:
     from quasargui.main import Api
 
 
-class Reactive:
+T = TypeVar('T')
+CallbackType = Callable[[], None]
+
+
+class Reactive(Generic[T]):
 
     @property
-    def value(self) -> str:
+    def value(self) -> T:
         raise NotImplementedError
 
-    def render_as_data(self):
+    def render_as_data(self) -> dict:
         raise NotImplementedError
 
     @property
-    def vue(self):
+    def vue(self) -> str:
         raise NotImplementedError
 
     def set_api(self, api: 'Api'):
         raise NotImplementedError
 
-    def add_callback(self, fun: Callable[[], None]):
+    def add_callback(self, fun: CallbackType):
         raise NotImplementedError
 
     @property
-    def callbacks(self):
+    def callbacks(self) -> List[CallbackType]:
         raise NotImplementedError
 
 
-class Model(Reactive):
+class Model(Reactive, Generic[T]):
     """
     Data is all the data that can change
     in both the GUI and on the backend
@@ -36,14 +40,21 @@ class Model(Reactive):
     """
     max_id = 1
     model_dic: Dict[int, 'Model'] = {}
+    NO_TYPE = (lambda x: x)
 
-    def __init__(self, value):
+    def __init__(self, value: T, type_: Type or NO_TYPE = None):
+        """
+        :param value:
+        :param type_: type of the model is enforced and the type is assumed to be the type of the initial value.
+        To disable automatic type conversions, set type_=Model.NO_TYPE.
+        """
         self.id = Model.max_id
         Model.max_id += 1
         self.model_dic[self.id] = self
         self._value = value
+        self._type = type_ or type(value)
         self.api = None
-        self._callbacks: List[Callable[[], None]] = []
+        self._callbacks: List[CallbackType] = []
 
     def __del__(self):
         del self.model_dic[self.id]
@@ -54,17 +65,16 @@ class Model(Reactive):
             api.set_data(self.id, self._value)
 
     @property
-    def value(self) -> str:
-        if self.api is not None:
-            return self.api.get_data(self.id)
-        else:
-            return self._value
+    def value(self) -> T:
+        return self._value
 
     @value.setter
-    def value(self, value):
+    def value(self, value: T):
         self.set_value(value)
 
-    def set_value(self, value, _jsapi=False):
+    def set_value(self, value: T, _jsapi=False):
+        if _jsapi:
+            value = self._type(value)
         if self._value == value:
             return
         self._value = value
@@ -73,23 +83,23 @@ class Model(Reactive):
         for callback in self._callbacks:
             callback()
 
-    def render_as_data(self):
+    def render_as_data(self) -> dict:
         return {'@': self.id, 'value': self.value}
 
     @property
     def vue(self) -> str:
         return "{{$root.data[" + str(self.id) + "]}}"
 
-    def add_callback(self, fun: Callable[[], None]):
+    def add_callback(self, fun: CallbackType):
         self._callbacks.append(fun)
 
     @property
-    def callbacks(self):
+    def callbacks(self) -> List[CallbackType]:
         return self._callbacks
 
 
-class Computed(Reactive):
-    def __init__(self, fun: Callable[[...], Any], *args: Reactive):
+class Computed(Reactive, Generic[T]):
+    def __init__(self, fun: Callable[[...], T], *args: Reactive):
         self.fun = fun
         self.args = args
         self.model = Model(None)
@@ -103,10 +113,10 @@ class Computed(Reactive):
         self.model.value = self.fun(*values)
 
     @property
-    def value(self):
+    def value(self) -> T:
         return self.model.value
 
-    def render_as_data(self):
+    def render_as_data(self) -> dict:
         return self.model.render_as_data()
 
     @property
@@ -116,9 +126,14 @@ class Computed(Reactive):
     def set_api(self, api: 'Api'):
         self.model.set_api(api)
 
-    def add_callback(self, fun: Callable[[], None]):
+    def add_callback(self, fun: CallbackType):
         self.model.add_callback(fun)
 
     @property
-    def callbacks(self):
+    def callbacks(self) -> List[CallbackType]:
         return self.model.callbacks
+
+
+class Not(Computed):
+    def __init__(self, var: Reactive):
+        super().__init__(lambda x: not x, var)

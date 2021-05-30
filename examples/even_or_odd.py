@@ -4,8 +4,8 @@ from quasargui.model import Computed
 
 a = Model(0)
 b = Model(0)
-even = Computed(lambda x, y: (int(x)+int(y)) % 2 == 0, a, b)
-odd = Computed(lambda x: not(bool(x)), even)
+even = Computed(lambda x, y: (x+y) % 2 == 0, a, b)
+odd = Computed(lambda x: not x, even)
 
 layout = Rows([
     Input('a', model=a),
@@ -19,4 +19,4 @@ layout = Rows([
     ]),
 ])
 
-quasargui.run(layout, debug=True)
+quasargui.run(layout)

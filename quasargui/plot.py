@@ -4,8 +4,8 @@ from os.path import join
 from typing import TYPE_CHECKING
 
 from quasargui import QUASAR_GUI_ASSETS_PATH
-from quasargui.model import Model
 from quasargui.base import Component
+from quasargui.model import Model
 from quasargui.tools import str_between
 from quasargui.typing import ClassesType, StylesType, PropValueType
 
@@ -47,31 +47,51 @@ class Plot(Component):
     ref. https://docs.bokeh.org/en/latest/docs/reference/embed.html#bokeh.embed.file_html
     otherwise a bokeh server needs to start in the background - which is also not impossible...
     """
+    defaults = {
+        'render': 'png',  # other choice: 'mpld3'
+    }
+    renderers = {'png', 'mpld3'}
+
     def __init__(self,
-                 interactive: PropValueType[bool] = True,
+                 renderer: PropValueType[str] = 'mpld3',
                  classes: ClassesType = None,
                  styles: StylesType = None
                  ):
-        self.interactive = Model(interactive) if isinstance(interactive, bool) else interactive
+        """
+        :param renderer: valid values are 'png' and 'mpld3'.
+        :param classes:
+        :param styles:
+        """
+        self.renderer = Model(renderer) if isinstance(renderer, str) else renderer
+        self.renderer.add_callback(self.update)
         self._check_imports()
 
+        self.fig = None
         self.html = {}
         self.img_base64 = ''
         super().__init__(classes=classes, styles=styles)
 
     def _check_imports(self):
-        if self.interactive.value:
+        if self.renderer.value == 'mpld3':
             if not MPLD3:
                 raise ImportError("Please install mpld3 package to use interactive plots")
-        else:
+        elif self.renderer.value == 'png':
             if not MATPLOTLIB:
                 raise ImportError("Please install matplotlib package to use interactive plots")
+        else:
+            raise AssertionError(f'Wrong renderer. Renderer is set to "{self.renderer.value}", '
+                                 f'should be one of {self.renderers}')
+
+    def update(self):
+        self.set_figure(self.fig)
+        super().update()
 
     def set_figure(self, fig: 'Figure'):
+        self.fig = fig
         self.html = {}
         self.img_base64 = ''
         self._check_imports()
-        if self.interactive.value:
+        if self.renderer.value == 'mpld3':
             raw_html = mpld3.fig_to_html(
                 fig,
                 d3_url='file://' + join(QUASAR_GUI_ASSETS_PATH, 'd3.v5.js'),
@@ -80,12 +100,12 @@ class Plot(Component):
             self.html['figId'] = str_between(raw_html, '<div id="', '"></div>')
             self.html['script'] = str_between(raw_html, "<script>", "</script>")
             self.html['style'] = str_between(raw_html, "<style>", "</style>")
-        else:
+        elif self.renderer.value == 'png':
             tmpfile = BytesIO()
             fig.savefig(tmpfile, format='png')
             encoded = base64.b64encode(tmpfile.getvalue()).decode('utf-8')
             self.img_base64 = "data:image/png;base64,{}".format(encoded)
-        self.update()
+        super().update()
 
     @property
     def vue(self) -> dict:

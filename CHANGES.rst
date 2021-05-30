@@ -40,5 +40,5 @@ Planned features:
 - supports matplotlib plots via Plot 
   (both non-interactive aka displaying png and interactive via mpld3)
 - Enables dynamic children
-- v-if as props
+- v-if as props, with Computed or Model as dynamically updated value
 
