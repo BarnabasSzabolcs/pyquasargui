@@ -35,7 +35,8 @@ Vue.component('dynamic-component', {
     }
     // sendLog(JSON.stringify(d))
     if (('value' in d.props) && !('input' in d.events)) {
-      inputEvent = `@input="$root.data['${d.props.value['@']}']=$event"`
+      const value = d.props.value
+      inputEvent = `@input="$root.data['${value['@']}']=$event"`
     } else {
       inputEvent = ''
     }
@@ -43,34 +44,49 @@ Vue.component('dynamic-component', {
       window.pywebview.api.call_cb(d.events.load)
       this.loadEventFired = true
     }
-    const events = _.map(_.toPairs(d.events),
-      pair => {
-        [eventName, cb_id] = pair
-        return `@${eventName}="params=>window.pywebview.api.call_cb(${cb_id}, params)"`
-      }
-    ).join(' ')
+    const events = this.renderEvents(d.events)
+    const props = this.renderProps(d.props)
+    const children = this.renderChildren(d.children)
+    const slots = this.renderSlots(d.slots)
 
-    const props = _.map(_.toPairs(d.props),
-      pair => {
-        const [propName, prop] = pair
-        if (_.isObject(prop) && '@' in prop) {
+    const attrs = [props, events, inputEvent].join(' ')
+    const template = `<${d.component} ${attrs}>${children}${slots}</${d.component}>`
+    // sendLog(Vue.compile(template).render)
+    sendLog('rendering:')
+    sendLog(template)
+    return this.renderTemplate(template)
+  },
+  methods: {
+    renderEvents(events) {
+      return _.map(events, (cb_id, eventName) => {
+        return `@${eventName}="params=>window.pywebview.api.call_cb(${cb_id}, params)"`
+      }).join(' ')
+    },
+    renderProps(props) {
+      return _.map(props, (prop, propName) => {
+        if (prop === null) {
+          return propName
+        } else if (_.isObject(prop) && '@' in prop) {
           const ref = prop['@']
           if (ref in this.$root.data === false) {
             this.$root.$set(this.$root.data, ref, prop.value)
           }
-          colon = propName.startsWith('v-') ? '' : ':'
-          return `${colon}${propName}="$root.data[${ref}]"`
+          const colon = propName.startsWith('v-') ? '' : ':'
+          const modifiers = 'modifiers' in prop ? '.' + prop.modifiers.join('.') : ''
+          return `${colon}${propName}${modifiers}="$root.data[${ref}]"`
+        } else if (_.isObject(prop) && '$' in prop) {
+          const colon = propName.startsWith('v-') ? '' : ':'
+          return `${colon}${propName}="${prop['$']}"`
         } else if (_.isString(prop)) {
           quotedProp = prop.replace(/"/g, '&quot;')
           return `${propName}="${quotedProp}"`
         } else {
           return `:${propName}="${prop}"`
         }
-      }
-    ).join(' ')
-
-    const children = _.map(d.children,
-      child => {
+      }).join(' ')
+    },
+    renderChildren(children) {
+      return _.map(children, child => {
         if (_.isString(child)) {
           return child
         } else {
@@ -78,16 +94,18 @@ Vue.component('dynamic-component', {
           child = JSON.stringify(child).replace(/'/g, "&#39;")
           return `<${childComponent} :id='${child}'></${childComponent}>`
         }
-      }
-    ).join('')
-
-    const template = `<${d.component} ${props} ${events} ${inputEvent}>${children}</${d.component}>`
-    // sendLog(Vue.compile(template).render)
-    sendLog('rendering:')
-    sendLog(template)
-    return this.renderTemplate(template)
-  },
-  methods: {
+      }).join('')
+    },
+    renderSlots(slots) {
+      return _.map(slots, (d, name) => {
+        const events = this.renderEvents(d.events)
+        const props = this.renderProps(d.props)
+        const children = this.renderChildren(d.children)
+        const slots = this.renderSlots(d.slots)
+        const attrs = [props, events].join(' ')
+        return `<template v-slot:${name} ${attrs}>${children}${slots}</template>`
+      }).join('')
+    },
     renderTemplate(template) {
       // This works even if the template does not have any reactive variables.
       // ref. https://github.com/vuejs/vue/issues/9911
@@ -159,9 +177,15 @@ const app = new Vue({
       if (refresh || (component.id in this.componentStore === false)) {
         this.$set(this.componentStore, component.id, component)
       }
-      const children = component.children || []
-      component.children = children.map(child => {
-        return _.isObject(child) ? this.registerComponent(child, refresh) : child
+      const _childrenToIds = (component) => {
+        const children = component.children || []
+        component.children = children.map(child => {
+          return _.isObject(child) ? this.registerComponent(child, refresh) : child
+        })
+      }
+      _childrenToIds(component)
+      _.each(component.slots, slot => {
+        _childrenToIds(slot)
       })
       return component.id
     },
@@ -171,12 +195,12 @@ const app = new Vue({
     getData(id) {
       return this.data[id]
     },
-    setData(payload){
+    setData(payload) {
       payload.forEach(([id, value]) => this._setData(id, value))
     },
     _setData(id, value) {
-      if(id in this.data===false){
-        this.$watch(`data.${id}`, v=>{
+      if (id in this.data === false) {
+        this.$watch(`data.${id}`, v => {
           window.pywebview.api.set_model_value(id, v)
         })
       }

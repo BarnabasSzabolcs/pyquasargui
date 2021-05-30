@@ -84,7 +84,8 @@ class Header(ComponentWithModel):
                  styles: StylesType = None,
                  props: PropsType = None
                  ):
-        children = children
+        if len(children) == 1 and isinstance(children[0], str):
+            children = [Toolbar([ToolbarTitle([children[0]])])]
         props = build_props(
             defaults=self.defaults['props'],
             props=props,
@@ -259,6 +260,7 @@ class Icon(Component):
                  size: PropValueType[str] = None,
                  color: PropValueType[str] = None,
                  classes: ClassesType = None,
-                 styles: StylesType = None):
+                 styles: StylesType = None,
+                 events: EventsType = None):
         props = build_props({}, {}, {'name': name, 'size': size, 'color': color})
-        super().__init__(props=props, classes=classes, styles=styles)
+        super().__init__(props=props, classes=classes, styles=styles, events=events)

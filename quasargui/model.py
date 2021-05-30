@@ -19,8 +19,7 @@ class Reactive(Generic[T]):
     def render_as_data(self) -> dict:
         raise NotImplementedError
 
-    @property
-    def vue(self) -> str:
+    def render_mustache(self) -> str:
         raise NotImplementedError
 
     def set_api(self, api: 'Api', _flush: bool = True):
@@ -57,6 +56,7 @@ class Model(Reactive, Generic[T]):
         self._type = type_ or type(value)
         self.api = None
         self._callbacks: List[CallbackType] = []
+        self.modifiers = set()
 
     def __del__(self):
         del self.model_dic[self.id]
@@ -104,10 +104,12 @@ class Model(Reactive, Generic[T]):
         self._type = type_
 
     def render_as_data(self) -> dict:
-        return {'@': self.id, 'value': self.value}
+        data = {'@': self.id, 'value': self.value}
+        if self.modifiers:
+            data['modifiers'] = list(self.modifiers)
+        return data
 
-    @property
-    def vue(self) -> str:
+    def render_mustache(self) -> str:
         return "{{$root.data[" + str(self.id) + "]}}"
 
     def add_callback(self, fun: CallbackType):
@@ -143,9 +145,8 @@ class Computed(Reactive, Generic[T]):
     def render_as_data(self) -> dict:
         return self.model.render_as_data()
 
-    @property
-    def vue(self) -> str:
-        return self.model.vue
+    def render_mustache(self) -> str:
+        return self.model.render_mustache()
 
     def set_api(self, api: 'Api', _flush: bool = True):
         self.model.set_api(api, _flush=_flush)
@@ -171,3 +172,8 @@ class And(Computed):
 class Or(Computed):
     def __init__(self, *arguments: Reactive):
         super().__init__(lambda *args: any(args), *arguments)
+
+
+class TrueFalse(Computed):
+    def __init__(self, true_value, false_value, argument: Reactive):
+        super().__init__(lambda a: true_value if a else false_value, argument)
