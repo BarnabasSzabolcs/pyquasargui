@@ -171,7 +171,10 @@ const app = new Vue({
     getData(id) {
       return this.data[id]
     },
-    setData(id, value) {
+    setData(payload){
+      payload.forEach(([id, value]) => this._setData(id, value))
+    },
+    _setData(id, value) {
       if(id in this.data===false){
         this.$watch(`data.${id}`, v=>{
           window.pywebview.api.set_model_value(id, v)

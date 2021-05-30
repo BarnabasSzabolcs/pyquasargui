@@ -23,7 +23,7 @@ class Reactive(Generic[T]):
     def vue(self) -> str:
         raise NotImplementedError
 
-    def set_api(self, api: 'Api'):
+    def set_api(self, api: 'Api', _flush: bool = True):
         raise NotImplementedError
 
     def add_callback(self, fun: CallbackType):
@@ -61,10 +61,12 @@ class Model(Reactive, Generic[T]):
     def __del__(self):
         del self.model_dic[self.id]
 
-    def set_api(self, api: 'Api'):
+    def set_api(self, api: 'Api', _flush: bool = True):
         if self.api != api:
             self.api = api
             api.set_data(self.id, self._value)
+        if _flush:
+            api.flush_data(self.id)
 
     @property
     def value(self) -> T:
@@ -91,6 +93,8 @@ class Model(Reactive, Generic[T]):
             self.api.set_data(self.id, self._value)
         for callback in self._callbacks:
             callback()
+        if self.api is not None and not _jsapi:
+            self.api.flush_data(self.id)
 
     @property
     def type(self):
@@ -143,8 +147,8 @@ class Computed(Reactive, Generic[T]):
     def vue(self) -> str:
         return self.model.vue
 
-    def set_api(self, api: 'Api'):
-        self.model.set_api(api)
+    def set_api(self, api: 'Api', _flush: bool = True):
+        self.model.set_api(api, _flush=_flush)
 
     def add_callback(self, fun: CallbackType):
         self.model.add_callback(fun)

@@ -83,15 +83,17 @@ class Component:
         d_base.update(d)
         return d_base
 
-    def set_api(self, api: 'Api'):
+    def set_api(self, api: 'Api', _flush: bool = True):
         # noinspection PyAttributeOutsideInit
         self.api = api
         for child in self._children:
             if isinstance(child, Component) or isinstance(child, Reactive):
-                child.set_api(api)
+                child.set_api(api, _flush=False)
         for prop in self.props.values():
             if isinstance(prop, Reactive):
-                prop.set_api(api)
+                prop.set_api(api, _flush=False)
+        if _flush:
+            api.flush_data()
 
     def notify(self, message: str, **kwargs):
         params = {'message': message}
@@ -137,9 +139,9 @@ class ComponentWithModel(Component):
                          props=props,
                          events=events)
 
-    def set_api(self, api: 'Api'):
-        super().set_api(api)
-        self._model.set_api(api)
+    def set_api(self, api: 'Api', _flush: bool = True):
+        super().set_api(api, _flush=_flush)
+        self._model.set_api(api, _flush=_flush)
 
     @property
     def model(self):

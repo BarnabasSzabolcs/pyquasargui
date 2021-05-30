@@ -20,6 +20,7 @@ class Api:
         self.window = None
         self.debug = debug
         self.render_debug = render_debug
+        self.set_data_queue = []
 
     def init(self, window):
         self.window = window
@@ -45,11 +46,17 @@ class Api:
     def set_data(self, data_id: int, value):
         if self.debug:
             print('set_data', data_id, value)
-        return self.window.evaluate_js(
-            'app.setData({data_id}, {value})'.format(
-                data_id=json.dumps(data_id),
-                value=json.dumps(value)
+        self.set_data_queue.append([data_id, value])
+
+    def flush_data(self, data_id=0):
+        if (not self.set_data_queue) or (data_id and self.set_data_queue[0][0] != data_id):
+            return
+        result = self.window.evaluate_js(
+            'app.setData({payload})'.format(
+                payload=json.dumps(self.set_data_queue)
             ))
+        self.set_data_queue = []
+        return result
 
     def set_component(self, component_vue):
         if self.debug:
