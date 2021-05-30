@@ -1,3 +1,4 @@
+import traceback
 from typing import List
 
 
@@ -39,3 +40,8 @@ def str_between(source: str, from_str: str, to_str: str) -> str:
         return source.split(from_str, 1)[1].split(to_str, 1)[0]
     except IndexError:
         return ''
+
+
+def print_error(e):
+    print("\n\nERROR {}: {}".format(e.__class__.__name__, e))
+    print(traceback.format_exc())

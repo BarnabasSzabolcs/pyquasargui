@@ -1,5 +1,4 @@
 import json
-import traceback
 from typing import List, Tuple
 
 import webview
@@ -9,26 +8,23 @@ from quasargui import QUASAR_GUI_INDEX_PATH
 from quasargui.base import EventCallbacks
 from quasargui.components import Component
 from quasargui.model import Model
-
-
-def _print_error(e):
-    print("\n\nERROR {}: {}".format(e.__class__.__name__, e))
-    print(traceback.format_exc())
+from quasargui.tools import print_error
 
 
 class Api:
     """
     python -> js
     """
-    def __init__(self, main_component: Component, debug: bool = False):
+    def __init__(self, main_component: Component, debug: bool = False, render_debug: bool = False):
         self.main_component = main_component
         self.window = None
         self.debug = debug
+        self.render_debug = render_debug
 
     def init(self, window):
         self.window = window
-        window.evaluate_js('app.setDebug({debug})'.format(
-            debug=json.dumps(self.debug)
+        window.evaluate_js('app.setDebug({render_debug})'.format(
+            render_debug=json.dumps(self.render_debug)
         ))
         self.set_main_component(self.main_component)
 
@@ -79,13 +75,13 @@ class JsApi:
             try:
                 fun()
             except Exception as e:
-                _print_error(e)
+                print_error(e)
                 raise e
         elif nargs == 1:
             try:
                 fun(params)
             except Exception as e:
-                _print_error(e)
+                print_error(e)
                 raise e
         else:
             raise AssertionError('Callback {name} has wrong number of parameters ({n})'.format(
@@ -100,16 +96,19 @@ class JsApi:
         print(*args.values(), sep=' ', end='\n', flush=True)
 
     def set_model_value(self, model_id, value):
-        Model.model_dic[int(model_id)].set_value(value, _jsapi=True)
-
+        try:
+            Model.model_dic[int(model_id)].set_value(value, _jsapi=True)
+        except Exception as e:
+            print_error(e)
+            raise e
 
 WINDOW = 0
 API = 1
 window_api_list: List[Tuple[Window, Api]] = []
 
 
-def run(component: Component, debug: bool = False):
-    api = Api(component, debug=debug)
+def run(component: Component, debug: bool = False, _render_debug: bool = False):
+    api = Api(component, debug=debug, render_debug = _render_debug)
     window = webview.create_window(
         'Program',
         QUASAR_GUI_INDEX_PATH,

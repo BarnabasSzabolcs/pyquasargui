@@ -1,5 +1,7 @@
 from typing import TYPE_CHECKING, Callable, List, Dict, Generic, TypeVar, Type
 
+from quasargui.tools import print_error
+
 if TYPE_CHECKING:
     from quasargui.main import Api
 
@@ -74,7 +76,14 @@ class Model(Reactive, Generic[T]):
 
     def set_value(self, value: T, _jsapi=False):
         if _jsapi:
-            value = self._type(value)
+            # noinspection PyBroadException
+            try:
+                value = self._type(value)
+            except Exception:
+                # if value == '' and self._type in {int, float}:
+                #     value = self._type(0)
+                if self.api.debug:
+                    print(f'WARNING: could not convert {value} to {self._type}')
         if self._value == value:
             return
         self._value = value
@@ -82,6 +91,13 @@ class Model(Reactive, Generic[T]):
             self.api.set_data(self.id, self._value)
         for callback in self._callbacks:
             callback()
+
+    @property
+    def type(self):
+        return self._type
+
+    def set_type(self, type_: Type):
+        self._type = type_
 
     def render_as_data(self) -> dict:
         return {'@': self.id, 'value': self.value}
@@ -104,13 +120,17 @@ class Computed(Reactive, Generic[T]):
         self.args = args
         self.model = Model(None)
         self.calculate()
+        self.model.set_type(type(self.model.value))
         for arg in args:
             if isinstance(arg, Reactive):
                 arg.add_callback(self.calculate)
 
     def calculate(self):
         values = [a.value for a in self.args]
-        self.model.value = self.fun(*values)
+        try:
+            self.model.value = self.fun(*values)
+        except Exception as e:
+            print_error(e)
 
     @property
     def value(self) -> T:
