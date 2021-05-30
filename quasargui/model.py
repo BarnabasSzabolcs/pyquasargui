@@ -10,7 +10,7 @@ class Reactive:
     def value(self) -> str:
         raise NotImplementedError
 
-    def render(self):
+    def render_as_data(self):
         raise NotImplementedError
 
     @property
@@ -73,7 +73,7 @@ class Model(Reactive):
         for callback in self._callbacks:
             callback()
 
-    def render(self):
+    def render_as_data(self):
         return {'@': self.id, 'value': self.value}
 
     @property
@@ -106,8 +106,8 @@ class Computed(Reactive):
     def value(self):
         return self.model.value
 
-    def render(self):
-        return self.model.render()
+    def render_as_data(self):
+        return self.model.render_as_data()
 
     @property
     def vue(self) -> str:

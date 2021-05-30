@@ -56,7 +56,7 @@ class Component:
     @property
     def vue(self) -> dict:
         props = {
-            k: v.render() if isinstance(v, Reactive) else v
+            k: v.render_as_data() if isinstance(v, Reactive) else v
             for k, v in self.props.items()
         }
         classes = self.classes if isinstance(self.classes, str) else " ".join(cs for cs in self.classes)
@@ -130,7 +130,7 @@ class ComponentWithModel(Component):
         value = value or ''
         self._model = model or Model(value)
         props = props or {}
-        props['value'] = self._model.render()
+        props['value'] = self._model.render_as_data()
         super().__init__(children=children,
                          classes=classes,
                          styles=styles,
