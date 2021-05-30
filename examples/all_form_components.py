@@ -42,7 +42,7 @@ layout = Layout([
                 )])]),
 
         Input(label="number input", type='number', props={
-            # 'rule': JSFunction("value => value>0 || 'Enter a positive number'")
+            'rules': JSFunction("[value => value>0 || 'Enter a positive number']")
         }),
 
         Toggle(label='q-toggle'),
