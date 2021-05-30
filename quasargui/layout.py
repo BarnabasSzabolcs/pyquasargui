@@ -84,7 +84,8 @@ class Header(ComponentWithModel):
                  styles: StylesType = None,
                  props: PropsType = None
                  ):
-        children = children
+        if len(children) == 1 and isinstance(children[0], str):
+            children = [Toolbar([ToolbarTitle([children[0]])])]
         props = build_props(
             defaults=self.defaults['props'],
             props=props,
