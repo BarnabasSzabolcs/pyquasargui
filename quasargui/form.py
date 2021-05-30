@@ -1,10 +1,12 @@
-from quasargui.base import *
-from quasargui.base import Component
+from quasargui.base import Component, ComponentWithModel
+from quasargui.model import Model
 from quasargui.tools import build_props
-from quasargui.typing import *
+from quasargui.typing import ClassesType, StylesType, PropsType, EventsType, PropValueType
 
 
 class Input(ComponentWithModel):
+    component = 'q-input'
+
     def __init__(self,
                  label: str = None,
                  value: str = None,
@@ -15,12 +17,6 @@ class Input(ComponentWithModel):
                  events: EventsType = None):
         props = build_props({}, props, {'label': label})
         super().__init__(model=model, value=value, classes=classes, styles=styles, props=props, events=events)
-
-    @property
-    def vue(self) -> dict:
-        return self._merge_vue({
-            'component': 'q-input',
-        })
 
 
 class Button(Component):
@@ -53,12 +49,12 @@ class Toggle(ComponentWithModel):
     component = 'q-toggle'
 
     def __init__(self,
-               label: str = None,
-               model: Model = None,
-               classes: ClassesType = None,
-               styles: StylesType = None,
-               props: PropsType = None,
-               events: EventsType = None):
+                 label: str = None,
+                 model: Model = None,
+                 classes: ClassesType = None,
+                 styles: StylesType = None,
+                 props: PropsType = None,
+                 events: EventsType = None):
         props = build_props({}, props, {
             'label': label})
         super().__init__(model=model, classes=classes, styles=styles, props=props, events=events)

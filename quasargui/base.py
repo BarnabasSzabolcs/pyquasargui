@@ -1,7 +1,7 @@
-from typing import Optional
+from typing import Optional, TYPE_CHECKING, Dict, Callable
 
-from quasargui.model import Model, Renderable
-from quasargui.typing import *
+from quasargui.model import Reactive, Model
+from quasargui.typing import ChildrenType, ClassesType, StylesType, PropsType, EventsType, ValueType
 
 if TYPE_CHECKING:
     from quasargui.main import Api
@@ -52,12 +52,11 @@ class Component:
         self.api: Optional['Api'] = None
         Component.max_id += 1
         self.id = Component.max_id
-        self.dependent_models = [v for v in self.props.values() if isinstance(v, Model)]
 
     @property
     def vue(self) -> dict:
         props = {
-            k: v.render() if isinstance(v, Renderable) else v
+            k: v.render() if isinstance(v, Reactive) else v
             for k, v in self.props.items()
         }
         classes = self.classes if isinstance(self.classes, str) else " ".join(cs for cs in self.classes)
@@ -72,7 +71,7 @@ class Component:
             'events': self.events,
             'props': props,
             'children': [child if isinstance(child, str) else
-                         child.vue if isinstance(child, Renderable) else
+                         child.vue if isinstance(child, Reactive) else
                          child.vue
                          for child in self._children]
         }
@@ -88,13 +87,11 @@ class Component:
         # noinspection PyAttributeOutsideInit
         self.api = api
         for child in self._children:
-            if isinstance(child, Component) or isinstance(child, Renderable):
+            if isinstance(child, Component) or isinstance(child, Reactive):
                 child.set_api(api)
         for prop in self.props.values():
-            if isinstance(prop, Renderable):
+            if isinstance(prop, Reactive):
                 prop.set_api(api)
-        for model in self.dependent_models:
-            model.set_api(api)
 
     def notify(self, message: str, **kwargs):
         params = {'message': message}
@@ -121,7 +118,7 @@ class Component:
 
 class ComponentWithModel(Component):
     def __init__(self,
-                 model: Optional[Model],
+                 model: Optional[Reactive],
                  value: ValueType = None,
                  children: Component = None,
                  classes: ClassesType = None,
@@ -154,4 +151,6 @@ class ComponentWithModel(Component):
 
     @value.setter
     def value(self, value):
+        if not isinstance(self._model, Model):
+            raise AssertionError('Cannot change value if instance\'s value is not Model')
         self._model.value = value

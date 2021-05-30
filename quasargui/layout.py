@@ -1,11 +1,11 @@
 from typing import List, Union
 
-from quasargui.components import Component, ComponentWithModel
-from quasargui.model import Model
-from quasargui.form import Button
-from quasargui.tools import merge_classes, build_props
 from quasargui.callbacks import toggle
-from quasargui.typing import EventsType, ClassesType, StylesType, PropsType, ChildrenType
+from quasargui.components import Component, ComponentWithModel
+from quasargui.form import Button
+from quasargui.model import Model, Reactive
+from quasargui.tools import merge_classes, build_props
+from quasargui.typing import EventsType, ClassesType, StylesType, PropsType, ChildrenType, PropValueType
 
 
 class Layout(Component):
@@ -82,7 +82,7 @@ class Header(ComponentWithModel):
                  hide_on_scroll: bool = None,  # this is the reveal prop
                  elevated: bool = None,
                  bordered: bool = None,
-                 show: Union[Model, bool] = True,
+                 show: PropValueType[bool] = True,
                  classes: ClassesType = None,
                  styles: StylesType = None,
                  props: PropsType = None
@@ -96,7 +96,7 @@ class Header(ComponentWithModel):
                 'elevated': elevated,
                 'bordered': bordered,
             })
-        model = show if isinstance(show, Model) else Model(show)
+        model = show if isinstance(show, Reactive) else Model(show)
         super().__init__(model=model, children=children, classes=classes, styles=styles, props=props)
 
     @property
@@ -153,7 +153,7 @@ class Drawer(ComponentWithModel):
                 'side': side,
                 'bordered': bordered,
             })
-        model = show if isinstance(show, Model) else Model(show)
+        model = show if isinstance(show, Reactive) else Model(show)
         super().__init__(model=model, children=children, classes=classes, styles=styles, props=props, events=events)
 
     @property
@@ -177,7 +177,7 @@ class Page(Component):
 
     def __init__(self,
                  children: ChildrenType = None,
-                 padding: bool = None,
+                 padding: PropValueType[bool] = None,
                  classes: ClassesType = None,
                  styles: StylesType = None,
                  props: PropsType = None,
@@ -232,7 +232,7 @@ class Footer(ComponentWithModel):
 
     def __init__(self,
                  children: ChildrenType = None,
-                 show: Union[Model, bool] = None,
+                 show: PropValueType[bool] = None,
                  hide_on_scroll: bool = None,  # this is the reveal prop
                  elevated: bool = None,
                  bordered: bool = None,
@@ -253,7 +253,7 @@ class Footer(ComponentWithModel):
             })
         classes = merge_classes(self.defaults['classes'], classes or '')
         show = props['show']
-        model = show if isinstance(show, Model) else Model(show)
+        model = show if isinstance(show, Reactive) else Model(show)
         super().__init__(model=model, children=children, classes=classes, styles=styles, props=props, events=events)
 
     @property
@@ -283,9 +283,9 @@ class Icon(Component):
     component = 'q-icon'
 
     def __init__(self,
-                 name: Union[str, Model],
-                 size: Union[str, Model] = None,
-                 color: Union[str, Model] = None,
+                 name: PropValueType[str],
+                 size: PropValueType[str] = None,
+                 color: PropValueType[str] = None,
                  classes: ClassesType = None,
                  styles: StylesType = None):
         props = build_props({}, {}, {'name': name, 'size': size, 'color': color})

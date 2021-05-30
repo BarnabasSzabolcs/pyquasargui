@@ -1,10 +1,14 @@
-from typing import TYPE_CHECKING, Any, Callable, Union, List, Dict
+from typing import TYPE_CHECKING, Any, Callable, List, Dict
 
 if TYPE_CHECKING:
     from quasargui.main import Api
 
 
-class Renderable:
+class Reactive:
+
+    @property
+    def value(self) -> str:
+        raise NotImplementedError
 
     def render(self):
         raise NotImplementedError
@@ -16,8 +20,15 @@ class Renderable:
     def set_api(self, api: 'Api'):
         raise NotImplementedError
 
+    def add_callback(self, fun: Callable[[], None]):
+        raise NotImplementedError
 
-class Model(Renderable):
+    @property
+    def callbacks(self):
+        raise NotImplementedError
+
+
+class Model(Reactive):
     """
     Data is all the data that can change
     in both the GUI and on the backend
@@ -32,7 +43,7 @@ class Model(Renderable):
         self.model_dic[self.id] = self
         self._value = value
         self.api = None
-        self.update_callbacks: List[Callable[[], None]] = []
+        self._callbacks: List[Callable[[], None]] = []
 
     def __del__(self):
         del self.model_dic[self.id]
@@ -59,7 +70,7 @@ class Model(Renderable):
         self._value = value
         if self.api is not None and not _jsapi:
             self.api.set_data(self.id, self._value)
-        for callback in self.update_callbacks:
+        for callback in self._callbacks:
             callback()
 
     def render(self):
@@ -69,18 +80,23 @@ class Model(Renderable):
     def vue(self) -> str:
         return "{{$root.data[" + str(self.id) + "]}}"
 
+    def add_callback(self, fun: Callable[[], None]):
+        self._callbacks.append(fun)
 
-class Computed(Renderable):
-    def __init__(self, fun: Callable[[...], Any], *args: Union[Model, 'Computed']):
+    @property
+    def callbacks(self):
+        return self._callbacks
+
+
+class Computed(Reactive):
+    def __init__(self, fun: Callable[[...], Any], *args: Reactive):
         self.fun = fun
         self.args = args
         self.model = Model(None)
         self.calculate()
-        self.model.update_callbacks = [computed.calculate for computed in args if isinstance(computed, Computed)]
-        self.update_callbacks = self.model.update_callbacks
         for arg in args:
-            if isinstance(arg, Model) or isinstance(arg, Computed):
-                arg.update_callbacks.append(self.calculate)
+            if isinstance(arg, Reactive):
+                arg.add_callback(self.calculate)
 
     def calculate(self):
         values = [a.value for a in self.args]
@@ -99,3 +115,10 @@ class Computed(Renderable):
 
     def set_api(self, api: 'Api'):
         self.model.set_api(api)
+
+    def add_callback(self, fun: Callable[[], None]):
+        self.model.add_callback(fun)
+
+    @property
+    def callbacks(self):
+        return self.model.callbacks
