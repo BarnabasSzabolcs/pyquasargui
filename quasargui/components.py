@@ -15,6 +15,8 @@ from quasargui.typing import *
 
 
 class Div(Component):
+    component = 'div'
+
     def __init__(self,
                  children: ChildrenType = None,
                  classes: ClassesType = None,
@@ -22,12 +24,6 @@ class Div(Component):
                  props: PropsType = None,
                  events: EventsType = None):
         super().__init__(children, classes, styles, props, events)
-
-    @property
-    def vue(self) -> dict:
-        return self._merge_vue({
-            'component': 'div'
-        })
 
 
 class Rows(Div):

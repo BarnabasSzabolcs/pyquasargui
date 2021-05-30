@@ -13,6 +13,8 @@ class Layout(Component):
     q-layout
     see: https://quasar.dev/layout-builder
     """
+    component = 'q-layout'
+
     def __init__(self,
                  children: List[Union['Header', 'Drawer', 'Page', 'Footer']] = None,
                  view: str = "hHh lpR fFf",
@@ -27,12 +29,6 @@ class Layout(Component):
         props['view'] = props.get('view', view)
         children = self.build_children(children)
         super().__init__(children=children, props=props, events=events)
-
-    @property
-    def vue(self) -> dict:
-        return self._merge_vue({
-            'component': 'q-layout'
-        })
 
     @staticmethod
     def build_children(children):
@@ -67,6 +63,7 @@ class Header(ComponentWithModel):
     Use it within a Layout.
     ref. https://quasar.dev/layout/header-and-footer#qheader-api
     """
+    component = 'q-header'
     PRIMARY = 'bg-primary text-white'  # convenience constant
 
     defaults = {
@@ -99,12 +96,6 @@ class Header(ComponentWithModel):
         model = show if isinstance(show, Reactive) else Model(show)
         super().__init__(model=model, children=children, classes=classes, styles=styles, props=props)
 
-    @property
-    def vue(self) -> dict:
-        return self._merge_vue({
-            'component': 'q-header'
-        })
-
 
 class Drawer(ComponentWithModel):
     """
@@ -112,6 +103,7 @@ class Drawer(ComponentWithModel):
     Use it within a Layout.
     ref. https://quasar.dev/layout/drawer#qdrawer-api
     """
+    component = 'q-drawer'
     # side constants
     LEFT = 'left'
     RIGHT = 'right'
@@ -156,12 +148,6 @@ class Drawer(ComponentWithModel):
         model = show if isinstance(show, Reactive) else Model(show)
         super().__init__(model=model, children=children, classes=classes, styles=styles, props=props, events=events)
 
-    @property
-    def vue(self) -> dict:
-        return self._merge_vue({
-            'component': 'q-drawer'
-        })
-
 
 class Page(Component):
     """
@@ -169,6 +155,7 @@ class Page(Component):
     Use it within a Layout.
     every parameter applies to the q-page.
     """
+    component = 'q-page-container'
     defaults = {
         'props': {
             'padding': True,
@@ -187,18 +174,14 @@ class Page(Component):
         self.page = _Page(children=children, classes=classes, styles=styles, props=props, events=events)
         super().__init__(children=[self.page])
 
-    @property
-    def vue(self) -> dict:
-        return self._merge_vue({
-            'component': 'q-page-container'
-        })
-
 
 class _Page(Component):
     """
     Internal component for the Page,
     since in quasar q-page is always wrapped into q-page-container.
     """
+    component = 'q-page'
+
     def __init__(self,
                  children: ChildrenType = None,
                  classes: ClassesType = None,
@@ -208,18 +191,13 @@ class _Page(Component):
                  ):
         super().__init__(children=children, classes=classes, styles=styles, props=props, events=events)
 
-    @property
-    def vue(self) -> dict:
-        return self._merge_vue({
-            'component': 'q-page'
-        })
-
 
 class Footer(ComponentWithModel):
     """
     q-footer
     ref. https://quasar.dev/layout/header-and-footer#qfooter-api
     """
+    component = 'q-footer'
     defaults = {
         'props': {
             'reveal': False,
@@ -255,12 +233,6 @@ class Footer(ComponentWithModel):
         show = props['show']
         model = show if isinstance(show, Reactive) else Model(show)
         super().__init__(model=model, children=children, classes=classes, styles=styles, props=props, events=events)
-
-    @property
-    def vue(self) -> dict:
-        return self._merge_vue({
-            'component': 'q-footer'
-        })
 
 
 class Toolbar(Component):
