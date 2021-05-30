@@ -6,6 +6,19 @@ from quasargui.tools import build_props
 from quasargui.typing import ClassesType, StylesType, PropsType, EventsType, PropValueType, ChildrenType
 
 
+class Form(Component):
+    component = 'form'
+    defaults = {'classes': 'q-gutter-md'}
+
+    def __init__(self,
+                 children: ChildrenType = None,
+                 classes: ClassesType = None,
+                 styles: StylesType = None,
+                 events: EventsType = None,
+                 ):
+        super().__init__(children=children, classes=classes, styles=styles, events=events)
+
+
 class Input(ComponentWithModel):
     """
     ref. https://quasar.dev/vue-components/input#qinput-api
@@ -16,8 +29,8 @@ class Input(ComponentWithModel):
     # noinspection PyShadowingBuiltins
     def __init__(self,
                  label: str = None,
-                 value: str = None,
                  model: Model = None,
+                 value: str = None,
                  type: PropValueType[str] = None,
                  classes: ClassesType = None,
                  styles: StylesType = None,
@@ -47,6 +60,12 @@ class Input(ComponentWithModel):
             events=events,
             children=children)
 
+    def validate(self):
+        return self.api.call_component_method(self.id, 'validate')
+
+    def reset_validation(self):
+        return self.api.call_component_method(self.id, 'resetValidation')
+
 
 class Button(Component):
     """
@@ -59,10 +78,12 @@ class Button(Component):
         }
     }
 
+    # noinspection PyShadowingBuiltins
     def __init__(self,
-                 label: str = None,
-                 icon: str = None,
+                 label: PropValueType[str] = None,
+                 icon: PropValueType[str] = None,
                  color: PropValueType[str] = None,
+                 type: PropValueType[str] = None,
                  classes: ClassesType = None,
                  styles: StylesType = None,
                  props: PropsType = None,
@@ -71,8 +92,10 @@ class Button(Component):
         props = build_props(self.defaults['props'], props, {
             'label': label,
             'icon': icon,
-            'color': color})
-        super().__init__(classes=classes, styles=styles, props=props, events=events)
+            'color': color,
+            'type': type
+        })
+        super().__init__(classes=classes, styles=styles, props=props, events=events, children=children)
 
 
 class Toggle(ComponentWithModel):

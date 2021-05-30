@@ -43,7 +43,7 @@ class Model(Reactive, Generic[T]):
     model_dic: Dict[int, 'Model'] = {}
     NO_TYPE = (lambda x: x)
 
-    def __init__(self, value: T, type_: Type or NO_TYPE = None):
+    def __init__(self, value: T = None, type_: Type or NO_TYPE = None):
         """
         :param value:
         :param type_: type of the model is enforced and the type is assumed to be the type of the initial value.

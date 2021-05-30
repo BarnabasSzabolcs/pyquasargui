@@ -111,3 +111,52 @@ class Columns(Div):
 
     def set_children(self, children: ChildrenType):
         super().set_children(self._wrap_children(children))
+
+
+class Link(Component):
+    """
+    This is not a Quasar component, but it is definitely useful.
+    Use this component to point to external links.
+    eg. Link('google', 'google.com', children=[Icon('open_in_new')])
+    """
+    component = 'a'
+    defaults = {
+        'props': {
+            'target': '_blank'
+        },
+        'classes': 'text-primary'
+    }
+
+    def __init__(self,
+                 title: str = None,
+                 href: PropValueType[str] = None,
+                 classes: ClassesType = None,
+                 styles: StylesType = None,
+                 children: ChildrenType = None,
+                 events: EventsType = None):
+        if children is None and title is None:
+            raise AssertionError('either title or children parameter must be set')
+        props = build_props(self.defaults['props'], {'href': href})
+        if props['target'] == '_blank' and children is None:
+            children = [Icon('open_in_new')]
+        if title is not None:
+            children = [title] + (children or [])
+        classes = merge_classes(self.defaults['classes'], classes or '')
+        super().__init__(children=children, props=props, classes=classes, styles=styles, events=events)
+
+
+class Heading(Component):
+    def __init__(self,
+                 n: int,
+                 text: PropValueType[str] = None,
+                 children: ChildrenType = None,
+                 classes: ClassesType = None,
+                 styles: StylesType = None,
+                 events: EventsType = None
+                 ):
+        if not 1 <= n <= 6:
+            raise AssertionError('n must be between 1 and 6')
+        self.component = f'h{n}'
+        if text is not None:
+            children = [text] + (children or [])
+        super().__init__(children=children, classes=classes, styles=styles, events=events)

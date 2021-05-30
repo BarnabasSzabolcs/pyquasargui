@@ -33,6 +33,7 @@ Vue.component('dynamic-component', {
       sendLog('rendering:', '(empty)')
       return ''
     }
+    d.props['data-id'] = this.id
     // sendLog(JSON.stringify(d))
     if (('value' in d.props) && !('input' in d.events)) {
       const value = d.props.value
@@ -217,6 +218,34 @@ const app = new Vue({
       }
       params = _.defaults(params, defaults)
       this.$q.notify(params)
+    },
+    callComponentMethod({
+      component_id,
+      method
+    }) {
+      // We shoot into the structure wherever we find data-id 
+      // then the vue component must be somewhere among the parents.
+      // This is clearly madness but it seems to work for now, for q-input validation. 
+      var el = document.querySelector(`[data-id="${component_id}"]`)
+      sendLog(JSON.stringify(el.tagName))
+      if (el === undefined) {
+        return
+      }
+      for (;; el = el.parentNode) {
+        sendLog(JSON.stringify(el.tagName))
+        if ('__vue__' in el)
+          break
+        if (el === null) {
+          return
+        }
+      }
+      that = el.__vue__
+      if (method in that) {
+        return that[method].bind(that)()
+      } else {
+        that = that.$children[0]
+        return that[method].bind(that)()
+      }
     }
   }
 })

@@ -65,6 +65,14 @@ class Api:
             'app.refreshComponent({component_vue})'.format(
                 component_vue=json.dumps(component_vue)))
 
+    def call_component_method(self, component_id: str, method: str):
+        """
+        eg. call_component_method(12, 'validate()')
+        """
+        return self.window.evaluate_js('app.callComponentMethod({params})'.format(
+            params=json.dumps({'component_id': component_id, 'method': method})
+        ))
+
     def send_notification(self, params: dict):
         return self.window.evaluate_js('app.showNotification({params})'.format(
             params=json.dumps(params)))
