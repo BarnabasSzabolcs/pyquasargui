@@ -43,51 +43,66 @@ Vue.component('dynamic-component', {
       window.pywebview.api.call_cb(d.events.load)
       this.loadEventFired = true
     }
-    const events = _.map(_.toPairs(d.events),
-      pair => {
-        [eventName, cb_id] = pair
-        return `@${eventName}="params=>window.pywebview.api.call_cb(${cb_id}, params)"`
-      }
-    ).join(' ')
+    const events = this.renderEvents(d.events)
+    const props = this.renderProps(d.props)
+    const children = this.renderChildren(d.children)
+    const slots = this.renderSlots(d.slots)
 
-    const props = _.map(_.toPairs(d.props),
-      pair => {
-        const [propName, prop] = pair
-        if (_.isObject(prop) && '@' in prop) {
-          const ref = prop['@']
-          if (ref in this.$root.data === false) {
-            this.$root.$set(this.$root.data, ref, prop.value)
-          }
-          colon = propName.startsWith('v-') ? '' : ':'
-          return `${colon}${propName}="$root.data[${ref}]"`
-        } else if (_.isString(prop)) {
-          quotedProp = prop.replace(/"/g, '&quot;')
-          return `${propName}="${quotedProp}"`
-        } else {
-          return `:${propName}="${prop}"`
-        }
-      }
-    ).join(' ')
-
-    const children = _.map(d.children,
-      child => {
-        if (_.isString(child)) {
-          return child
-        } else {
-          const childComponent = 'dynamic-component'
-          child = JSON.stringify(child).replace(/'/g, "&#39;")
-          return `<${childComponent} :id='${child}'></${childComponent}>`
-        }
-      }
-    ).join('')
-
-    const template = `<${d.component} ${props} ${events} ${inputEvent}>${children}</${d.component}>`
+    const attrs = [props, events, inputEvent].join(' ')
+    const template = `<${d.component} ${attrs}>${children}${slots}</${d.component}>`
     // sendLog(Vue.compile(template).render)
     sendLog('rendering:')
     sendLog(template)
     return this.renderTemplate(template)
   },
   methods: {
+    renderEvents(events){
+      return _.map(_.toPairs(events),
+        pair => {
+          [eventName, cb_id] = pair
+          return `@${eventName}="params=>window.pywebview.api.call_cb(${cb_id}, params)"`
+        }
+      ).join(' ')
+    },
+    renderProps(props){
+      return _.map(_.toPairs(props),
+        pair => {
+          const [propName, prop] = pair
+          if (prop === null){
+            return propName
+          } else if (_.isObject(prop) && '@' in prop) {
+            const ref = prop['@']
+            if (ref in this.$root.data === false) {
+              this.$root.$set(this.$root.data, ref, prop.value)
+            }
+            colon = propName.startsWith('v-') ? '' : ':'
+            return `${colon}${propName}="$root.data[${ref}]"`
+          } else if (_.isString(prop)) {
+            quotedProp = prop.replace(/"/g, '&quot;')
+            return `${propName}="${quotedProp}"`
+          } else {
+            return `:${propName}="${prop}"`
+          }
+        }
+      ).join(' ')
+    },
+    renderChildren(children){
+      return _.map(children,
+        child => {
+          if (_.isString(child)) {
+            return child
+          } else {
+            const childComponent = 'dynamic-component'
+            child = JSON.stringify(child).replace(/'/g, "&#39;")
+            return `<${childComponent} :id='${child}'></${childComponent}>`
+          }
+        }
+      ).join('')
+    },
+    renderSlots(slots){
+      // TODO
+      return ''
+    },
     renderTemplate(template) {
       // This works even if the template does not have any reactive variables.
       // ref. https://github.com/vuejs/vue/issues/9911
