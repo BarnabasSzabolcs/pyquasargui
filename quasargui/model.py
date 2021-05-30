@@ -160,10 +160,10 @@ class Not(Computed):
 
 
 class And(Computed):
-    def __init__(self, *vars: Reactive):
-        super().__init__(lambda *args: all(args), *vars)
+    def __init__(self, *arguments: Reactive):
+        super().__init__(lambda *args: all(args), *arguments)
 
 
 class Or(Computed):
-    def __init__(self, *vars: Reactive):
-        super().__init__(lambda *args: any(args), *vars)
+    def __init__(self, *arguments: Reactive):
+        super().__init__(lambda *args: any(args), *arguments)

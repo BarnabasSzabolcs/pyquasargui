@@ -102,13 +102,14 @@ class JsApi:
             print_error(e)
             raise e
 
+
 WINDOW = 0
 API = 1
 window_api_list: List[Tuple[Window, Api]] = []
 
 
 def run(component: Component, debug: bool = False, _render_debug: bool = False):
-    api = Api(component, debug=debug, render_debug = _render_debug)
+    api = Api(component, debug=debug, render_debug=_render_debug)
     window = webview.create_window(
         'Program',
         QUASAR_GUI_INDEX_PATH,
