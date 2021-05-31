@@ -84,8 +84,9 @@ class Header(ComponentWithModel):
                  styles: StylesType = None,
                  props: PropsType = None
                  ):
-        if len(children) == 1 and isinstance(children[0], str):
-            children = [Toolbar([ToolbarTitle([children[0]])])]
+        if 1 <= len(children) <= 2 and isinstance(children[-1], str):
+            children = [Toolbar([ToolbarTitle(children)])]
+
         props = build_props({}, props, {
             'reveal': hide_on_scroll,
             'elevated': elevated,
@@ -215,7 +216,7 @@ class Footer(ComponentWithModel):
                  events: EventsType = None
                  ):
         children = children
-        props = build_props({}, props, {
+        props = build_props(self.defaults['props'], props, {
             'reveal': hide_on_scroll,
             'elevated': elevated,
             'bordered': bordered,

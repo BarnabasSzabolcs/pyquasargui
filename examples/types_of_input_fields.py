@@ -15,7 +15,7 @@ my_datetime = DateTimeModel(dt.now())
 my_datetime.add_callback(lambda: my_datetime.api.show_notification({
     'message': f'Selected date and time: {my_datetime.value} ({type(my_datetime.value)}).',
 }))
-form1 = Form(styles={'max-width': '30em', 'margin': '0 auto'}, children=[
+form1 = Form(styles={'max-width': '20em', 'margin': '0 auto'}, children=[
     Heading(5, 'Inputs by value type'),
     InputStr('str input'),  # Input
     InputInt('int input slider [-3, 3]', appearance='slider', min=-3, max=3),  # input, knob or slider
@@ -36,7 +36,7 @@ form1 = Form(styles={'max-width': '30em', 'margin': '0 auto'}, children=[
     # Toggle(), Checkbox(), ButtonToggle(),
 ])
 layout = Layout([
-    Header(['Fields for different types of data']),
+    Header([Icon('table_view', 'lg', classes='q-mx-md'), 'Fields for different types of data']),
     Page([form1])
 ])
 
