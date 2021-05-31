@@ -1,6 +1,8 @@
-from typing import TYPE_CHECKING, Callable, List, Dict, Generic, TypeVar, Type
+import datetime
+from typing import TYPE_CHECKING, Callable, List, Dict, Generic, TypeVar
 
 from quasargui.tools import print_error
+from quasargui.typing import ValueType
 
 if TYPE_CHECKING:
     from quasargui.main import Api
@@ -41,19 +43,21 @@ class Model(Reactive, Generic[T]):
     """
     max_id = 1
     model_dic: Dict[int, 'Model'] = {}
-    NO_TYPE = (lambda x: x)
 
-    def __init__(self, value: T = None, type_: Type or NO_TYPE = None):
-        """
-        :param value:
-        :param type_: type of the model is enforced and the type is assumed to be the type of the initial value.
-        To disable automatic type conversions, set type_=Model.NO_TYPE.
-        """
+    @staticmethod
+    def no_conversion(value):
+        return value
+
+    def __init__(self, value: T = None,
+                 to_python: Callable[[ValueType], T] = None,
+                 from_python: Callable[[T], ValueType] = None
+                 ):
         self.id = Model.max_id
         Model.max_id += 1
         self.model_dic[self.id] = self
         self._value = value
-        self._type = type_ or type(value)
+        self.to_python = to_python or type(value)
+        self.from_python = from_python or self.no_conversion
         self.api = None
         self._callbacks: List[CallbackType] = []
         self.modifiers = set()
@@ -64,7 +68,7 @@ class Model(Reactive, Generic[T]):
     def set_api(self, api: 'Api', _flush: bool = True):
         if self.api != api:
             self.api = api
-            api.set_data(self.id, self._value)
+            api.set_data(self.id, self.from_python(self._value))
         if _flush:
             api.flush_data(self.id)
 
@@ -80,31 +84,29 @@ class Model(Reactive, Generic[T]):
         if _jsapi:
             # noinspection PyBroadException
             try:
-                value = self._type(value)
+                value = self.to_python(value)
             except Exception:
                 # if value == '' and self._type in {int, float}:
                 #     value = self._type(0)
                 if self.api.debug:
-                    print(f'WARNING: could not convert {value} to {self._type}')
+                    print(f'WARNING: could not convert {value} using {self.to_python}')
         if self._value == value:
             return
         self._value = value
         if self.api is not None and not _jsapi:
-            self.api.set_data(self.id, self._value)
+            self.api.set_data(self.id, self.from_python(self._value))
         for callback in self._callbacks:
             callback()
         if self.api is not None and not _jsapi:
             self.api.flush_data(self.id)
 
-    @property
-    def type(self):
-        return self._type
-
-    def set_type(self, type_: Type):
-        self._type = type_
+    def set_conversion(self, to_python: Callable[[ValueType], T], from_python: Callable[[T], ValueType] = None):
+        self.to_python = to_python
+        if from_python:
+            self.from_python = from_python
 
     def render_as_data(self) -> dict:
-        data = {'@': self.id, 'value': self.value}
+        data = {'@': self.id, 'value': self.from_python(self.value)}
         if self.modifiers:
             data['modifiers'] = list(self.modifiers)
         return data
@@ -120,13 +122,32 @@ class Model(Reactive, Generic[T]):
         return self._callbacks
 
 
+class DateTimeModel(Model[datetime.datetime]):
+    def __init__(self, value: datetime.datetime):
+        super().__init__(value, self._to_python, self._from_python)
+
+    @staticmethod
+    def _to_python(s):
+        try:
+            return datetime.datetime.fromisoformat(s.replace('/', '-').replace('.', '-'))
+        except ValueError:
+            return None
+
+    @staticmethod
+    def _from_python(dt):
+        try:
+            return dt.isoformat(sep=' ').rsplit('.', 1)[0]
+        except AttributeError:
+            return None
+
+
 class Computed(Reactive, Generic[T]):
     def __init__(self, fun: Callable[[...], T], *args: Reactive):
         self.fun = fun
         self.args = args
         self.model = Model(None)
         self.calculate()
-        self.model.set_type(type(self.model.value))
+        self.model.set_conversion(type(self.model.value))
         for arg in args:
             if isinstance(arg, Reactive):
                 arg.add_callback(self.calculate)

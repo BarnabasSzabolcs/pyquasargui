@@ -241,21 +241,3 @@ class Space(Component):
 
 class Avatar(Component):
     component = 'q-avatar'
-
-
-class Icon(Component):
-    component = 'q-icon'
-
-    def __init__(self,
-                 name: PropValueType[str],
-                 size: PropValueType[str] = None,
-                 color: PropValueType[str] = None,
-                 classes: ClassesType = None,
-                 styles: StylesType = None,
-                 events: EventsType = None):
-        props = build_props({}, {}, {
-            'name': name,
-            'size': size,
-            'color': color
-        })
-        super().__init__(props=props, classes=classes, styles=styles, events=events)

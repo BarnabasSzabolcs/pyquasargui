@@ -1,7 +1,8 @@
+import datetime
 from typing import List, Type, Union
 
-from quasargui.base import Component, ComponentWithModel, Slot
-from quasargui.components import Div
+from quasargui.base import Component, ComponentWithModel, Slot, JSFunction
+from quasargui.components import Div, Icon, PopupProxy
 from quasargui.model import Model
 from quasargui.tools import build_props, merge_classes
 from quasargui.typing import ClassesType, StylesType, PropsType, EventsType, PropValueType, ChildrenType
@@ -137,8 +138,16 @@ class Slider(ComponentWithModel):
     }
 
 
+class TimePicker(ComponentWithModel):
+    component = 'q-time'
+
+
+class DatePicker(ComponentWithModel):
+    component = 'q-date'
+
+
 class InputStr(Input):
-    """This is just an alias for completeness"""
+    """This is just an alias for the sake of completeness"""
 
 
 class _NumericInput(ComponentWithModel):
@@ -171,7 +180,7 @@ class _NumericInput(ComponentWithModel):
         }[appearance]
         model = model or Model(0, self._type)
         model.modifiers.add('number')
-        model._type = self._type
+        model.set_conversion(self._type)
         special_props = {
             'min': min,
             'max': max
@@ -233,3 +242,177 @@ class InputInt(_NumericInput):
 
 class InputFloat(_NumericInput):
     _type = float
+
+
+class _GenericInputPicker(ComponentWithModel):
+    """
+    This component is based on
+    https://quasar.dev/vue-components/date#with-qinput
+    """
+    component = 'q-input'
+    defaults = {
+        'props': {},
+        'popup_props': {
+            'transition-show': 'scale',
+            'transition-hide': 'scale',
+            'cover': True
+        },
+        'popup_row_classes': 'row items-center justify-end',
+        'picker_props': {},
+        'button_props': {
+            'label': 'OK',
+            'color': 'primary',
+            'v-close-popup': None,
+            'unelevated': False,
+            'flat': True
+        },
+        'popup_slots': []
+    }
+
+    @staticmethod
+    def _to_python(s):
+        raise NotImplementedError
+
+    @staticmethod
+    def _from_python(s):
+        return s
+
+    def __init__(self,
+                 label: str = None,
+                 model: Model = None,
+                 props: PropsType = None,
+                 classes: ClassesType = None,
+                 styles: StylesType = None,
+                 events: EventsType = None,
+                 children: List[Slot] = None):
+        props = build_props({}, props, {'label': label})
+        model = self._get_model(model)
+        children = self._create_popup_slots(model) + (children or [])
+        super().__init__(model=model,
+                         props=props,
+                         classes=classes,
+                         styles=styles,
+                         events=events,
+                         children=children)
+
+    def _create_popup_slots(self, model):
+        slots = []
+        for position, icon, picker_class in self.defaults['popup_slots']:
+            popup = PopupProxy(
+                props=self.defaults['popup_props'],
+                children=[picker_class(
+                    model,
+                    props=self.defaults['picker_props'],
+                    children=[self._popup_buttons()])
+                ])
+            slots.append(Slot(position, [
+                Icon(name=icon, classes='cursor-pointer', children=[popup])
+            ]))
+        return slots
+
+    def _get_model(self, model):
+        model = model or Model(None)
+        model.set_conversion(self._to_python, self._from_python)
+        return model
+
+    def _popup_buttons(self):
+        return Div(
+            classes=self.defaults['popup_row_classes'],
+            children=[
+                Button(props=self.defaults['button_props'])
+            ])
+
+    @classmethod
+    def _build_defaults(cls, defaults, custom):
+        results = custom.copy()
+        for category, settings in defaults.items():
+            if category not in results:
+                results[category] = settings
+            elif '_classes' in category:
+                results[category] = merge_classes(settings, results[category])
+            elif isinstance(settings, dict):
+                results[category] = build_props(settings, results[category])
+            else:
+                continue
+        return results
+
+
+class InputTime(_GenericInputPicker):
+    """
+    This component is based on
+    https://quasar.dev/vue-components/date#example--with-qinput
+    """
+    defaults = {
+        'props': {
+            'mask': 'time',
+            'rules': ['time']
+        },
+        'picker_props': {
+            'format24h': True
+        },
+        'popup_slots': [
+            ('append', 'access_time', TimePicker),
+        ]
+    }
+    defaults = _GenericInputPicker._build_defaults(_GenericInputPicker.defaults, defaults)
+
+    @staticmethod
+    def _to_python(s):
+        return datetime.time.fromisoformat(s)
+
+
+class InputDate(_GenericInputPicker):
+    """
+    This component is based on
+    https://quasar.dev/vue-components/date#example--with-qinput
+    """
+    defaults = {
+        'props': {
+            'mask': 'date',
+            'rules': ['date']
+        },
+        'picker_props': {},
+        'popup_slots': [
+            ('append', 'event', DatePicker),
+        ]
+    }
+    defaults = _GenericInputPicker._build_defaults(_GenericInputPicker.defaults, defaults)
+
+    @staticmethod
+    def _to_python(s):
+        return datetime.date.fromisoformat(s.replace('/', '-'))
+
+
+class InputDateTime(_GenericInputPicker):
+    """
+    This component is based on
+    https://quasar.dev/vue-components/date#example--qdate-and-qtime-with-qinput
+    """
+    defaults = {
+        'props': {
+            'mask': '####-##-## ##:##',
+        },
+        'picker_props': {
+            'format24h': True,
+            'mask': 'YYYY-MM-DD HH:mm',
+        },
+        'popup_slots': [
+            ('prepend', 'event', DatePicker),
+            ('append', 'access_time', TimePicker),
+        ]
+    }
+    defaults = _GenericInputPicker._build_defaults(_GenericInputPicker.defaults, defaults)
+
+    @staticmethod
+    def _to_python(s):
+        try:
+            return datetime.datetime.fromisoformat(s.replace('/', '-'))
+        except ValueError:
+            return None
+
+    @staticmethod
+    def _from_python(dt):
+        try:
+            return dt.isoformat(sep=' ').rsplit(':', 1)[0]
+        except AttributeError:
+            return None

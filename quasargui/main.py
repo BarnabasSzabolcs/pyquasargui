@@ -73,7 +73,7 @@ class Api:
             params=json.dumps({'component_id': component_id, 'method': method})
         ))
 
-    def send_notification(self, params: dict):
+    def show_notification(self, params: dict):
         return self.window.evaluate_js('app.showNotification({params})'.format(
             params=json.dumps(params)))
 

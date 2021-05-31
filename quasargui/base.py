@@ -116,7 +116,7 @@ class Component:
         params = {'message': message}
         if kwargs:
             params.update(kwargs)
-        self.api.send_notification(params)
+        self.api.show_notification(params)
 
     @property
     def children(self):

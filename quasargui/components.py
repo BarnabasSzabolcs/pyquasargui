@@ -1,11 +1,10 @@
 # noinspection PyUnresolvedReferences
 import base64
 
-from quasargui.layout import Icon
 # noinspection PyUnresolvedReferences
 from quasargui.base import Component
-from quasargui.tools import merge_classes
-from quasargui.typing import *
+from quasargui.tools import merge_classes, build_props
+from quasargui.typing import PropValueType, ClassesType, StylesType, EventsType, ChildrenType, PropsType
 
 
 class Div(Component):
@@ -130,7 +129,7 @@ class Link(Component):
                  events: EventsType = None):
         if children is None and title is None:
             raise AssertionError('either title or children parameter must be set')
-        props = {'href': href}
+        props = build_props(self.defaults['props'], {'href': href})
         if props['target'] == '_blank' and children is None:
             children = [Icon('open_in_new')]
         if title is not None:
@@ -154,3 +153,36 @@ class Heading(Component):
         if text is not None:
             children = [text] + (children or [])
         super().__init__(children=children, classes=classes, styles=styles, events=events)
+
+
+########################
+# Some Quasar components
+########################
+
+class PopupProxy(Component):
+    component = 'q-popup-proxy'
+
+
+class Icon(Component):
+    component = 'q-icon'
+
+    def __init__(self,
+                 name: PropValueType[str],
+                 size: PropValueType[str] = None,
+                 color: PropValueType[str] = None,
+                 classes: ClassesType = None,
+                 styles: StylesType = None,
+                 events: EventsType = None,
+                 children: ChildrenType = None):
+        props = build_props({}, {}, {
+            'name': name,
+            'size': size,
+            'color': color
+        })
+        super().__init__(
+            props=props,
+            classes=classes,
+            styles=styles,
+            events=events,
+            children=children
+        )
