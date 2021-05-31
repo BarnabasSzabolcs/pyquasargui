@@ -1,7 +1,7 @@
 import datetime
 from typing import List, Type, Union
 
-from quasargui.base import Component, ComponentWithModel, Slot, JSFunction
+from quasargui.base import Component, ComponentWithModel, Slot
 from quasargui.components import Div, Icon, PopupProxy
 from quasargui.model import Model
 from quasargui.tools import build_props, merge_classes
@@ -280,10 +280,13 @@ class InputFloat(_NumericInput):
     _type = float
 
 
-class _GenericInputPicker(ComponentWithModel):
+class _InputWithPicker(ComponentWithModel):
     """
     This component is based on
     https://quasar.dev/vue-components/date#with-qinput
+
+    Create new pickers by changing the configuration of the defaults.
+    Pickers go to the popup_slots. (See InputDateTime.)
     """
     component = 'q-input'
     defaults = {
@@ -373,7 +376,7 @@ class _GenericInputPicker(ComponentWithModel):
         return results
 
 
-class InputTime(_GenericInputPicker):
+class InputTime(_InputWithPicker):
     """
     This component is based on
     https://quasar.dev/vue-components/date#example--with-qinput
@@ -390,14 +393,14 @@ class InputTime(_GenericInputPicker):
             ('append', 'access_time', TimePicker),
         ]
     }
-    defaults = _GenericInputPicker._build_defaults(_GenericInputPicker.defaults, defaults)
+    defaults = _InputWithPicker._build_defaults(_InputWithPicker.defaults, defaults)
 
     @staticmethod
     def _to_python(s):
         return datetime.time.fromisoformat(s)
 
 
-class InputDate(_GenericInputPicker):
+class InputDate(_InputWithPicker):
     """
     This component is based on
     https://quasar.dev/vue-components/date#example--with-qinput
@@ -412,14 +415,14 @@ class InputDate(_GenericInputPicker):
             ('append', 'event', DatePicker),
         ]
     }
-    defaults = _GenericInputPicker._build_defaults(_GenericInputPicker.defaults, defaults)
+    defaults = _InputWithPicker._build_defaults(_InputWithPicker.defaults, defaults)
 
     @staticmethod
     def _to_python(s):
         return datetime.date.fromisoformat(s.replace('/', '-'))
 
 
-class InputDateTime(_GenericInputPicker):
+class InputDateTime(_InputWithPicker):
     """
     This component is based on
     https://quasar.dev/vue-components/date#example--qdate-and-qtime-with-qinput
@@ -437,7 +440,7 @@ class InputDateTime(_GenericInputPicker):
             ('append', 'access_time', TimePicker),
         ]
     }
-    defaults = _GenericInputPicker._build_defaults(_GenericInputPicker.defaults, defaults)
+    defaults = _InputWithPicker._build_defaults(_InputWithPicker.defaults, defaults)
 
     @staticmethod
     def _to_python(s):
@@ -454,7 +457,7 @@ class InputDateTime(_GenericInputPicker):
             return None
 
 
-class InputColor(_GenericInputPicker):
+class InputColor(_InputWithPicker):
     """
     This component is based on
     https://quasar.dev/vue-components/color-picker#example--input
@@ -468,7 +471,7 @@ class InputColor(_GenericInputPicker):
             ('append', 'colorize', ColorPicker),
         ]
     }
-    defaults = _GenericInputPicker._build_defaults(_GenericInputPicker.defaults, defaults)
+    defaults = _InputWithPicker._build_defaults(_InputWithPicker.defaults, defaults)
 
     @staticmethod
     def _to_python(s):
