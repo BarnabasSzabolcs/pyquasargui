@@ -1,8 +1,9 @@
-from typing import List
+from typing import List, Type, Union
 
 from quasargui.base import Component, ComponentWithModel, Slot
+from quasargui.components import Div
 from quasargui.model import Model
-from quasargui.tools import build_props
+from quasargui.tools import build_props, merge_classes
 from quasargui.typing import ClassesType, StylesType, PropsType, EventsType, PropValueType, ChildrenType
 
 
@@ -30,14 +31,13 @@ class Input(ComponentWithModel):
     def __init__(self,
                  label: str = None,
                  model: Model = None,
-                 value: str = None,
                  type: PropValueType[str] = None,
                  classes: ClassesType = None,
                  styles: StylesType = None,
                  props: PropsType = None,
                  events: EventsType = None,
                  children: List[Slot] = None):
-        props = build_props(self.defaults['props'], props, {
+        props = build_props({}, props, {
             'label': label,
             'type': type,
         })
@@ -53,7 +53,6 @@ class Input(ComponentWithModel):
             props['label-slot'] = True
         super().__init__(
             model=model,
-            value=value,
             classes=classes,
             styles=styles,
             props=props,
@@ -89,7 +88,7 @@ class Button(Component):
                  props: PropsType = None,
                  events: EventsType = None,
                  children: ChildrenType = None):
-        props = build_props(self.defaults['props'], props, {
+        props = build_props({}, props, {
             'label': label,
             'icon': icon,
             'color': color,
@@ -113,6 +112,124 @@ class Toggle(ComponentWithModel):
                  props: PropsType = None,
                  events: EventsType = None,
                  children: ChildrenType = None):
-        props = build_props(self.defaults['props'], props, {
-            'label': label})
+        props = build_props({}, props, {'label': label})
         super().__init__(model=model, classes=classes, styles=styles, props=props, events=events, children=children)
+
+
+class Knob(ComponentWithModel):
+    component = 'q-knob'
+    defaults = {
+        'props': {
+            'track-color': 'grey-3',
+            'color': 'primary',
+            'unelevated': True,
+            'show-value': True
+        }
+    }
+
+
+class Slider(ComponentWithModel):
+    component = 'q-slider'
+    defaults = {
+        'props': {
+            'label': True
+        }
+    }
+
+
+class InputStr(Input):
+    """This is just an alias for completeness"""
+
+
+class _NumericInput(ComponentWithModel):
+    _type: Type = None
+    defaults = {
+        'field_classes': 'text-sm',
+        'control_props': {'snap': True}
+    }
+
+    # noinspection PyShadowingBuiltins
+    def __init__(self,
+                 label: str = None,
+                 model: Model = None,
+                 appearance: str = None,
+                 min: Union[int, float] = None,
+                 max: Union[int, float] = None,
+                 props: PropsType = None,
+                 field_props: PropsType = None,
+                 field_classes: ClassesType = None,
+                 field_styles: StylesType = None,
+                 children: List[Slot] = None,
+                 classes: ClassesType = None,
+                 styles: StylesType = None,
+                 events: EventsType = None):
+        appearance = appearance or 'input'
+        self.component = {
+            'input': 'q-input',
+            'knob': 'q-field',
+            'slider': 'q-field'
+        }[appearance]
+        model = model or Model(0, self._type)
+        model.modifiers.add('number')
+        model._type = self._type
+        special_props = {
+            'min': min,
+            'max': max
+        }
+
+        if appearance in {'knob', 'slider'}:
+            component_class = {'knob': Knob, 'slider': Slider}[appearance]
+            control_props = build_props(self.defaults['control_props'], props)
+            control_props = build_props({
+                'label-position': 'before' if appearance == 'knob' else 'top'
+            }, control_props, special_props)
+            control = component_class(
+                model=model,
+                props=control_props,
+                children=children,
+                classes=classes,
+                styles=styles,
+                events=events,
+            )
+            label_position = control_props['label-position']
+
+            field_props = build_props({
+                'borderless': True,
+                'stack-label': True,
+            }, field_props, {'label': label if label_position == 'top' else None})
+            label_slot = []
+            if label and label_position != 'top':
+                field_classes = merge_classes(self.defaults['field_classes'], field_classes or '')
+                if isinstance(label, str):
+                    label = Div([label], classes=field_classes)
+                label_position = {
+                    'left': 'before',
+                    'right': 'after'
+                }.get(label_position, label_position)
+                label_slot = [Slot(label_position, children=[label])]
+            super().__init__(
+                model=model,
+                props=field_props,
+                children=[Slot('control', [control])] + label_slot
+            )
+        else:
+            props = build_props({'type': 'number'}, props, special_props)
+            props = build_props(props, field_props, {'label': label})
+            classes = merge_classes(classes, field_classes)
+            styles = build_props(styles, field_styles)
+            self.component = 'q-input'
+            super().__init__(
+                model=model,
+                classes=classes,
+                styles=styles,
+                props=props,
+                events=events,
+                children=children)
+
+
+class InputInt(_NumericInput):
+    _type = int
+
+
+class InputFloat(_NumericInput):
+    _type = float

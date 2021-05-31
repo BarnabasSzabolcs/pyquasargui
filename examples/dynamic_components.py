@@ -6,9 +6,7 @@ This example showcases
 """
 
 import quasargui
-from quasargui import set_main_component, Model
-from quasargui.callbacks import call
-from quasargui.components import Div, Rows, Columns, Input, Button
+from quasargui import *
 
 
 def chunks(lst, n):

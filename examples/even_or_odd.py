@@ -1,6 +1,5 @@
 import quasargui
-from quasargui.components import *
-from quasargui.model import Computed
+from quasargui import *
 
 a = Model(0)
 b = Model(0)

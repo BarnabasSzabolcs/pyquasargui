@@ -1,8 +1,5 @@
 import quasargui
-from quasargui.base import JSFunction
-from quasargui.components import *
-from quasargui.form import Form
-from quasargui.layout import *
+from quasargui import *
 
 
 def on_submit():

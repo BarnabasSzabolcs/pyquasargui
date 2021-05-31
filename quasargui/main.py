@@ -118,8 +118,7 @@ class JsApi:
             raise e
 
 
-WINDOW = 0
-API = 1
+WINDOW, API = 0, 1
 window_api_list: List[Tuple[Window, Api]] = []
 
 

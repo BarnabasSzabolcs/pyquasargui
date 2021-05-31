@@ -1,11 +1,5 @@
 import quasargui
-
-from quasargui import Model
-from quasargui.base import Slot, JSFunction
-from quasargui.callbacks import toggle
-from quasargui.form import Input, Form
-from quasargui.layout import Layout, Header, Page, Icon
-from quasargui.model import TrueFalse
+from quasargui import *
 
 isPassword = Model(True)
 text_parameter = Model('')

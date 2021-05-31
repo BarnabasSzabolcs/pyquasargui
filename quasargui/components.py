@@ -1,15 +1,9 @@
 # noinspection PyUnresolvedReferences
 import base64
 
+from quasargui.layout import Icon
 # noinspection PyUnresolvedReferences
 from quasargui.base import Component
-
-# noinspection PyUnresolvedReferences
-from quasargui.form import *
-# noinspection PyUnresolvedReferences
-from quasargui.layout import *
-# noinspection PyUnresolvedReferences
-from quasargui.plot import *
 from quasargui.tools import merge_classes
 from quasargui.typing import *
 
@@ -136,7 +130,7 @@ class Link(Component):
                  events: EventsType = None):
         if children is None and title is None:
             raise AssertionError('either title or children parameter must be set')
-        props = build_props(self.defaults['props'], {'href': href})
+        props = {'href': href}
         if props['target'] == '_blank' and children is None:
             children = [Icon('open_in_new')]
         if title is not None:
