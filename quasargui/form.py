@@ -146,15 +146,45 @@ class DatePicker(ComponentWithModel):
     component = 'q-date'
 
 
+class ColorPicker(ComponentWithModel):
+    component = 'q-color'
+
+
 class InputStr(Input):
     """This is just an alias for the sake of completeness"""
+
+
+class InputBool(ComponentWithModel):
+    def __init__(self, label: str = None,
+                 appearance: str = None,
+                 model: Model = None,
+                 classes: ClassesType = None,
+                 styles: StylesType = None,
+                 props: PropsType = None,
+                 events: EventsType = None,
+                 children: List[Slot] = None):
+        self.component = {
+            'input': 'q-input',
+            'checkbox': 'q-checkbox',
+            'toggle': 'q-toggle'
+        }[appearance or 'input']
+        model = model or Model(False)
+        model.set_conversion(bool, bool)
+        props = build_props({}, props, {'label': label})
+        super().__init__(
+            model=model,
+            classes=classes,
+            styles=styles,
+            props=props,
+            events=events,
+            children=children)
 
 
 class _NumericInput(ComponentWithModel):
     _type: Type = None
     defaults = {
         'field_classes': 'text-sm',
-        'control_props': {'snap': True}
+        'control_props': {}
     }
 
     # noinspection PyShadowingBuiltins
@@ -187,8 +217,14 @@ class _NumericInput(ComponentWithModel):
         }
 
         if appearance in {'knob', 'slider'}:
+            min = 0 if min is None else min
+            max = 100 if max is None else max
             component_class = {'knob': Knob, 'slider': Slider}[appearance]
-            control_props = build_props(self.defaults['control_props'], props)
+
+            control_props = build_props({'snap': self._type == int}, props)
+            control_props = build_props(self.defaults['control_props'], control_props)
+            if self._type == float:
+                control_props = build_props({'step': (max-min)/1000}, control_props)
             control_props = build_props({
                 'label-position': 'before' if appearance == 'knob' else 'top'
             }, control_props, special_props)
@@ -224,8 +260,8 @@ class _NumericInput(ComponentWithModel):
         else:
             props = build_props({'type': 'number'}, props, special_props)
             props = build_props(props, field_props, {'label': label})
-            classes = merge_classes(classes, field_classes)
-            styles = build_props(styles, field_styles)
+            classes = merge_classes(classes or '', field_classes or '')
+            styles = build_props(styles or {}, field_styles)
             self.component = 'q-input'
             super().__init__(
                 model=model,
@@ -416,3 +452,24 @@ class InputDateTime(_GenericInputPicker):
             return dt.isoformat(sep=' ').rsplit(':', 1)[0]
         except AttributeError:
             return None
+
+
+class InputColor(_GenericInputPicker):
+    """
+    This component is based on
+    https://quasar.dev/vue-components/color-picker#example--input
+    """
+    defaults = {
+        'props': {
+            'rules': ['anyColor']
+        },
+        'picker_props': {},
+        'popup_slots': [
+            ('append', 'colorize', ColorPicker),
+        ]
+    }
+    defaults = _GenericInputPicker._build_defaults(_GenericInputPicker.defaults, defaults)
+
+    @staticmethod
+    def _to_python(s):
+        return s

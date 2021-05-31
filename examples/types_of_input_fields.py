@@ -18,22 +18,20 @@ my_datetime.add_callback(lambda: my_datetime.api.show_notification({
 form1 = Form(styles={'max-width': '30em', 'margin': '0 auto'}, children=[
     Heading(5, 'Inputs by value type'),
     InputStr('str input'),  # Input
+    InputInt('int input slider [-3, 3]', appearance='slider', min=-3, max=3),  # input, knob or slider
+    InputInt('int input [-3, 3]', min=-3, max=3),  # input, knob or slider
+    InputFloat('float input [0.0, 100.0]', appearance='knob'),  # input, knob or slider
+    InputFloat('float input [-3.0, 3.0]', appearance='slider', min=-3.0, max=3.0),  # input, knob or slider
+    InputBool('bool input', appearance='toggle'),  # toggle or checkbox
+    InputBool('bool input', appearance='checkbox'),  # toggle or checkbox
+    InputColor('color input'),  # Input + popup Color
     InputDate('date input', my_date),  # Input + popup Date
     InputTime('time input', my_time),  # Input + popup Time
     InputDateTime('datetime input', my_datetime),  # Input + popup date + popup time
     # InputFile(appearance='browse'),  # File with attachment icon or browse button
-    InputInt('int input', appearance='slider', min=-3, max=3),  # input, knob, slider
-    InputFloat('float input', appearance='knob'),  # input, knob, slider
     # InputList(),  # tags, select multiple
-    # InputBool(appearance='button'),  # toggle or checkbox
-    # InputColor(),  # Input + popup Color
 
-    Input(),
-    # Date(),
-    # Time(),
     # File(),
-    Input(type='number'),
-    Input(type='number'),
     # Select(), TagsInput(),
     # Toggle(), Checkbox(), ButtonToggle(),
 ])
