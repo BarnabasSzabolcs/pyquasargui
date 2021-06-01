@@ -7,16 +7,16 @@ def on_submit():
     validation = validation and input_name.validate()
     validation = validation and input_age.validate()
     if not accept.value:
-        accept.api.show_notification({
-            'color': 'negative',
-            'message': 'You need to accept the license and terms first'
-        })
+        accept.api.show_notification(
+            color='negative',
+            message='You need to accept the license and terms first'
+        )
     elif validation:
-        accept.api.show_notification({
-            'icon': 'done',
-            'color': 'positive',
-            'message': 'Submitted'
-        })
+        accept.api.show_notification(
+            icon='done',
+            color='positive',
+            message='Submitted'
+        )
 
 
 def on_reset():
@@ -34,10 +34,10 @@ accept = Model(False)
 
 input_name = Input('Your name *', props={
     'hint': 'Name and surname',
-    'rules': JSFunction("[ val => val && val.length > 0 || 'Please type something']")
+    'rules': JSRaw("[ val => val && val.length > 0 || 'Please type something']")
 })
 input_age = Input('Your age *', type='number', props={
-    'rules': JSFunction("""[
+    'rules': JSRaw("""[
               val => val !== null && val !== '' || 'Please type your age',
               val => val > 0 && val < 100 || 'Please type a real age'
             ]""")

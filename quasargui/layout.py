@@ -2,7 +2,7 @@ from typing import List, Union
 
 from quasargui.base import Component, ComponentWithModel
 from quasargui.callbacks import toggle
-from quasargui.form import Button
+from quasargui.components import Button
 from quasargui.model import Model, Reactive
 from quasargui.tools import merge_classes, build_props
 from quasargui.typing import EventsType, ClassesType, StylesType, PropsType, ChildrenType, PropValueType

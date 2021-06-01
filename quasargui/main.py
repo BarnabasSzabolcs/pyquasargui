@@ -9,6 +9,7 @@ from quasargui.base import EventCallbacks
 from quasargui.components import Component
 from quasargui.model import Model
 from quasargui.tools import print_error
+from quasargui.typing import ValueType
 
 
 class Api:
@@ -73,7 +74,7 @@ class Api:
             params=json.dumps({'component_id': component_id, 'method': method})
         ))
 
-    def show_notification(self, params: dict):
+    def show_notification(self, **params: ValueType):
         return self.window.evaluate_js('app.showNotification({params})'.format(
             params=json.dumps(params)))
 

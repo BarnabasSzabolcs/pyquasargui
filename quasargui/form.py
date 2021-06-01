@@ -2,7 +2,7 @@ import datetime
 from typing import List, Type, Union
 
 from quasargui.base import Component, ComponentWithModel, Slot
-from quasargui.components import Div, Icon, PopupProxy
+from quasargui.components import Div, Button, Icon, PopupProxy
 from quasargui.model import Model
 from quasargui.tools import build_props, merge_classes
 from quasargui.typing import ClassesType, StylesType, PropsType, EventsType, PropValueType, ChildrenType
@@ -65,37 +65,6 @@ class Input(ComponentWithModel):
 
     def reset_validation(self):
         return self.api.call_component_method(self.id, 'resetValidation')
-
-
-class Button(Component):
-    """
-    ref. https://quasar.dev/vue-components/button#qbtn-api
-    """
-    component = 'q-btn'
-    defaults = {
-        'props': {
-            'unelevated': True,
-        }
-    }
-
-    # noinspection PyShadowingBuiltins
-    def __init__(self,
-                 label: PropValueType[str] = None,
-                 icon: PropValueType[str] = None,
-                 color: PropValueType[str] = None,
-                 type: PropValueType[str] = None,
-                 classes: ClassesType = None,
-                 styles: StylesType = None,
-                 props: PropsType = None,
-                 events: EventsType = None,
-                 children: ChildrenType = None):
-        props = build_props({}, props, {
-            'label': label,
-            'icon': icon,
-            'color': color,
-            'type': type
-        })
-        super().__init__(classes=classes, styles=styles, props=props, events=events, children=children)
 
 
 class Toggle(ComponentWithModel):

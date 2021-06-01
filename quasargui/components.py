@@ -159,8 +159,36 @@ class Heading(Component):
 # Some Quasar components
 ########################
 
-class PopupProxy(Component):
-    component = 'q-popup-proxy'
+
+class Button(Component):
+    """
+    ref. https://quasar.dev/vue-components/button#qbtn-api
+    """
+    component = 'q-btn'
+    defaults = {
+        'props': {
+            'unelevated': True,
+        }
+    }
+
+    # noinspection PyShadowingBuiltins
+    def __init__(self,
+                 label: PropValueType[str] = None,
+                 icon: PropValueType[str] = None,
+                 color: PropValueType[str] = None,
+                 type: PropValueType[str] = None,
+                 classes: ClassesType = None,
+                 styles: StylesType = None,
+                 props: PropsType = None,
+                 events: EventsType = None,
+                 children: ChildrenType = None):
+        props = build_props({}, props, {
+            'label': label,
+            'icon': icon,
+            'color': color,
+            'type': type
+        })
+        super().__init__(classes=classes, styles=styles, props=props, events=events, children=children)
 
 
 class Icon(Component):
@@ -186,3 +214,44 @@ class Icon(Component):
             events=events,
             children=children
         )
+
+
+class PopupProxy(Component):
+    component = 'q-popup-proxy'
+
+
+class Spinner(Component):
+    """
+
+    appearances:
+    https://quasar.dev/vue-components/spinners#example--other-spinners
+    """
+    component = 'q-spinner'
+    appearances = {
+        'audio', 'ball', 'bars', 'box', 'clock', 'comment', 'cube',
+        'dots', 'facebook', 'gears', 'grid', 'hearts', 'hourglass',
+        'infinity', 'ios', 'orbit', 'oval', 'pie', 'puff', 'radio',
+        'rings', 'tail'}
+
+    def __init__(self, appearance: str = None,
+                 color: PropValueType[str] = None,
+                 size: PropValueType[str] = None,
+                 classes: ClassesType = None,
+                 styles: StylesType = None,
+                 props: PropsType = None,
+                 events: EventsType = None,
+                 ):
+        kwargs = dict(
+            props=build_props({}, props, {
+                'color': color,
+                'size': size
+            }),
+            classes=classes,
+            styles=styles,
+            events=events,
+        )
+        if appearance is not None:
+            if appearance not in self.appearances:
+                raise AssertionError(f'Appearance must be one of {self.appearances}')
+            kwargs['component'] = f'q-spinner-{appearance}'
+        super().__init__(**kwargs)

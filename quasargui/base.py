@@ -31,7 +31,7 @@ class EventCallbacks:
         del cls.callbacks[cb_id]
 
 
-class JSFunction:
+class JSRaw:
     def __init__(self, code: str):
         if '"' in code:
             raise AssertionError('JSFunction code cannot contain \'"\'.')
@@ -49,11 +49,14 @@ class Component:
     defaults = {}
 
     def __init__(self,
+                 component: str = None,
                  children: ChildrenType = None,
                  classes: ClassesType = None,
                  styles: StylesType = None,
                  props: PropsType = None,
                  events: EventsType = None):
+        if component is not None:
+            self.component = component
         if not hasattr(self, 'classes'):
             self.classes = merge_classes(self.defaults.get('classes', ''), classes or '')
         self.styles = styles or {}
@@ -70,7 +73,7 @@ class Component:
     @property
     def vue(self) -> dict:
         props = {
-            k: v.render_as_data() if isinstance(v, Reactive) or isinstance(v, JSFunction) else v
+            k: v.render_as_data() if isinstance(v, Reactive) or isinstance(v, JSRaw) else v
             for k, v in self.props.items()
         }
         classes = self.classes if isinstance(self.classes, str) else " ".join(cs for cs in self.classes)
@@ -116,7 +119,7 @@ class Component:
         params = {'message': message}
         if kwargs:
             params.update(kwargs)
-        self.api.show_notification(params)
+        self.api.show_notification(**params)
 
     @property
     def children(self):
@@ -137,7 +140,7 @@ class Component:
 
 class ComponentWithModel(Component):
     def __init__(self,
-                 model: Optional[Reactive],
+                 model: Reactive = None,
                  children: ChildrenType = None,
                  classes: ClassesType = None,
                  styles: StylesType = None,

@@ -4,17 +4,17 @@ import quasargui
 from quasargui import *
 
 my_date = Model(None)
-my_date.add_callback(lambda: my_date.api.show_notification({
-    'message': f'Selected date: {my_date.value} ({type(my_date.value)}).',
-}))
+my_date.add_callback(lambda: my_date.api.show_notification(
+    message=f'Selected date: {my_date.value} ({type(my_date.value)}).'
+))
 my_time = Model(None)
-my_time.add_callback(lambda: my_time.api.show_notification({
-    'message': f'Selected time: {my_time.value} ({type(my_time.value)}).',
-}))
+my_time.add_callback(lambda: my_time.api.show_notification(
+    message=f'Selected time: {my_time.value} ({type(my_time.value)}).'
+))
 my_datetime = DateTimeModel(dt.now())
-my_datetime.add_callback(lambda: my_datetime.api.show_notification({
-    'message': f'Selected date and time: {my_datetime.value} ({type(my_datetime.value)}).',
-}))
+my_datetime.add_callback(lambda: my_datetime.api.show_notification(
+    message=f'Selected date and time: {my_datetime.value} ({type(my_datetime.value)}).'
+))
 form1 = Form(styles={'max-width': '20em', 'margin': '0 auto'}, children=[
     Heading(5, 'Inputs by value type'),
     InputStr('str input'),  # Input
@@ -28,12 +28,19 @@ form1 = Form(styles={'max-width': '20em', 'margin': '0 auto'}, children=[
     InputDate('date input', my_date),  # Input + popup Date
     InputTime('time input', my_time),  # Input + popup Time
     InputDateTime('datetime input', my_datetime),  # Input + popup date + popup time
-    # InputFile(appearance='browse'),  # File with attachment icon or browse button
-    # InputList(),  # tags, select multiple
+    # InputChoice(), # radio, buttons, select
+    # InputList(),  # tags, select, checkbox (OptionGroup), toggle (OptionGroup)
 
-    # File(),
-    # Select(), TagsInput(),
-    # Toggle(), Checkbox(), ButtonToggle(),
+    Heading(5, 'Inputs by Quasar components'),
+    Input('vanilla input'),
+    Input('oldschool number input', type='number'),
+    # FilePicker(),
+    # Select(), TagsInput(), Radio(), ButtonToggle(),
+    Slider(model=Model()),
+    # Range(Model()),  # OptionGroup(type="checkbox"), # radio, toggle
+    Toggle(),  # Checkbox(),
+    TimePicker(Model()),
+    DatePicker(Model()),
 ])
 layout = Layout([
     Header([Icon('table_view', 'lg', classes='q-mx-md'), 'Fields for different types of data']),

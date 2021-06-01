@@ -35,7 +35,7 @@ form1 = Form(styles={'max-width': '30em', 'margin': '0 auto'}, children=[
             )])]),
 
     Input(label="number input", type='number', props={
-        'rules': JSFunction("[value => value>0 || 'Enter a positive number']")
+        'rules': JSRaw("[value => value>0 || 'Enter a positive number']")
     }),
 ])
 
