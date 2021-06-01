@@ -1,7 +1,8 @@
-# Python Quasar GUI
-A modern, easy-to-use package for making Python GUI desktop apps.
+# Python Vue Quasar GUI
+A user-friendly package for making Python HTML-GUI desktop apps,
+without ever needing to touch JavaScript.
 
-### Usage:
+## Usage:
 
 This GUI library creates a window with a html view, in which Quasar Vue system is running. But don't worry, you can build up everything in python.
 
@@ -9,7 +10,7 @@ A window is built up of Component's and the components correspond to components 
 
 You can react to user events using callbacks. (See: simple greeter app.)
 
-**Hello world:**
+###Hello world
 
 ```python
 import quasargui
@@ -19,31 +20,29 @@ layout = Layout(children=["Hello World!"])
 quasargui.run(layout)
 ```
 
-**Simple greeter app:**
+###Simple greeter app
 
 This app demonstrates how you can build up a simple form and use the form's data to run your code.
 
 ```python
 import quasargui
-from quasargui.components import Layout, Input, Button
+from quasargui import Div, Input, Button, Model
+
+name = Model()
 
 def display_notification():
-    layout.notify(f'Hello, {input_name.value}!')
+    layout.api.show_notification(message=f'Hello, {name.value}!')
 
-input_name = Input()
-btn_submit = Button(
-    label='Submit',
-    classes='text-primary',
-    props={'unelevated': True, 'size': 'lg'},
-    events={'click': display_notification})
-
-layout = Layout(
+layout = Div(
     styles={'max-width': '30em', 'margin-left': 'auto', 'margin-right': 'auto'},
     classes='q-mt-xl text-center',
     children=[
         "What's your name?",
-        input_name,
-        btn_submit
+        Input('Name', name),
+        Button('Submit', classes='text-primary',
+            props={'size': 'lg'},
+            events={'click': display_notification}
+        )
 ])
 
 quasargui.run(layout)  # Shows a window with the layout.
@@ -58,12 +57,12 @@ From Quasar's page
  * any classes can be added to classes and
  * any events can be added to events (without the @).
 
-Dynamic props (on Quasar's page it is in ":prop" format) can be added using `Data`:
-```
-my_value = Data('my str')
+Dynamic props (on Quasar's page it is in ":prop" format) can be added using `Model`:
+```python
+my_value = Model('my str')
 props={'string-prop': my_value}
 ```
-Data works with any json-like type (str, bool, int, list, dict).
+Model works with any json-like type (str, bool, int, list, dict).
 
 [See further examples in the examples folder.](examples)
 
@@ -77,6 +76,93 @@ but it will be available on pip soon.
 
  * pywebview
 
-#### License:
+### License:
 
 MIT license
+
+
+## Concepts of quasargui
+
+Quasargui package closely follows the structure of Quasar, and you can also easily integrate any Vue component. The most important is to have handy defaults so you only need to write code when you want to customize.
+
+The GUI builds up itself from `Component`'s and `Model`'s. To understand the logic of all components, let's examine a typical component.
+```python
+loading = Model(False)
+def connect(): loading.value = True; print('Connect button clicked')
+
+button = Button(
+    label='Connect',
+    classes='q-ma-md',
+    styles={'opacity': 0.8},
+    props={'no-caps': True, 'loading': loading},
+    events={'click': connect},
+    children=[
+        Slot('loading', [Spinner(appearance='dots')])
+    ])
+```
+In Vue, `button`'s definition corresponds to:
+```html
+<q-button
+    label="Connect"
+    class="q-ma-md"
+    styles="opacity: 0.8"
+    :no-caps="true"
+    :loading="loading"
+    @click="connect"
+>
+    <template v-slot:loading>
+        <q-spinner-dots></q-spinner-dots>
+    </template>
+</q-button>
+```
+The common attributes of a `Component` are:
+- *classes*: custom css classes, separated by space (html class attribute)
+- *styles*: custom styles applied (html style attribute)
+- *props*: all the quasar attrs (no-caps is a constant attribute, loading is an  attribute that is bound to a variable.)
+- *events*: all the quasar "@" attrs. Events call the assigned callback in python.
+- *children*: are list of the html children, everything that is between <q-button>...</q-button>. So, *slots* are also set here with `Slot('slot-name', [...list of children...])`. 
+
+**Convenience:** Argument order follows convenience. Some commonly used props of a component such as `label` are given a "shortcut" parameter, and even put into first position, so you don't need to type out its name.   
+Writing `Button('OK')` is the same as `Button(props={'label': 'OK'})` but more concise. 
+
+**Type system:** All arguments are typed so you can catch most of the errors with a type-checker. This is the benefit of having props and events separated.
+
+**Formulas**: If there's a formula in a Vue attribute, you need to use `Computed`.
+If the component *requires* JavaScript function to be used, you can resort to `JSRaw`.
+```python
+x, y = Model(2), Model(3)
+Input(
+    label=Computed(lambda x, y: f'{x} + {y} =', x, y), 
+    props={'rules': JSRaw("[value => value>0 || 'Enter a positive number']")}
+)
+```
+
+**Vue directives:** If a component works with `v-model` then you can access it via the `model` parameter. Other `v-`'s such as `v-if` can be accessed as props. 
+Additionally, **prop modifiers** are simply put after the prop name as in Vue. 
+
+**Computed values:** `Model` and `Computed` work like an excel sheet, where `Model` is the normal data, `Computed` are the formulas. Everytime a `Model` changes, it updates all its dependent `Computed` values. You can also hook into `Model`'s changes by adding a callback:
+```python
+model = Model()
+model.add_callback(lambda: print('model changed'))
+```
+
+### Convenience classes
+
+For all the typical Python data-types quasargui package has a Component, designed to provide a convenient input.
+
+ - basic types: InputStr, InputInt, InputFloat, InputBool, InputList
+ - list: InputList -  tags, multi-select or checkboxes.
+ - choices: InputChoice - radio, button-group or select.
+ - file path: InputFile.
+ - datatime (data, time and datatime): InputDate, InputTime, InputDataTime are  input fields with calendar/clock popup.
+ - hex color: InputColor
+
+
+#### Overriding defaults
+
+Some other components try and guess your intent (Drawer adds a sandwich menu button for itself, Header wraps its arguments into Toolbar&ToolbarTitle if necessary.)
+ 
+However, every automatic guess and default can be overridden. Some have parameter to disable (eg. automatic sandwich menu for Drawer).
+In components that have defaults, you can override default with `del YourComponent.defaults['props']['your-prop']`. 
+
+To remove a slot, add `RemoveSlot('name')` to `children`.
