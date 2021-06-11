@@ -194,6 +194,10 @@ class DateTimeModel(Model[datetime.datetime]):
 
 
 class Computed(Reactive, Generic[T]):
+    """
+    Computed values are updated automatically whenever their arguments
+    (Models or other Computed) change.
+    """
     def __init__(self, fun: Callable[[...], T], *args: Reactive):
         self.fun = fun
         self.args = args
