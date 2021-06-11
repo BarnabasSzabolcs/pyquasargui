@@ -185,6 +185,9 @@ class Slot(Component):
 
 
 class RemoveSlot(Slot):
+    """
+    Removes a previously defined slot from within a Component's children.
+    """
     component = 'template'
 
     def __init__(self, name: str):
