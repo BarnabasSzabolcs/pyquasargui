@@ -255,3 +255,24 @@ class Spinner(Component):
                 raise AssertionError(f'Appearance must be one of {self.appearances}')
             kwargs['component'] = f'q-spinner-{appearance}'
         super().__init__(**kwargs)
+
+
+class Splitter(Component):
+    """
+    reference: https://quasar.dev/vue-components/splitter
+    """
+    component = 'q-splitter'
+
+
+class Tooltip(Component):
+    """
+    reference: https://quasar.dev/vue-components/tooltip
+    """
+    component = 'q-tooltip'
+
+
+class Tree(Component):
+    """
+    reference: https://quasar.dev/vue-components/tree
+    """
+    component = 'q-tree'
