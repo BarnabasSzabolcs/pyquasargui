@@ -49,14 +49,11 @@ class Component:
     defaults = {}
 
     def __init__(self,
-                 component: str = None,
                  children: ChildrenType = None,
                  classes: ClassesType = None,
                  styles: StylesType = None,
                  props: PropsType = None,
                  events: EventsType = None):
-        if component is not None:
-            self.component = component
         if not hasattr(self, 'classes'):
             self.classes = merge_classes(self.defaults.get('classes', ''), classes or '')
         self.styles = styles or {}
@@ -192,3 +189,24 @@ class RemoveSlot(Slot):
 
     def __init__(self, name: str):
         super().__init__(name)
+
+
+class CustomComponent(Component):
+    """
+    Use this with html tags and custom components.
+    """
+    def __init__(self,
+                 component: str = None,
+                 children: ChildrenType = None,
+                 classes: ClassesType = None,
+                 styles: StylesType = None,
+                 props: PropsType = None,
+                 events: EventsType = None):
+        self.component = component
+        super().__init__(
+            children=children,
+            classes=classes,
+            styles=styles,
+            props=props,
+            events=events
+        )
