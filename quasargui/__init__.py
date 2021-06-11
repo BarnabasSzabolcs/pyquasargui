@@ -7,4 +7,10 @@ QUASAR_GUI_ASSETS_PATH = join(this_directory, 'assets')
 QUASAR_GUI_INDEX_PATH = join(QUASAR_GUI_ASSETS_PATH, 'index.html')
 
 from quasargui.main import run, set_main_component
-from quasargui.model import Model
+from quasargui.base import *
+from quasargui.callbacks import *
+from quasargui.components import *
+from quasargui.form import *
+from quasargui.layout import *
+from quasargui.model import *
+from quasargui.plot import Plot

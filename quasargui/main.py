@@ -9,6 +9,7 @@ from quasargui.base import EventCallbacks
 from quasargui.components import Component
 from quasargui.model import Model
 from quasargui.tools import print_error
+from quasargui.typing import ValueType
 
 
 class Api:
@@ -65,7 +66,15 @@ class Api:
             'app.refreshComponent({component_vue})'.format(
                 component_vue=json.dumps(component_vue)))
 
-    def send_notification(self, params: dict):
+    def call_component_method(self, component_id: str, method: str):
+        """
+        eg. call_component_method(12, 'validate()')
+        """
+        return self.window.evaluate_js('app.callComponentMethod({params})'.format(
+            params=json.dumps({'component_id': component_id, 'method': method})
+        ))
+
+    def show_notification(self, **params: ValueType):
         return self.window.evaluate_js('app.showNotification({params})'.format(
             params=json.dumps(params)))
 
@@ -110,8 +119,7 @@ class JsApi:
             raise e
 
 
-WINDOW = 0
-API = 1
+WINDOW, API = 0, 1
 window_api_list: List[Tuple[Window, Api]] = []
 
 

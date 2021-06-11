@@ -1,0 +1,15 @@
+.text-xl{
+    font-size: 25px;
+}
+.text-lg{
+    font-size: 20px;
+}
+.text-md{
+    font-size: 16px;
+}
+.text-sm{
+    font-size: 12px;
+}
+.text-xs{
+    font-size: 10px;
+}

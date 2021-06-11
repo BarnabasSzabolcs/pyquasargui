@@ -1,5 +1,5 @@
 import quasargui
-from quasargui.components import Div, Input, Button
+from quasargui import *
 
 
 def run_program():

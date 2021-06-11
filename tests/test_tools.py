@@ -2,7 +2,7 @@ import unittest
 from unittest import TestCase
 
 # noinspection PyProtectedMember
-from quasargui._tools import *
+from quasargui.tools import *
 
 
 class TestFlatten(TestCase):

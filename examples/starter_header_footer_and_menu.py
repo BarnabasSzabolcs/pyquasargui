@@ -3,9 +3,7 @@ This is a starter template.
 """
 
 import quasargui
-from quasargui import Model
-from quasargui.callbacks import toggle
-from quasargui.components import Layout, Header, Footer, Page, Drawer, Button, Toolbar, ToolbarTitle, Icon
+from quasargui import *
 
 loading = Model(True)
 

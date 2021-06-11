@@ -11,8 +11,7 @@ import time
 import matplotlib.pyplot as plt
 
 import quasargui
-from quasargui.components import *
-from quasargui.model import Model, Computed, Not, And
+from quasargui import *
 
 loading = Model[bool](True)
 calculation_time = Model(0.0)

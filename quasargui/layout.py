@@ -1,8 +1,8 @@
 from typing import List, Union
 
+from quasargui.base import Component, ComponentWithModel
 from quasargui.callbacks import toggle
-from quasargui.components import Component, ComponentWithModel
-from quasargui.form import Button
+from quasargui.components import Button
 from quasargui.model import Model, Reactive
 from quasargui.tools import merge_classes, build_props
 from quasargui.typing import EventsType, ClassesType, StylesType, PropsType, ChildrenType, PropValueType
@@ -84,16 +84,14 @@ class Header(ComponentWithModel):
                  styles: StylesType = None,
                  props: PropsType = None
                  ):
-        if len(children) == 1 and isinstance(children[0], str):
-            children = [Toolbar([ToolbarTitle([children[0]])])]
-        props = build_props(
-            defaults=self.defaults['props'],
-            props=props,
-            specials={
-                'reveal': hide_on_scroll,
-                'elevated': elevated,
-                'bordered': bordered,
-            })
+        if 1 <= len(children) <= 2 and isinstance(children[-1], str):
+            children = [Toolbar([ToolbarTitle(children)])]
+
+        props = build_props({}, props, {
+            'reveal': hide_on_scroll,
+            'elevated': elevated,
+            'bordered': bordered,
+        })
         model = show if isinstance(show, Reactive) else Model(show)
         super().__init__(model=model, children=children, classes=classes, styles=styles, props=props)
 
@@ -139,13 +137,10 @@ class Drawer(ComponentWithModel):
         """
         self.menu_in_header = menu_in_header
         children = children
-        props = build_props(
-            defaults=self.defaults['props'],
-            props=props,
-            specials={
-                'side': side,
-                'bordered': bordered,
-            })
+        props = build_props({}, props, {
+            'side': side,
+            'bordered': bordered,
+        })
         model = show if isinstance(show, Reactive) else Model(show)
         super().__init__(model=model, children=children, classes=classes, styles=styles, props=props, events=events)
 
@@ -171,7 +166,7 @@ class Page(Component):
                  props: PropsType = None,
                  events: EventsType = None
                  ):
-        props = build_props(self.defaults['props'], props, {'padding': padding})
+        props = build_props({}, props, {'padding': padding})
         self.page = _Page(children=children, classes=classes, styles=styles, props=props, events=events)
         super().__init__(children=[self.page])
 
@@ -221,15 +216,12 @@ class Footer(ComponentWithModel):
                  events: EventsType = None
                  ):
         children = children
-        props = build_props(
-            defaults=self.defaults['props'],
-            props=props,
-            specials={
-                'reveal': hide_on_scroll,
-                'elevated': elevated,
-                'bordered': bordered,
-                'show': show,
-            })
+        props = build_props(self.defaults['props'], props, {
+            'reveal': hide_on_scroll,
+            'elevated': elevated,
+            'bordered': bordered,
+            'show': show,
+        })
         classes = merge_classes(self.defaults['classes'], classes or '')
         show = props['show']
         model = show if isinstance(show, Reactive) else Model(show)
@@ -250,17 +242,3 @@ class Space(Component):
 
 class Avatar(Component):
     component = 'q-avatar'
-
-
-class Icon(Component):
-    component = 'q-icon'
-
-    def __init__(self,
-                 name: PropValueType[str],
-                 size: PropValueType[str] = None,
-                 color: PropValueType[str] = None,
-                 classes: ClassesType = None,
-                 styles: StylesType = None,
-                 events: EventsType = None):
-        props = build_props({}, {}, {'name': name, 'size': size, 'color': color})
-        super().__init__(props=props, classes=classes, styles=styles, events=events)

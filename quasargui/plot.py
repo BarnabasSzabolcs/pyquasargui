@@ -9,6 +9,7 @@ from quasargui.model import Model
 from quasargui.tools import str_between
 from quasargui.typing import ClassesType, StylesType, PropValueType
 
+
 try:
     # noinspection PyPackageRequirements,PyUnresolvedReferences
     import mpld3 as mpld3
@@ -30,6 +31,7 @@ except ImportError:
 if TYPE_CHECKING:
     # noinspection PyPackageRequirements
     from matplotlib.pyplot import Figure
+    from quasargui.base import Api
 
 
 class Plot(Component):
@@ -68,7 +70,8 @@ class Plot(Component):
 
         self.fig = None
         self.html = {}
-        self.img_base64 = ''
+        self.img_base64 = Model('')
+        self.last_renderer = None
         super().__init__(classes=classes, styles=styles)
 
     def _check_imports(self):
@@ -84,12 +87,9 @@ class Plot(Component):
 
     def update(self):
         self.set_figure(self.fig)
-        super().update()
 
     def set_figure(self, fig: 'Figure'):
         self.fig = fig
-        self.html = {}
-        self.img_base64 = ''
         self._check_imports()
         if self.renderer.value == 'mpld3':
             raw_html = mpld3.fig_to_html(
@@ -104,12 +104,14 @@ class Plot(Component):
             tmpfile = BytesIO()
             fig.savefig(tmpfile, format='png')
             encoded = base64.b64encode(tmpfile.getvalue()).decode('utf-8')
-            self.img_base64 = "data:image/png;base64,{}".format(encoded)
-        super().update()
+            self.img_base64.value = "data:image/png;base64,{}".format(encoded)
+        if self.last_renderer != self.renderer.value or self.renderer.value != 'png':
+            super().update()
+        self.last_renderer = self.renderer.value
 
     @property
     def vue(self) -> dict:
-        if self.html:
+        if self.renderer.value == 'mpld3':
             return self._merge_vue({
                 'component': 'mpld3-figure',
                 'props': {
@@ -118,12 +120,16 @@ class Plot(Component):
                     'figId': self.html['figId']
                 }
             })
-        elif self.img_base64:
+        elif self.renderer.value == 'png':
             return self._merge_vue({
-                'component': 'q-img',
-                'props': {'src': self.img_base64}
+                'component': 'img',
+                'props': {'src': self.img_base64.render_as_data()}
             })
         else:
             return self._merge_vue({
                 'component': 'div'
             })
+
+    def set_api(self, api: 'Api', _flush: bool = True):
+        self.img_base64.set_api(api, _flush=_flush)
+        super().set_api(api, _flush=_flush)

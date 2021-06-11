@@ -1,7 +1,8 @@
 from typing import Optional, TYPE_CHECKING, Dict, Callable
 
 from quasargui.model import Reactive, Model
-from quasargui.typing import ChildrenType, ClassesType, StylesType, PropsType, EventsType, ValueType
+from quasargui.tools import build_props, merge_classes
+from quasargui.typing import ChildrenType, ClassesType, StylesType, PropsType, EventsType
 
 if TYPE_CHECKING:
     from quasargui.main import Api
@@ -30,7 +31,7 @@ class EventCallbacks:
         del cls.callbacks[cb_id]
 
 
-class JSFunction:
+class JSRaw:
     def __init__(self, code: str):
         if '"' in code:
             raise AssertionError('JSFunction code cannot contain \'"\'.')
@@ -45,6 +46,7 @@ class Component:
     A renderable GUI component.
     """
     max_id = 0
+    defaults = {}
 
     def __init__(self,
                  children: ChildrenType = None,
@@ -52,9 +54,11 @@ class Component:
                  styles: StylesType = None,
                  props: PropsType = None,
                  events: EventsType = None):
-        self.classes = classes or ''
+        if not hasattr(self, 'classes'):
+            self.classes = merge_classes(self.defaults.get('classes', ''), classes or '')
         self.styles = styles or {}
-        self.props = props or {}
+        if not hasattr(self, 'props'):
+            self.props = build_props(self.defaults.get('props', {}), props or {})
         events = events or {}
         self.events = {event: EventCallbacks.register(cb)
                        for event, cb in events.items()}
@@ -66,7 +70,7 @@ class Component:
     @property
     def vue(self) -> dict:
         props = {
-            k: v.render_as_data() if isinstance(v, Reactive) or isinstance(v, JSFunction) else v
+            k: v.render_as_data() if isinstance(v, Reactive) or isinstance(v, JSRaw) else v
             for k, v in self.props.items()
         }
         classes = self.classes if isinstance(self.classes, str) else " ".join(cs for cs in self.classes)
@@ -76,6 +80,7 @@ class Component:
         if styles:
             props.update({'style': styles})
         slots = {slot.name: slot.vue for slot in self._children if isinstance(slot, Slot)}
+        slots = {name: value for name, value in slots.items() if len(value['children'])}
         return {
             'id': self.id,
             'component': getattr(self, 'component', None),
@@ -111,7 +116,7 @@ class Component:
         params = {'message': message}
         if kwargs:
             params.update(kwargs)
-        self.api.send_notification(params)
+        self.api.show_notification(**params)
 
     @property
     def children(self):
@@ -132,17 +137,13 @@ class Component:
 
 class ComponentWithModel(Component):
     def __init__(self,
-                 model: Optional[Reactive],
-                 value: ValueType = None,
-                 children: Component = None,
+                 model: Reactive = None,
+                 children: ChildrenType = None,
                  classes: ClassesType = None,
                  styles: StylesType = None,
                  props: PropsType = None,
                  events: EventsType = None):
-        if model is not None and value is not None:
-            raise AssertionError("Cannot set both model and value.")
-        value = value or ''
-        self._model = model or Model(value)
+        self._model = model or Model(None)
         props = props or {}
         props['value'] = self._model.render_as_data()
         super().__init__(children=children,
@@ -176,6 +177,36 @@ class Slot(Component):
     def __init__(self,
                  name: str,
                  children: ChildrenType = None,
-                 props: PropsType = None):
+                 props: PropsType = None,
+                 classes: ClassesType = None,
+                 styles: StylesType = None):
         self.name = name
-        super().__init__(props=props, children=children)
+        super().__init__(props=props, children=children, classes=classes, styles=styles)
+
+
+class RemoveSlot(Slot):
+    component = 'template'
+
+    def __init__(self, name: str):
+        super().__init__(name)
+
+
+class CustomComponent(Component):
+    """
+    Use this with html tags and custom components.
+    """
+    def __init__(self,
+                 component: str = None,
+                 children: ChildrenType = None,
+                 classes: ClassesType = None,
+                 styles: StylesType = None,
+                 props: PropsType = None,
+                 events: EventsType = None):
+        self.component = component
+        super().__init__(
+            children=children,
+            classes=classes,
+            styles=styles,
+            props=props,
+            events=events
+        )
