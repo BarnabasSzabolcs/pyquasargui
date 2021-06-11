@@ -1,8 +1,8 @@
 import datetime
 from typing import TYPE_CHECKING, Callable, List, Dict, Generic, TypeVar
 
-from quasargui.tools import print_error
-from quasargui.typing import ValueType
+from quasargui.tools import print_error, get_path, set_path_value
+from quasargui.typing import ValueType, PathType, PathSegmentType
 
 if TYPE_CHECKING:
     from quasargui.main import Api
@@ -37,12 +37,19 @@ class Reactive(Generic[T]):
 
 class Model(Reactive, Generic[T]):
     """
-    Data is all the data that can change
-    in both the GUI and on the backend
+    Model handles data that can change
+    both in the frontend and the backend
     (typically the value of an Input)
+
+    There are two types of Model's,
+    Model's with and without path.
+    If a Model has no path, it stores value,
+    a Model with path represents access to a "deep" value.
+    Model's with path have a path-less counterpart that manages the value handling.
     """
     max_id = 1
     model_dic: Dict[int, 'Model'] = {}
+    model_dependent_count: Dict[int, int] = {}
 
     @staticmethod
     def no_conversion(value):
@@ -50,37 +57,74 @@ class Model(Reactive, Generic[T]):
 
     def __init__(self, value: T = None,
                  to_python: Callable[[ValueType], T] = None,
-                 from_python: Callable[[T], ValueType] = None
+                 from_python: Callable[[T], ValueType] = None,
+                 _id: int = None,
+                 _path: PathType = None
                  ):
-        self.id = Model.max_id
-        Model.max_id += 1
-        self.model_dic[self.id] = self
-        self._value = value
-        self.to_python = to_python or type(value)
+        if _id is not None:
+            self.id = _id
+            if value is not None:
+                raise AssertionError
+            Model.model_dependent_count[self.id] += 1
+        else:
+            self.id = Model.max_id
+            Model.max_id += 1
+            Model.model_dic[self.id] = self
+            Model.model_dependent_count[self.id] = 1
+            self._value = value
+        self._path = _path or []
+        if to_python is not None:
+            self.to_python = to_python
+        elif type(value) not in {dict, list}:
+            self.to_python = type(value)
+        else:
+            self.to_python = self.no_conversion
         self.from_python = from_python or self.no_conversion
         self.api = None
         self._callbacks: List[CallbackType] = []
         self.modifiers = set()
 
     def __del__(self):
-        del self.model_dic[self.id]
+        Model.model_dependent_count[self.id] -= 1
+        if Model.model_dependent_count.get(self.id, 0) == 0:
+            del self.model_dic[self.id]
 
     def set_api(self, api: 'Api', _flush: bool = True):
-        if self.api != api:
-            self.api = api
-            api.set_data(self.id, self.from_python(self._value))
+        if self.api == api:
+            return
+        self.api = api
+        if self._path:
+            Model.model_dic[self.id].set_api(api, _flush)
+            return
+        api.set_model_data(self.id, self._path, self.from_python(self.value))
         if _flush:
             api.flush_data(self.id)
 
+    def __getitem__(self, item) -> 'Model':
+        return Model(_id=self.id, _path=self._path + [item])
+
+    def __setitem__(self, key: PathSegmentType, value: any):
+        self.value[key] = value
+
     @property
     def value(self) -> T:
-        return self._value
+        if not self._path:
+            return self._value
+        else:
+            return get_path(self.model_dic[self.id]._value, self._path)
 
     @value.setter
     def value(self, value: T):
         self.set_value(value)
 
     def set_value(self, value: T, _jsapi=False):
+
+        def _set_value(val):
+            if not self._path:
+                self._value = val
+            else:
+                set_path_value(self.model_dic[self.id]._value, self._path, val)
+
         if _jsapi:
             # noinspection PyBroadException
             try:
@@ -88,13 +132,13 @@ class Model(Reactive, Generic[T]):
             except Exception:
                 # if value == '' and self._type in {int, float}:
                 #     value = self._type(0)
-                if self.api.debug:
+                if self.api is not None and self.api.debug:
                     print(f'WARNING: could not convert {value} using {self.to_python}')
-        if self._value == value:
+        if self.value == value:
             return
-        self._value = value
+        _set_value(value)
         if self.api is not None and not _jsapi:
-            self.api.set_data(self.id, self.from_python(self._value))
+            self.api.set_model_data(self.id, self._path, self.from_python(self._value))
         for callback in self._callbacks:
             callback()
         if self.api is not None and not _jsapi:
@@ -106,13 +150,21 @@ class Model(Reactive, Generic[T]):
             self.from_python = from_python
 
     def render_as_data(self) -> dict:
-        data = {'@': self.id, 'value': self.from_python(self.value)}
+        data = {'@': self.id}
+        if self._path:
+            data['path'] = self._path
+        else:
+            data['value'] = self.from_python(self._value)
         if self.modifiers:
             data['modifiers'] = list(self.modifiers)
         return data
 
     def render_mustache(self) -> str:
-        return "{{$root.data[" + str(self.id) + "]}}"
+        if self._path:
+            path = ''.join(f'["{p}"]' for p in self._path)
+            return "{{$root.data[" + str(self.id) + "]" + path + "}}"
+        else:
+            return "{{$root.data[" + str(self.id) + "]}}"
 
     def add_callback(self, fun: CallbackType):
         self._callbacks.append(fun)

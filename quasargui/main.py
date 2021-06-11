@@ -9,7 +9,7 @@ from quasargui.base import EventCallbacks
 from quasargui.components import Component
 from quasargui.model import Model
 from quasargui.tools import print_error
-from quasargui.typing import ValueType
+from quasargui.typing import ValueType, PathType
 
 
 class Api:
@@ -39,15 +39,15 @@ class Api:
             print(cmd)
         self.window.evaluate_js(cmd)
 
-    def get_data(self, data_id: int):
+    def get_model_data(self, data_id: int):
         return self.window.evaluate_js('app.getData({data_id})'.format(
             data_id=data_id
         ))
 
-    def set_data(self, data_id: int, value):
+    def set_model_data(self, model_id: int, path: PathType, value: ValueType):
         if self.debug:
-            print('set_data', data_id, value)
-        self.set_data_queue.append([data_id, value])
+            print('set_model_data', model_id, path, value)
+        self.set_data_queue.append({'id': model_id, 'path': path, 'value': value})
 
     def flush_data(self, data_id=0):
         if (not self.set_data_queue) or (data_id and self.set_data_queue[0][0] != data_id):

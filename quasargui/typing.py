@@ -12,6 +12,8 @@ StylesType = Dict[str, str]
 
 ChildrenType = List[Union['Component', str, 'Reactive']]
 ValueType = Union[bool, int, float, str, list, dict, None]
+PathSegmentType = Union[str, int]
+PathType = List[PathSegmentType]
 
 T = TypeVar('T')
 PropValueType = Union[T, 'Reactive']

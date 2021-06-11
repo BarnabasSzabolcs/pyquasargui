@@ -36,8 +36,9 @@ Vue.component('dynamic-component', {
     d.props['data-id'] = this.id.toString()
     // sendLog(JSON.stringify(d))
     if (('value' in d.props) && !('input' in d.events)) {
-      const value = d.props.value
-      inputEvent = `@input="$root.data['${value['@']}']=$event"`
+      const prop = d.props.value
+      const path = 'path' in prop ? prop.path.map(v => `['${v}']`).join('') : ''
+      inputEvent = `@input="$root.data[${prop['@']}]${path}=$event"`
     } else {
       inputEvent = ''
     }
@@ -69,13 +70,14 @@ Vue.component('dynamic-component', {
           return propName
         } else if (_.isObject(prop) && '@' in prop) {
           // Model
-          const ref = prop['@']
-          if (ref in this.$root.data === false) {
-            this.$root.$set(this.$root.data, ref, prop.value)
+          const modelId = prop['@']
+          if (('value' in prop) && !(modelId in this.$root.data)) {
+            this.$root.$set(this.$root.data, modelId, prop.value)
           }
           const colon = propName.startsWith('v-') ? '' : ':'
           const modifiers = 'modifiers' in prop ? '.' + prop.modifiers.join('.') : ''
-          return `${colon}${propName}${modifiers}="$root.data[${ref}]"`
+          const path = 'path' in prop ? prop.path.map(v => `['${v}']`).join('') : ''
+          return `${colon}${propName}${modifiers}="$root.data[${modelId}]${path}"`
         } else if (_.isObject(prop) && '$' in prop) {
           // JSFunction
           const colon = propName.startsWith('v-') ? '' : ':'
@@ -200,12 +202,27 @@ const app = new Vue({
       return this.data[id]
     },
     setData(payload) {
-      payload.forEach(([id, value]) => this._setData(id, value))
+      payload.forEach(({
+        id,
+        path,
+        value
+      }) => this._setData(id, path, value))
     },
-    _setData(id, value) {
+    _setData(id, path, value) {
+      if (path.length) {
+        let target = this.data[id]
+        for (let i = 0; i < path.length - 1; i++) {
+          target = target[path[i]]
+        }
+        this.$set(target, path[path.length - 1], value)
+        return
+      }
       if (id in this.data === false) {
-        this.$watch(`data.${id}`, v => {
-          window.pywebview.api.set_model_value(id, v)
+        this.$watch(`data.${id}`, {
+          handler: v => {
+            window.pywebview.api.set_model_value(id, v)
+          },
+          deep: _.isObject(value)
         })
       }
       this.$set(this.data, id, value)

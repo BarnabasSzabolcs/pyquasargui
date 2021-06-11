@@ -1,5 +1,7 @@
 import traceback
-from typing import List
+from typing import List, Union
+
+from quasargui.typing import PathType
 
 
 def flatten(lst: List[list]) -> list:
@@ -45,3 +47,17 @@ def str_between(source: str, from_str: str, to_str: str) -> str:
 def print_error(e):
     print("\n\nERROR {}: {}".format(e.__class__.__name__, e))
     print(traceback.format_exc())
+
+
+def get_path(dic: Union[dict, list], path: PathType) -> any:
+    result = dic
+    for p in path:
+        result = result[p]
+    return result
+
+
+def set_path_value(dic: Union[dict, list], path: PathType, value: any) -> None:
+    target = dic
+    for p in path[:-1]:
+        target = target[p]
+    target[path[-1]] = value
