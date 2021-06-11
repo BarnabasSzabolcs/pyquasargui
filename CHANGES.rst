@@ -9,8 +9,6 @@ Planned features:
 - Dialog, Banner
 - FilePicker (make good defaults!), Uploader
 - Badge, ButtonGroup, FloatingActionButton
-- ColorPicker
-- TimePicker, DatePicker
 - Editor
 - Select
 - Radio -> OptionGroup
@@ -25,7 +23,6 @@ Planned features:
 - MarkupTable (if pagination is needed then Table...)
 - Rating
 - ScrollArea
-- Spinner
 - Stepper (Wizard)
 - Tabs, TabPanels
 - Toolbar, Tooltip
