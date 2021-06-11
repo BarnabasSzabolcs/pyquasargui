@@ -84,6 +84,9 @@ class JsApi:
     """
     js -> python
     """
+    def __init__(self, debug):
+        self.debug = debug
+
     def call_cb(self, cb_id: int, params=None):
         fun = EventCallbacks.get(cb_id)
         nargs = fun.__code__.co_argcount
@@ -113,6 +116,8 @@ class JsApi:
 
     def set_model_value(self, model_id, value):
         try:
+            if self.debug:
+                print('set_model_value', model_id, value)
             Model.model_dic[int(model_id)].set_value(value, _jsapi=True)
         except Exception as e:
             print_error(e)
@@ -128,7 +133,7 @@ def run(component: Component, debug: bool = False, _render_debug: bool = False):
     window = webview.create_window(
         'Program',
         QUASAR_GUI_INDEX_PATH,
-        js_api=JsApi(),
+        js_api=JsApi(debug=debug),
         min_size=(600, 450))
     window_api_list.append((window, api))
     webview.start(api.init, window, debug=debug)

@@ -9,6 +9,12 @@ function sendLog() {
     window.pywebview.api.print_log(arguments)
 }
 
+function getPathJs(prop, drop_last_segment) {
+  if (!('path' in prop && prop.path.length)) return ''
+  path = drop_last_segment ? _.dropRight(prop.path, 1) : prop.path
+  return path.map(v => _.isString(v) ? `['${v}']` : `[${v}]`).join('')
+}
+
 // ref. https://symfonycasts.com/screencast/vue/vue-instance
 // problem: this solution keeps rerendering unnecessarily when used with q-input
 // alternative solution is to send html code and add it within script tags
@@ -37,8 +43,19 @@ Vue.component('dynamic-component', {
     // sendLog(JSON.stringify(d))
     if (('value' in d.props) && !('input' in d.events)) {
       const prop = d.props.value
-      const path = 'path' in prop ? prop.path.map(v => `['${v}']`).join('') : ''
-      inputEvent = `@input="$root.data[${prop['@']}]${path}=$event"`
+      const path = getPathJs(prop, true)
+      // The trickery with $set below is necessary 
+      // since array-valued things are not updated properly
+      // if normal 'variable=$event' is used.
+      if ('path' in prop && prop.path.length) {
+        let last = prop.path[prop.path.length - 1]
+        if (_.isString(last)) {
+          last = `'${last}'`
+        }
+        inputEvent = `@input="$set($root.data[${prop['@']}]${path}, ${last}, $event)"`
+      } else {
+        inputEvent = `@input="$root.data[${prop['@']}]=$event"`
+      }
     } else {
       inputEvent = ''
     }
@@ -76,7 +93,7 @@ Vue.component('dynamic-component', {
           }
           const colon = propName.startsWith('v-') ? '' : ':'
           const modifiers = 'modifiers' in prop ? '.' + prop.modifiers.join('.') : ''
-          const path = 'path' in prop ? prop.path.map(v => `['${v}']`).join('') : ''
+          const path = getPathJs(prop)
           return `${colon}${propName}${modifiers}="$root.data[${modelId}]${path}"`
         } else if (_.isObject(prop) && '$' in prop) {
           // JSFunction
@@ -98,7 +115,7 @@ Vue.component('dynamic-component', {
         } else {
           const childComponent = 'dynamic-component'
           child = JSON.stringify(child).replace(/'/g, "&#39;")
-          return `<${childComponent} :id='${child}'></${childComponent}>`
+          return `<${childComponent} :id="${child}"></${childComponent}>`
         }
       }).join('')
     },
@@ -217,7 +234,10 @@ const app = new Vue({
         this.$set(target, path[path.length - 1], value)
         return
       }
-      if (id in this.data === false) {
+      const idIsNew = id in this.data === false
+      this.$set(this.data, id, value)
+      if (idIsNew) {
+        sendLog('_.isObject(value)', _.isObject(value))
         this.$watch(`data.${id}`, {
           handler: v => {
             window.pywebview.api.set_model_value(id, v)
@@ -225,7 +245,6 @@ const app = new Vue({
           deep: _.isObject(value)
         })
       }
-      this.$set(this.data, id, value)
     },
     showNotification(params) {
       const longTimeOut = 7000

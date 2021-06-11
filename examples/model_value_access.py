@@ -19,17 +19,26 @@ except IndexError:
 
 print(dic_model.value)  # ~> {'color': '#aaa', 'data': ['Item 1']}
 
-deep_model = Model({'deep': {'data': 'deep value'}})
+normal_model = Model('normal')
 
+deep_model = Model({'deep': {'data': 'deep value'}})
 print(deep_model['deep']['data'].value)  # ~> deep value (but this creates 2 extra models)
 print(deep_model.value['deep']['data'])  # ~> deep value (this just retrieves the value)
+deep_data = deep_model['deep']['data']
 
-my_model = deep_model['deep']['data']
+list_model = Model(['apple', 'orange'])
+list0 = list_model[0]
 
 layout = Layout([Page([
-    Input('deep model', my_model, events={
-        'keyup': lambda: layout.notify(f"Deep value is {my_model.value}")
-    })
+    Input('normal:', normal_model, events={
+        'keyup': lambda: layout.notify(f"Value is {normal_model.value}")
+    }),
+    Input('deep.data:', deep_data, events={
+        'keyup': lambda: layout.notify(f"Value is {deep_data.value}")
+    }),
+    Input('list[0]:', list0, events={
+        'keyup': lambda: layout.notify(f"Value is {list0.value}")
+    }),
 ])])
 
 run(layout, _render_debug=True, debug=True)
