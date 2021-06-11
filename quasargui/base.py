@@ -17,9 +17,9 @@ class EventCallbacks:
 
     @classmethod
     def register(cls, cb):
+        cls.max_id += 1
         cb_id = cls.max_id
         cls.callbacks[cb_id] = cb
-        cls.max_id += 1
         return cb_id
 
     @classmethod

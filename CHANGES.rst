@@ -4,8 +4,6 @@ Changelog
 
 Planned features:
 =================
-- Data watches for another Data's changes and updates on change.
-
 - Dialog, Banner
 - FilePicker (make good defaults!), Uploader
 - Badge, ButtonGroup, FloatingActionButton
@@ -38,4 +36,5 @@ Planned features:
   (both non-interactive aka displaying png and interactive via mpld3)
 - Enables dynamic children
 - v-if as props, with Computed or Model as dynamically updated value
+- deep Model's
 

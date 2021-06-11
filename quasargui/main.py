@@ -9,7 +9,7 @@ from quasargui.base import EventCallbacks
 from quasargui.components import Component
 from quasargui.model import Model
 from quasargui.tools import print_error
-from quasargui.typing import ValueType
+from quasargui.typing import ValueType, PathType
 
 
 class Api:
@@ -39,15 +39,15 @@ class Api:
             print(cmd)
         self.window.evaluate_js(cmd)
 
-    def get_data(self, data_id: int):
+    def get_model_data(self, data_id: int):
         return self.window.evaluate_js('app.getData({data_id})'.format(
             data_id=data_id
         ))
 
-    def set_data(self, data_id: int, value):
+    def set_model_data(self, model_id: int, path: PathType, value: ValueType):
         if self.debug:
-            print('set_data', data_id, value)
-        self.set_data_queue.append([data_id, value])
+            print('set_model_data', model_id, path, value)
+        self.set_data_queue.append({'id': model_id, 'path': path, 'value': value})
 
     def flush_data(self, data_id=0):
         if (not self.set_data_queue) or (data_id and self.set_data_queue[0][0] != data_id):
@@ -84,6 +84,9 @@ class JsApi:
     """
     js -> python
     """
+    def __init__(self, debug):
+        self.debug = debug
+
     def call_cb(self, cb_id: int, params=None):
         fun = EventCallbacks.get(cb_id)
         nargs = fun.__code__.co_argcount
@@ -113,6 +116,8 @@ class JsApi:
 
     def set_model_value(self, model_id, value):
         try:
+            if self.debug:
+                print('set_model_value', model_id, value)
             Model.model_dic[int(model_id)].set_value(value, _jsapi=True)
         except Exception as e:
             print_error(e)
@@ -128,7 +133,7 @@ def run(component: Component, debug: bool = False, _render_debug: bool = False):
     window = webview.create_window(
         'Program',
         QUASAR_GUI_INDEX_PATH,
-        js_api=JsApi(),
+        js_api=JsApi(debug=debug),
         min_size=(600, 450))
     window_api_list.append((window, api))
     webview.start(api.init, window, debug=debug)
