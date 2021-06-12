@@ -277,6 +277,8 @@ class Computed(Reactive, Generic[T]):
                 arg.add_callback(self.calculate)
 
     def calculate(self):
+        if self.props:
+            raise AssertionError('calculate can be only called if the object does not depend on PropVar')
         values = [a.value for a in self.args]
         try:
             self.model.value = self.fun(*values)
@@ -289,6 +291,8 @@ class Computed(Reactive, Generic[T]):
 
     @property
     def value(self) -> T:
+        if self.props:
+            raise AssertionError('value works only if the object does not depend on PropVar')
         return self.model.value
 
     @property
@@ -313,13 +317,18 @@ class Computed(Reactive, Generic[T]):
             return {'$': self.js_var_name}
 
     def set_api(self, api: 'Api', _flush: bool = True):
-        self.model.set_api(api, _flush=_flush)
+        if not self.props:
+            self.model.set_api(api, _flush=_flush)
 
     def add_callback(self, fun: CallbackType):
+        if self.props:
+            raise AssertionError('Callbacks work only if the object does not depend on PropVar')
         self.model.add_callback(fun)
 
     @property
     def callbacks(self) -> List[CallbackType]:
+        if self.props:
+            raise AssertionError('Callbacks work only if the object does not depend on PropVar')
         return self.model.callbacks
 
 
