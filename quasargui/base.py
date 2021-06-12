@@ -40,7 +40,7 @@ class JSRaw(Renderable):
     def render_as_data(self) -> dict:
         return {'$': self.code}
 
-    def render_mustache(self) -> str:
+    def js_var_name(self) -> str:
         return self.code
 
 
@@ -73,7 +73,7 @@ class Component:
     @property
     def vue(self) -> dict:
         props = {
-            k: v.render_as_data() if isinstance(v, Renderable) or isinstance(v, JSRaw) else v
+            k: v.render_as_data() if isinstance(v, Renderable) else v
             for k, v in self.props.items()
         }
         classes = self.classes if isinstance(self.classes, str) else " ".join(cs for cs in self.classes)
@@ -86,6 +86,10 @@ class Component:
         if isinstance(self._children, Callable):
             propVar = PropVar()
             children = self._children(propVar)
+            for child in children:
+                if isinstance(child, Reactive):
+                    child.set_api(self.api)
+
             result['arg'] = propVar.js_var_name
         else:
             children = self._children

@@ -23,9 +23,6 @@ class Renderable:
     def js_var_name(self) -> str:
         raise NotImplementedError
 
-    def set_api(self, api: 'Api', _flush: bool = True):
-        raise NotImplementedError
-
 
 class Reactive(Renderable, Generic[T], metaclass=ABCMeta):
 
@@ -38,6 +35,9 @@ class Reactive(Renderable, Generic[T], metaclass=ABCMeta):
 
     @property
     def callbacks(self) -> List[CallbackType]:
+        raise NotImplementedError
+
+    def set_api(self, api: 'Api', _flush: bool = True):
         raise NotImplementedError
 
 
@@ -240,9 +240,6 @@ class PropVar(Renderable):
         else:
             path = ''
         return f'prop{self.id}{path}'
-
-    def set_api(self, api: 'Api', _flush: bool = True):
-        pass
 
 
 class Computed(Reactive, Generic[T]):
