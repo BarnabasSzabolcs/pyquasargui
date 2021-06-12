@@ -21,7 +21,7 @@ class Api:
         self.window = None
         self.debug = debug
         self.render_debug = render_debug
-        self.set_data_queue = []
+        self.model_data_queue = []
 
     def init(self, window):
         self.window = window
@@ -47,16 +47,16 @@ class Api:
     def set_model_data(self, model_id: int, path: PathType, value: ValueType):
         if self.debug:
             print('set_model_data', model_id, path, value)
-        self.set_data_queue.append({'id': model_id, 'path': path, 'value': value})
+        self.model_data_queue.append({'id': model_id, 'path': path, 'value': value})
 
     def flush_model_data(self, data_id=0):
-        if (not self.set_data_queue) or (data_id and self.set_data_queue[0][0] != data_id):
+        if (not self.model_data_queue) or (data_id and self.model_data_queue[0]['id'] != data_id):
             return
         self.window.evaluate_js(
             'app.setData({payload})'.format(
-                payload=json.dumps(self.set_data_queue)
+                payload=json.dumps(self.model_data_queue)
             ))
-        self.set_data_queue = []
+        self.model_data_queue = []
 
     def set_component(self, component_vue):
         if self.debug:
