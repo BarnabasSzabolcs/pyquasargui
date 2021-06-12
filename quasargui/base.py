@@ -1,8 +1,9 @@
+from inspect import signature
 from typing import Optional, TYPE_CHECKING, Dict, Callable, Union
 
 from quasargui.model import Renderable, Reactive, Model, PropVar
 from quasargui.tools import build_props, merge_classes
-from quasargui.typing import ChildrenType, ClassesType, StylesType, PropsType, EventsType
+from quasargui.typing import ChildrenType, ClassesType, StylesType, PropsType, EventsType, PropValueType
 
 if TYPE_CHECKING:
     from quasargui.main import Api
@@ -234,3 +235,43 @@ class CustomComponent(Component):
             props=props,
             events=events
         )
+
+
+class VFor(Component):
+    # noinspection PyMissingConstructor
+    def __init__(self,
+         model: Renderable,
+         key: PropValueType[str] = None,
+         component: Union[
+             Callable[[PropVar], Component],
+             Callable[[PropVar, PropVar], Component]
+         ] = None):
+        n_args = len(signature(component).parameters)
+        if n_args == 1:
+            p1 = PropVar()
+            component = component(p1)
+            component.props['v-for'] = JSRaw("{} in {}".format(
+                p1.js_var_name, model.js_var_name))
+        elif n_args == 2:
+            p1, p2 = PropVar(), PropVar()
+            component = component(p1, p2)
+            component.props['v-for'] = JSRaw("({}, {}) in {}".format(
+                p1.js_var_name, p2.js_var_name, model.js_var_name))
+        else:
+            raise AssertionError
+        if key is not None:
+            component.props['key'] = key
+        self._model = model
+        self._component = component
+
+    @property
+    def vue(self) -> dict:
+        return self._component.vue
+
+    def set_api(self, api: 'Api', _flush: bool = True):
+        if isinstance(self._model, Reactive):
+            self._model.set_api(api, _flush)
+        return self._component.set_api(api, _flush)
+
+    def set_children(self, children: ChildrenType):
+        raise AssertionError('Do not set children on VFor')
