@@ -44,6 +44,25 @@ Vue.component('dynamic-component', {
     return this.renderTemplate(template)
   },
   methods: {
+    calculateWithProp(computedId, props){
+      // calculates a Computed within a scoped slot for props
+      if (computedId in this.$root.computed===false){
+        this.$set(this.$root.computed, computedId, {})
+      }
+      const s = JSON.stringify(props)
+      if (s in this.$root.computed[computedId]){
+        return this.$root.computed[computedId][s]
+      }else{
+        this.$set(this.$root.computed[computedId], s, {value: undefined})
+        window.pywebview.api.calculate_computed(computedId, [props])
+          .then(response => {
+            if (this.$root.computed[computedId][s].value !== response){
+              this.$set(this.$root.computed[computedId], s, {value: response})
+            }
+          })
+        return this.$root.computed[computedId][s]
+      }
+    },
     assembleTemplate(id, recursive) {
       if (id === undefined || id === null) {
         return ''
@@ -210,6 +229,7 @@ const app = new Vue({
     return {
       mainComponentId: null,
       data: {}, // holds the Model values {id: value}
+      computed: {}, // holds computed values
       componentStore: {}, // holds the Component specifications {id: descriptor}
       debug: false,
     }
@@ -276,6 +296,9 @@ const app = new Vue({
           deep: _.isObject(value)
         })
       }
+    },
+    setComputedValue({id, propsJson, value}){
+      this.$set(this.computed[id], propsJson, value)
     },
     showNotification(params) {
       const longTimeOut = 7000

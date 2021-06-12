@@ -8,7 +8,6 @@ from quasargui.typing import ValueType, PathType, PathSegmentType
 if TYPE_CHECKING:
     from quasargui.main import Api
 
-
 T = TypeVar('T')
 CallbackType = Callable[[], None]
 
@@ -18,6 +17,10 @@ class Renderable:
         raise NotImplementedError
 
     def render_mustache(self) -> str:
+        return "{{" + self.js_var_name + "}}"
+
+    @property
+    def js_var_name(self) -> str:
         raise NotImplementedError
 
     def set_api(self, api: 'Api', _flush: bool = True):
@@ -101,7 +104,7 @@ class Model(Reactive, Generic[T]):
             return
         api.set_model_data(self.id, self.path, self.from_python(self.value))
         if _flush:
-            api.flush_data(self.id)
+            api.flush_model_data(self.id)
 
     def __getitem__(self, item) -> 'Model':
         return Model(_id=self.id, _path=self.path + [item])
@@ -145,7 +148,7 @@ class Model(Reactive, Generic[T]):
         for callback in self._callbacks:
             callback()
         if self.api is not None and not _jsapi:
-            self.api.flush_data(self.id)
+            self.api.flush_model_data(self.id)
 
     def set_conversion(self, to_python: Callable[[ValueType], T], from_python: Callable[[T], ValueType] = None):
         self.to_python = to_python
@@ -162,12 +165,13 @@ class Model(Reactive, Generic[T]):
             data['modifiers'] = list(self.modifiers)
         return data
 
-    def render_mustache(self) -> str:
+    @property
+    def js_var_name(self):
         if self.path:
             path = ''.join(f'["{p}"]' for p in self.path)
         else:
             path = ''
-        return "{{$root.data[" + str(self.id) + "]" + path + "}}"
+        return "$root.data[" + str(self.id) + "]" + path
 
     def add_callback(self, fun: CallbackType):
         self._callbacks.append(fun)
@@ -229,12 +233,6 @@ class PropVar(Renderable):
     def render_as_data(self) -> dict:
         return {'@p': f'prop{self.id}', 'path': self.path}
 
-    def render_mustache(self) -> str:
-        return "{{" + self.js_var_name + "}}"
-
-    def set_api(self, api: 'Api', _flush: bool = True):
-        pass
-
     @property
     def js_var_name(self):
         if self.path:
@@ -243,32 +241,42 @@ class PropVar(Renderable):
             path = ''
         return f'prop{self.id}{path}'
 
+    def set_api(self, api: 'Api', _flush: bool = True):
+        pass
+
 
 class Computed(Reactive, Generic[T]):
     """
     Computed values are updated automatically whenever their arguments
     (Models or other Computed) change.
+    Also, Computed values are independently calculated for PropVars when necessary.
 
-    Note that computed can only work with Reactive args.
-    Thus, when using a Component with callable children argument,
-    JSRaw has to be used instead of Computed.
+    Do not use Computed with PropVars outside a children argument's callable value.
 
     see: quasargui/examples/prop_vars.py
-    ```
-    JSRaw(prop['node']['icon'].js_var_name + " || 'share'")
-    ```
-    is used instead of Computed(lambda ic: ic or 'share', prop['node]['icon'])
     """
+    max_id = 0
+    computed_dic: Dict[int, 'Computed'] = {}
+
     def __init__(self, fun: Callable[[...], T], *args: Reactive):
+        """
+        :param fun: is assumed to be an idempotent function (that its value changes only if args changes)
+        :param args:
+        """
+        Computed.max_id += 1
+        self.id = self.max_id
+        Computed.computed_dic[self.id] = self
         self.fun = fun
-        if not all(isinstance(arg, Reactive) for arg in args):
-            raise AssertionError('An argument is not Reactive')
+        if not all(isinstance(arg, Reactive) or isinstance(arg, PropVar) for arg in args):
+            raise AssertionError('args have to be Reactive or PropVar.')
+        self.props = any(isinstance(arg, PropVar) for arg in args)
         self.args = args
-        self.model = Model(None)
-        self.calculate()
-        self.model.set_conversion(type(self.model.value))
-        for arg in args:
-            arg.add_callback(self.calculate)
+        if not self.props:
+            self.model = Model(None)
+            self.calculate()
+            self.model.set_conversion(type(self.model.value))
+            for arg in args:
+                arg.add_callback(self.calculate)
 
     def calculate(self):
         values = [a.value for a in self.args]
@@ -277,15 +285,34 @@ class Computed(Reactive, Generic[T]):
         except Exception as e:
             print_error(e)
 
+    @classmethod
+    def _calculate_for_props_value(cls, computed_id: int, props: any):
+        return cls.computed_dic[computed_id].fun(*props)
+
     @property
     def value(self) -> T:
         return self.model.value
 
-    def render_as_data(self) -> dict:
-        return self.model.render_as_data()
+    @property
+    def js_var_name(self) -> str:
+        """
+        scoped Slots come with a callable children argument.
+        The callable children argument is called with a PropVar,
+        but it does not represent a single component but a component template.
+        Therefore the Computed represents multiple arguments instead of a single one.
+        """
+        if not self.props:
+            return self.model.js_var_name
+        # noinspection PyTypeChecker
+        var_names = [arg.js_var_name for arg in self.args]
+        arg_list = ', '.join(var_names)
+        return f"calculateWithProp({self.id}, {arg_list}).value"
 
-    def render_mustache(self) -> str:
-        return self.model.render_mustache()
+    def render_as_data(self) -> dict:
+        if not self.props:
+            return self.model.render_as_data()
+        else:
+            return {'$': self.js_var_name}
 
     def set_api(self, api: 'Api', _flush: bool = True):
         self.model.set_api(api, _flush=_flush)

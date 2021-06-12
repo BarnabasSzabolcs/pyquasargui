@@ -61,8 +61,7 @@ layout = Tree(
         Slot('default-header', lambda prop: [
             Div(classes='row items-center', children=[
                 Icon(
-                    # name=Computed(lambda ic: ic or 'share', prop['node']['icon']),
-                    name=JSRaw(prop['node']['icon'].js_var_name + " || 'share'"),
+                    name=Computed(lambda ic: ic or 'share', prop['node']['icon']),
                     size='28px',
                     color='orange',
                     classes='q-mr-sm'),
@@ -83,4 +82,4 @@ layout = Tree(
         ])
     ])
 
-run(layout, title='PropVar demo')
+run(layout, title='Scoped slot demo')

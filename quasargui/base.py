@@ -122,7 +122,7 @@ class Component:
             if isinstance(prop, Reactive):
                 prop.set_api(api, _flush=False)
         if _flush:
-            api.flush_data()
+            api.flush_model_data()
 
     def notify(self, message: str, **kwargs):
         params = {'message': message}

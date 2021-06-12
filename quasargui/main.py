@@ -7,7 +7,7 @@ from webview import Window
 from quasargui import QUASAR_GUI_INDEX_PATH
 from quasargui.base import EventCallbacks
 from quasargui.components import Component
-from quasargui.model import Model
+from quasargui.model import Model, Computed
 from quasargui.tools import print_error
 from quasargui.typing import ValueType, PathType
 
@@ -49,20 +49,19 @@ class Api:
             print('set_model_data', model_id, path, value)
         self.set_data_queue.append({'id': model_id, 'path': path, 'value': value})
 
-    def flush_data(self, data_id=0):
+    def flush_model_data(self, data_id=0):
         if (not self.set_data_queue) or (data_id and self.set_data_queue[0][0] != data_id):
             return
-        result = self.window.evaluate_js(
+        self.window.evaluate_js(
             'app.setData({payload})'.format(
                 payload=json.dumps(self.set_data_queue)
             ))
         self.set_data_queue = []
-        return result
 
     def set_component(self, component_vue):
         if self.debug:
             print('set_component', component_vue)
-        return self.window.evaluate_js(
+        self.window.evaluate_js(
             'app.refreshComponent({component_vue})'.format(
                 component_vue=json.dumps(component_vue)))
 
@@ -75,7 +74,7 @@ class Api:
         ))
 
     def show_notification(self, **params: ValueType):
-        return self.window.evaluate_js('app.showNotification({params})'.format(
+        self.window.evaluate_js('app.showNotification({params})'.format(
             params=json.dumps(params)))
 
 
@@ -122,6 +121,10 @@ class JsApi:
         except Exception as e:
             print_error(e)
             raise e
+
+    def calculate_computed(self, computed_id: int, props: any):
+        # noinspection PyProtectedMember
+        return Computed._calculate_for_props_value(computed_id, props)
 
 
 WINDOW, API = 0, 1
