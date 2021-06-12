@@ -128,10 +128,22 @@ WINDOW, API = 0, 1
 window_api_list: List[Tuple[Window, Api]] = []
 
 
-def run(component: Component, debug: bool = False, _render_debug: bool = False):
+def run(
+        component: Component,
+        title: str = None,
+        debug: bool = False,
+        _render_debug: bool = False,
+):
+    """
+    :param component:
+    :param title: The title of the window.
+    :param debug: Enables right-click inspection in the GUI window.
+    :param _render_debug: this option is for quasargui development.
+    It displays all the rendering in python's standard output.
+    """
     api = Api(component, debug=debug, render_debug=_render_debug)
     window = webview.create_window(
-        'Program',
+        title or 'Program',
         QUASAR_GUI_INDEX_PATH,
         js_api=JsApi(debug=debug),
         min_size=(600, 450))

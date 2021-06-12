@@ -191,6 +191,36 @@ class Button(Component):
         super().__init__(classes=classes, styles=styles, props=props, events=events, children=children)
 
 
+class Card(Component):
+    """
+    ref. https://quasar.dev/vue-components/card#qcard-api
+    Use it with CardSection, Separator and CardActions
+    """
+    component = 'q-card'
+
+
+class CardSection(Component):
+    """
+    ref. https://quasar.dev/vue-components/card#qcardsection-api
+    """
+    component = 'q-card-section'
+
+
+class CardActions(Component):
+    """
+    ref. https://quasar.dev/vue-components/card#qcardactions-api
+    """
+    component = 'q-card-actions'
+
+
+class ExpansionItem(Component):
+    """
+    Use it with ListComponent, children: Card, and CardSection within the Card.
+    ref. https://quasar.dev/vue-components/expansion-item#qexpansionitem-api
+    """
+    component = 'q-expansion-item'
+
+
 class Icon(Component):
     component = 'q-icon'
 
@@ -201,8 +231,9 @@ class Icon(Component):
                  classes: ClassesType = None,
                  styles: StylesType = None,
                  events: EventsType = None,
+                 props: PropsType = None,
                  children: ChildrenType = None):
-        props = build_props({}, {}, {
+        props = build_props({}, props, {
             'name': name,
             'size': size,
             'color': color
@@ -217,7 +248,20 @@ class Icon(Component):
 
 
 class PopupProxy(Component):
+    """
+    Creates a pop-up element.
+    eg. InputDate, InputTime, InputDateTime uses it.
+    ref. https://quasar.dev/vue-components/popup-proxy#qpopupproxy-api
+    """
     component = 'q-popup-proxy'
+
+
+class Separator(Component):
+    """
+    A horizontal line.
+    ref. https://quasar.dev/vue-components/separator
+    """
+    component = 'q-separator'
 
 
 class Spinner(Component):
