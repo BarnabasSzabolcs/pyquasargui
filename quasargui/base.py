@@ -1,6 +1,6 @@
-from typing import Optional, TYPE_CHECKING, Dict, Callable
+from typing import Optional, TYPE_CHECKING, Dict, Callable, Union
 
-from quasargui.model import Reactive, Model
+from quasargui.model import Renderable, Reactive, Model, PropVar
 from quasargui.tools import build_props, merge_classes
 from quasargui.typing import ChildrenType, ClassesType, StylesType, PropsType, EventsType
 
@@ -31,7 +31,7 @@ class EventCallbacks:
         del cls.callbacks[cb_id]
 
 
-class JSRaw:
+class JSRaw(Renderable):
     def __init__(self, code: str):
         if '"' in code:
             raise AssertionError('JSFunction code cannot contain \'"\'.')
@@ -39,6 +39,9 @@ class JSRaw:
 
     def render_as_data(self) -> dict:
         return {'$': self.code}
+
+    def render_mustache(self) -> str:
+        return self.code
 
 
 class Component:
@@ -70,7 +73,7 @@ class Component:
     @property
     def vue(self) -> dict:
         props = {
-            k: v.render_as_data() if isinstance(v, Reactive) or isinstance(v, JSRaw) else v
+            k: v.render_as_data() if isinstance(v, Renderable) or isinstance(v, JSRaw) else v
             for k, v in self.props.items()
         }
         classes = self.classes if isinstance(self.classes, str) else " ".join(cs for cs in self.classes)
@@ -79,19 +82,27 @@ class Component:
         styles = ";".join('{k}:{v}'.format(k=k, v=v) for k, v in self.styles.items())
         if styles:
             props.update({'style': styles})
-        slots = {slot.name: slot.vue for slot in self._children if isinstance(slot, Slot)}
+        result = {}
+        if isinstance(self._children, Callable):
+            propVar = PropVar()
+            children = self._children(propVar)
+            result['arg'] = propVar.js_var_name
+        else:
+            children = self._children
+        slots = {slot.name: slot.vue for slot in children if isinstance(slot, Slot)}
         slots = {name: value for name, value in slots.items() if len(value['children'])}
-        return {
+        result.update({
             'id': self.id,
             'component': getattr(self, 'component', None),
             'events': self.events,
             'props': props,
             'children': [child if isinstance(child, str) else
-                         child.render_mustache() if isinstance(child, Reactive) else
+                         child.render_mustache() if isinstance(child, Renderable) else
                          child.vue
-                         for child in self._children if not isinstance(child, Slot)],
+                         for child in children if not isinstance(child, Slot)],
             'slots': slots
-        }
+        })
+        return result
 
     def _merge_vue(self, d: dict) -> dict:
         # ref. https://stackoverflow.com/a/1021484/1031191
@@ -103,9 +114,10 @@ class Component:
     def set_api(self, api: 'Api', _flush: bool = True):
         # noinspection PyAttributeOutsideInit
         self.api = api
-        for child in self._children:
-            if isinstance(child, Component) or isinstance(child, Reactive):
-                child.set_api(api, _flush=False)
+        if isinstance(self._children, list):
+            for child in self._children:
+                if isinstance(child, Component) or isinstance(child, Reactive):
+                    child.set_api(api, _flush=False)
         for prop in self.props.values():
             if isinstance(prop, Reactive):
                 prop.set_api(api, _flush=False)
@@ -137,7 +149,7 @@ class Component:
 
 class ComponentWithModel(Component):
     def __init__(self,
-                 model: Reactive = None,
+                 model: Renderable = None,
                  children: ChildrenType = None,
                  classes: ClassesType = None,
                  styles: StylesType = None,
@@ -176,7 +188,7 @@ class Slot(Component):
 
     def __init__(self,
                  name: str,
-                 children: ChildrenType = None,
+                 children: Union[ChildrenType, Callable[[PropVar], ChildrenType]] = None,
                  props: PropsType = None,
                  classes: ClassesType = None,
                  styles: StylesType = None):

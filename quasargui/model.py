@@ -1,4 +1,5 @@
 import datetime
+from abc import ABCMeta
 from typing import TYPE_CHECKING, Callable, List, Dict, Generic, TypeVar
 
 from quasargui.tools import print_error, get_path, set_path_value
@@ -12,12 +13,7 @@ T = TypeVar('T')
 CallbackType = Callable[[], None]
 
 
-class Reactive(Generic[T]):
-
-    @property
-    def value(self) -> T:
-        raise NotImplementedError
-
+class Renderable:
     def render_as_data(self) -> dict:
         raise NotImplementedError
 
@@ -25,6 +21,13 @@ class Reactive(Generic[T]):
         raise NotImplementedError
 
     def set_api(self, api: 'Api', _flush: bool = True):
+        raise NotImplementedError
+
+
+class Reactive(Renderable, Generic[T], metaclass=ABCMeta):
+
+    @property
+    def value(self) -> T:
         raise NotImplementedError
 
     def add_callback(self, fun: CallbackType):
@@ -47,7 +50,7 @@ class Model(Reactive, Generic[T]):
     a Model with path represents access to a "deep" value.
     Model's with path have a path-less counterpart that manages the value handling.
     """
-    max_id = 1
+    max_id = 0
     model_dic: Dict[int, 'Model'] = {}
     model_dependent_count: Dict[int, int] = {}
 
@@ -67,12 +70,12 @@ class Model(Reactive, Generic[T]):
                 raise AssertionError
             Model.model_dependent_count[self.id] += 1
         else:
-            self.id = Model.max_id
             Model.max_id += 1
+            self.id = Model.max_id
             Model.model_dic[self.id] = self
             Model.model_dependent_count[self.id] = 1
             self._value = value
-        self._path = _path or []
+        self.path = _path or []
         if to_python is not None:
             self.to_python = to_python
         elif type(value) not in {dict, list}:
@@ -93,25 +96,25 @@ class Model(Reactive, Generic[T]):
         if self.api == api:
             return
         self.api = api
-        if self._path:
+        if self.path:
             Model.model_dic[self.id].set_api(api, _flush)
             return
-        api.set_model_data(self.id, self._path, self.from_python(self.value))
+        api.set_model_data(self.id, self.path, self.from_python(self.value))
         if _flush:
             api.flush_data(self.id)
 
     def __getitem__(self, item) -> 'Model':
-        return Model(_id=self.id, _path=self._path + [item])
+        return Model(_id=self.id, _path=self.path + [item])
 
     def __setitem__(self, key: PathSegmentType, value: any):
         self.value[key] = value
 
     @property
     def value(self) -> T:
-        if not self._path:
+        if not self.path:
             return self._value
         else:
-            return get_path(self.model_dic[self.id]._value, self._path)
+            return get_path(self.model_dic[self.id]._value, self.path)
 
     @value.setter
     def value(self, value: T):
@@ -120,10 +123,10 @@ class Model(Reactive, Generic[T]):
     def set_value(self, value: T, _jsapi=False):
 
         def _set_value(val):
-            if not self._path:
+            if not self.path:
                 self._value = val
             else:
-                set_path_value(self.model_dic[self.id]._value, self._path, val)
+                set_path_value(self.model_dic[self.id]._value, self.path, val)
 
         if _jsapi:
             # noinspection PyBroadException
@@ -138,7 +141,7 @@ class Model(Reactive, Generic[T]):
             return
         _set_value(value)
         if self.api is not None and not _jsapi:
-            self.api.set_model_data(self.id, self._path, self.from_python(self._value))
+            self.api.set_model_data(self.id, self.path, self.from_python(self._value))
         for callback in self._callbacks:
             callback()
         if self.api is not None and not _jsapi:
@@ -151,8 +154,8 @@ class Model(Reactive, Generic[T]):
 
     def render_as_data(self) -> dict:
         data = {'@': self.id}
-        if self._path:
-            data['path'] = self._path
+        if self.path:
+            data['path'] = self.path
         else:
             data['value'] = self.from_python(self._value)
         if self.modifiers:
@@ -160,11 +163,11 @@ class Model(Reactive, Generic[T]):
         return data
 
     def render_mustache(self) -> str:
-        if self._path:
-            path = ''.join(f'["{p}"]' for p in self._path)
-            return "{{$root.data[" + str(self.id) + "]" + path + "}}"
+        if self.path:
+            path = ''.join(f'["{p}"]' for p in self.path)
         else:
-            return "{{$root.data[" + str(self.id) + "]}}"
+            path = ''
+        return "{{$root.data[" + str(self.id) + "]" + path + "}}"
 
     def add_callback(self, fun: CallbackType):
         self._callbacks.append(fun)
@@ -193,20 +196,79 @@ class DateTimeModel(Model[datetime.datetime]):
             return None
 
 
+class PropVar(Renderable):
+    """
+    PropVar is the substitution for Model when a function is passed to a Slot's children parameter,
+    instead of an array (eg. Table, Tree).
+    PropVar can be considered as a limited version of a Model.
+    It has item accessors and can be used exactly as models, except they cannot be get/set a value directly.
+
+    Internally, prop's are rendered as prop1, prop2 etc,
+    with prop paths as prop1['path']['subpath'][0] etc.
+    PropVar's appear when a Slot receives a function as children, and with VFor.
+    PropVar's are invisible for the users.
+    """
+    max_id = 0
+
+    def __init__(self, _id: int = None, _path: PathType = None):
+        if _id is not None:
+            self.id = _id
+            if _path is None:
+                raise AssertionError
+            self.path = _path
+        else:
+            PropVar.max_id += 1
+            self.id = PropVar.max_id
+            if _path is not None:
+                raise AssertionError
+            self.path = []
+
+    def __getitem__(self, item) -> 'PropVar':
+        return PropVar(_id=self.id, _path=self.path + [item])
+
+    def render_as_data(self) -> dict:
+        return {'@p': f'prop{self.id}', 'path': self.path}
+
+    def render_mustache(self) -> str:
+        return "{{" + self.js_var_name + "}}"
+
+    def set_api(self, api: 'Api', _flush: bool = True):
+        pass
+
+    @property
+    def js_var_name(self):
+        if self.path:
+            path = ''.join(f"['{p}']" for p in self.path)
+        else:
+            path = ''
+        return f'prop{self.id}{path}'
+
+
 class Computed(Reactive, Generic[T]):
     """
     Computed values are updated automatically whenever their arguments
     (Models or other Computed) change.
+
+    Note that computed can only work with Reactive args.
+    Thus, when using a Component with callable children argument,
+    JSRaw has to be used instead of Computed.
+
+    see: quasargui/examples/prop_vars.py
+    ```
+    JSRaw(prop['node']['icon'].js_var_name + " || 'share'")
+    ```
+    is used instead of Computed(lambda ic: ic or 'share', prop['node]['icon'])
     """
     def __init__(self, fun: Callable[[...], T], *args: Reactive):
         self.fun = fun
+        if not all(isinstance(arg, Reactive) for arg in args):
+            raise AssertionError('An argument is not Reactive')
         self.args = args
         self.model = Model(None)
         self.calculate()
         self.model.set_conversion(type(self.model.value))
         for arg in args:
-            if isinstance(arg, Reactive):
-                arg.add_callback(self.calculate)
+            arg.add_callback(self.calculate)
 
     def calculate(self):
         values = [a.value for a in self.args]
