@@ -149,7 +149,7 @@ class Heading(Component):
                  ):
         if not 1 <= n <= 6:
             raise AssertionError('n must be between 1 and 6')
-        self.component = f'h{n}'
+        self.component = 'h{}'.format(n)
         if text is not None:
             children = [text] + (children or [])
         super().__init__(children=children, classes=classes, styles=styles, events=events)
@@ -296,8 +296,8 @@ class Spinner(Component):
         )
         if appearance is not None:
             if appearance not in self.appearances:
-                raise AssertionError(f'Appearance must be one of {self.appearances}')
-            kwargs['component'] = f'q-spinner-{appearance}'
+                raise AssertionError('Appearance must be one of {}'.format(self.appearances))
+            kwargs['component'] = 'q-spinner-{}'.format(appearance)
         super().__init__(**kwargs)
 
 

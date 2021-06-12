@@ -93,6 +93,11 @@ class Component:
             result['arg'] = propVar.js_var_name
         else:
             children = self._children
+        if any([isinstance(child, type) for child in children]):
+            raise AssertionError(
+                "{children} should be not a type but an object (Did you forget to add '()'?)".format(
+                    children=', '.join(str(child) for child in children if isinstance(child, type))))
+
         slots = {slot.name: slot.vue for slot in children if isinstance(slot, Slot)}
         slots = {name: value for name, value in slots.items() if len(value['children'])}
         result.update({

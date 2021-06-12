@@ -139,7 +139,8 @@ class Model(Reactive, Generic[T]):
                 # if value == '' and self._type in {int, float}:
                 #     value = self._type(0)
                 if self.api is not None and self.api.debug:
-                    print(f'WARNING: could not convert {value} using {self.to_python}')
+                    print('WARNING: could not convert {value} using {converter}'.format(
+                        value=value, converter=self.to_python))
         if self.value == value:
             return
         _set_value(value)
@@ -168,7 +169,7 @@ class Model(Reactive, Generic[T]):
     @property
     def js_var_name(self):
         if self.path:
-            path = ''.join(f'["{p}"]' for p in self.path)
+            path = ''.join('["{}"]'.format(p) for p in self.path)
         else:
             path = ''
         return "$root.data[" + str(self.id) + "]" + path
@@ -231,15 +232,15 @@ class PropVar(Renderable):
         return PropVar(_id=self.id, _path=self.path + [item])
 
     def render_as_data(self) -> dict:
-        return {'@p': f'prop{self.id}', 'path': self.path}
+        return {'@p': 'prop{}'.format(self.id), 'path': self.path}
 
     @property
     def js_var_name(self):
         if self.path:
-            path = ''.join(f"['{p}']" for p in self.path)
+            path = ''.join("['{}']".format(p) for p in self.path)
         else:
             path = ''
-        return f'prop{self.id}{path}'
+        return 'prop{}{}'.format(self.id, path)
 
 
 class Computed(Reactive, Generic[T]):
@@ -303,7 +304,7 @@ class Computed(Reactive, Generic[T]):
         # noinspection PyTypeChecker
         var_names = [arg.js_var_name for arg in self.args]
         arg_list = ', '.join(var_names)
-        return f"calculateWithProp({self.id}, {arg_list}).value"
+        return "calculateWithProp({}, {}).value".format(self.id, arg_list)
 
     def render_as_data(self) -> dict:
         if not self.props:

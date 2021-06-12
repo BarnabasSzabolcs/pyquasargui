@@ -31,13 +31,13 @@ list0 = list_model[0]
 
 layout = Layout([Page([
     Input('normal:', normal_model, events={
-        'keyup': lambda: layout.notify(f"Value is {normal_model.value}")
+        'keyup': lambda: layout.notify("Value is {}".format(normal_model.value))
     }),
     Input('deep.data:', deep_data, events={
-        'keyup': lambda: layout.notify(f"Value is {deep_data.value}")
+        'keyup': lambda: layout.notify("Value is {}".format(deep_data.value))
     }),
     Input('list[0]:', list0, events={
-        'keyup': lambda: layout.notify(f"Value is {list0.value}")
+        'keyup': lambda: layout.notify("Value is {}".format(list0.value))
     }),
 ])])
 
