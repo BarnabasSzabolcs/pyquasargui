@@ -5,7 +5,7 @@ function createEventCB(id) {
 }
 
 function sendLog() {
-  if (app.debug)
+  if (window.debug)
     window.pywebview.api.print_log(arguments)
 }
 
@@ -44,20 +44,24 @@ Vue.component('dynamic-component', {
     return this.renderTemplate(template)
   },
   methods: {
-    calculateWithProp(computedId, props){
+    calculateWithProp(computedId, props) {
       // calculates a Computed within a scoped slot for props
-      if (computedId in this.$root.computed===false){
+      if (computedId in this.$root.computed === false) {
         this.$set(this.$root.computed, computedId, {})
       }
       const s = JSON.stringify(props)
-      if (s in this.$root.computed[computedId]){
+      if (s in this.$root.computed[computedId]) {
         return this.$root.computed[computedId][s]
-      }else{
-        this.$set(this.$root.computed[computedId], s, {value: undefined})
+      } else {
+        this.$set(this.$root.computed[computedId], s, {
+          value: undefined
+        })
         window.pywebview.api.calculate_computed(computedId, [props])
           .then(response => {
-            if (this.$root.computed[computedId][s].value !== response){
-              this.$set(this.$root.computed[computedId], s, {value: response})
+            if (this.$root.computed[computedId][s].value !== response) {
+              this.$set(this.$root.computed[computedId], s, {
+                value: response
+              })
             }
           })
         return this.$root.computed[computedId][s]
@@ -82,10 +86,6 @@ Vue.component('dynamic-component', {
       if (('value' in d.props) && !('input' in d.events)) {
         const prop = d.props.value
         const path = getPathJs(prop, true)
-        // The trickery with $set below is necessary 
-      // The trickery with $set below is necessary 
-        // The trickery with $set below is necessary 
-      // The trickery with $set below is necessary 
         // The trickery with $set below is necessary 
         // since array-valued things are not updated properly
         // if normal 'variable=$event' is used.
@@ -115,8 +115,13 @@ Vue.component('dynamic-component', {
       return `<${d.component} ${attrs}>${children}${slots}</${d.component}>`
     },
     renderEvents(events) {
-      return _.map(events, (cb_id, eventName) => {
-        return `@${eventName}="params=>window.pywebview.api.call_cb(${cb_id}, params)"`
+      return _.map(events, (cb, eventName) => {
+        if (_.isNumber(cb)) {
+          const cb_id = cb
+          return `@${eventName}="params=>window.pywebview.api.call_cb(${cb_id}, params)"`
+        } else if ('$' in cb){
+          return `@${eventName}="${cb['$']}"`
+        }
       }).join(' ')
     },
     renderProps(props) {
@@ -157,7 +162,7 @@ Vue.component('dynamic-component', {
       return _.map(children, child => {
         if (_.isString(child)) {
           return child
-        } else if (recursive){
+        } else if (recursive) {
           return this.assembleTemplate(child, recursive)
         } else {
           const childComponent = 'dynamic-component'
@@ -231,12 +236,11 @@ const app = new Vue({
       data: {}, // holds the Model values {id: value}
       computed: {}, // holds computed values
       componentStore: {}, // holds the Component specifications {id: descriptor}
-      debug: false,
     }
   },
   methods: {
     setDebug(debug) {
-      this.debug = debug
+      window.debug = debug
       if (debug) {
         setTimeout(() => {
           document.getElementById('debug').style.display = 'block'
@@ -288,7 +292,6 @@ const app = new Vue({
       const idIsNew = id in this.data === false
       this.$set(this.data, id, value)
       if (idIsNew) {
-        sendLog('_.isObject(value)', _.isObject(value))
         this.$watch(`data.${id}`, {
           handler: v => {
             window.pywebview.api.set_model_value(id, v)
@@ -297,7 +300,11 @@ const app = new Vue({
         })
       }
     },
-    setComputedValue({id, propsJson, value}){
+    setComputedValue({
+      id,
+      propsJson,
+      value
+    }) {
       this.$set(this.computed[id], propsJson, value)
     },
     showNotification(params) {

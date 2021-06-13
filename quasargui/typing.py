@@ -2,11 +2,13 @@ from typing import Dict, Callable, Any, List, Union, TYPE_CHECKING, TypeVar
 
 if TYPE_CHECKING:
     # noinspection PyUnresolvedReferences
+    from quasargui.base import JSRaw
+    # noinspection PyUnresolvedReferences
     from quasargui.model import Model, Reactive
     # noinspection PyUnresolvedReferences
     from quasargui.components import Component
 
-EventsType = Dict[str, Callable[[...], Any]]
+EventsType = Dict[str, Union[Callable[[...], Any], 'JSRaw']]
 ClassesType = str
 StylesType = Dict[str, str]
 

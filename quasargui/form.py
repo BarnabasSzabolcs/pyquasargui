@@ -1,7 +1,7 @@
 import datetime
 from typing import List, Type, Union
 
-from quasargui.base import Component, ComponentWithModel, Slot
+from quasargui.base import Component, ComponentWithModel, Slot, JSRaw
 from quasargui.components import Div, Button, Icon, PopupProxy
 from quasargui.model import Model
 from quasargui.tools import build_props, merge_classes
@@ -125,8 +125,8 @@ class InputStr(Input):
 
 class InputBool(ComponentWithModel):
     def __init__(self, label: str = None,
-                 appearance: str = None,
                  model: Model = None,
+                 appearance: str = None,
                  classes: ClassesType = None,
                  styles: StylesType = None,
                  props: PropsType = None,
@@ -247,6 +247,75 @@ class InputInt(_NumericInput):
 
 class InputFloat(_NumericInput):
     _type = float
+
+
+class InputFile(ComponentWithModel):
+    component = 'q-file'
+    defaults = {
+        'props': {
+            'clearable': True
+        }
+    }
+
+    def __init__(self,
+                 label: str = None,
+                 model: Model = None,
+                 appearance: str = 'icon',
+                 icon: str = 'attachment',
+                 icon_left: bool = True,
+                 button_caption: str = 'Browse',
+                 button_left: bool = True,
+                 classes: ClassesType = None,
+                 styles: StylesType = None,
+                 props: PropsType = None,
+                 events: EventsType = None,
+                 children: List[Slot] = None):
+        """
+        :param label:
+        :param model:
+        :param appearance: 'icon' (default) or 'browse'.
+        :param icon: icon if appearance == 'icon'
+        :param icon_left: the position of the icon if appearance == 'icon'
+        :param button_caption: if appearance == 'button'
+        :param button_left: the position of the button if appearance == 'button'
+        :param classes:
+        :param styles:
+        :param props:
+        :param events:
+        :param children:
+        """
+        props = build_props({}, props, {'label': label})
+        children = children or []
+        if appearance == 'icon':
+            slots = [
+                Slot('prepend' if icon_left else 'append', [Icon(icon)])
+            ]
+            children = slots + children
+        elif appearance == 'button':
+            slots = [
+                Slot('prepend' if button_left else 'append', [
+                    Button(button_caption, events={
+                        'click': JSRaw(
+                            """
+                            (function(e){
+                                while(e.tagName !== 'LABEL'){e = e.parentNode}
+                                e.getElementsByTagName('input')[0].click()
+                            })($event.target)
+                            """)
+                    })
+                ])
+            ]
+            children = slots + children
+        else:
+            raise NotImplementedError
+        super().__init__(
+            model=model,
+            classes=classes,
+            styles=styles,
+            props=props,
+            events=events,
+            children=children
+        )
 
 
 class _InputWithPicker(ComponentWithModel):
