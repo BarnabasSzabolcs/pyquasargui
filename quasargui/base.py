@@ -1,5 +1,5 @@
 from inspect import signature
-from typing import Optional, TYPE_CHECKING, Dict, Callable, Union
+from typing import Optional, TYPE_CHECKING, Dict, Callable, Union, List
 
 from quasargui.model import Renderable, Reactive, Model, PropVar
 from quasargui.tools import build_props, merge_classes
@@ -68,6 +68,8 @@ class Component:
                        for event, cb in events.items()}
         self._children = children or []
         self.api: Optional['Api'] = None
+        # other objects that should be attached to the api when this Component is attached:
+        self.dependents: List[Union[Component, Reactive]] = []
         Component.max_id += 1
         self.id = Component.max_id
 
@@ -84,16 +86,9 @@ class Component:
         if styles:
             props.update({'style': styles})
         result = {}
-        if isinstance(self._children, Callable):
-            propVar = PropVar()
-            children = self._children(propVar)
-            for child in children:
-                if isinstance(child, Reactive):
-                    child.set_api(self.api)
-
-            result['arg'] = propVar.js_var_name
-        else:
-            children = self._children
+        if hasattr(self, '_prop_var'):
+            result['arg'] = self._prop_var.js_var_name
+        children = self._children
         if any([isinstance(child, type) for child in children]):
             raise AssertionError(
                 "{children} should be not a type but an object (Did you forget to add '()'?)".format(
@@ -124,10 +119,11 @@ class Component:
     def set_api(self, api: 'Api', _flush: bool = True):
         # noinspection PyAttributeOutsideInit
         self.api = api
-        if isinstance(self._children, list):
-            for child in self._children:
-                if isinstance(child, Component) or isinstance(child, Reactive):
-                    child.set_api(api, _flush=False)
+        for child in self._children:
+            if hasattr(child, 'set_api'):
+                child.set_api(api, _flush=False)
+        for dependent in self.dependents:
+            dependent.set_api(api, _flush=False)
         for prop in self.props.values():
             if isinstance(prop, Reactive):
                 prop.set_api(api, _flush=False)
@@ -148,7 +144,7 @@ class Component:
         self._children = children
         if self.api is not None:
             for child in children:
-                if isinstance(child, Component):
+                if hasattr(child, 'set_api'):
                     child.set_api(self.api)
             self.update()
 
@@ -203,6 +199,10 @@ class Slot(Component):
                  classes: ClassesType = None,
                  styles: StylesType = None):
         self.name = name
+        if isinstance(children, Callable):
+            prop_var = PropVar()
+            children = children(prop_var)
+            self._prop_var = prop_var
         super().__init__(props=props, children=children, classes=classes, styles=styles)
 
 
