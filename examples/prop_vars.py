@@ -71,14 +71,16 @@ layout = Tree(
             ])
         ]),
         Slot('default-body', lambda prop: [
-            Div(props={'v-if': prop['node']['story']}, children=[
+            v_if(prop['node']['story'], Div([
                 CustomComponent('span', classes='text-weight-bold', children=['This node has a story']),
                 ': ',
                 prop['node']['story']
-            ]),
-            CustomComponent('span', props={'v-else': None}, classes='text-weight-light text-black', children=[
-                'This is some default content.'
-            ])
+            ])),
+            v_else(
+                CustomComponent('span', classes='text-weight-light text-black', children=[
+                    'This is some default content.'
+                ])
+            )
         ])
     ])
 

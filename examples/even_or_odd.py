@@ -10,12 +10,8 @@ layout = Rows([
     Input('a', model=a),
     '+',
     Input('b', model=b),
-    Div(props={'v-if': even}, children=[
-        'is even'
-    ]),
-    Div(props={'v-if': odd}, children=[
-        'is odd'
-    ]),
+    v_if(even, Div(['is even'])),
+    v_if(odd, Div(['is odd'])),
 ])
 
 quasargui.run(layout)

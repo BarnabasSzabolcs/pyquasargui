@@ -117,7 +117,10 @@ class Link(Component):
         'props': {
             'target': '_blank'
         },
-        'classes': 'text-primary'
+        'classes': 'text-primary',
+        'styles': {
+            'text-decoration': 'none'
+        }
     }
 
     def __init__(self,
@@ -130,6 +133,7 @@ class Link(Component):
         if children is None and title is None:
             raise AssertionError('either title or children parameter must be set')
         props = build_props(self.defaults['props'], {'href': href})
+        styles = build_props(self.defaults['styles'], styles)
         if props['target'] == '_blank' and children is None:
             children = [Icon('open_in_new')]
         if title is not None:

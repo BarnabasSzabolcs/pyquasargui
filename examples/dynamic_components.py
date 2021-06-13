@@ -84,10 +84,12 @@ form_layout = Rows(
             label='Enter a number between 1 and 100',
             model=n_buttons,
             styles={'min-width': "30em"}),
-        Div(
-            props={'v-if': n_buttons},
-            classes="q-ml-sm",
-            children=["You have entered: ", n_buttons]),
+        v_if(
+            n_buttons,
+            Div(
+                classes="q-ml-sm",
+                children=["You have entered: ", n_buttons])
+        ),
         Button(
             label='ok',
             props={'color': 'primary'},

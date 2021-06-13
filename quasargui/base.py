@@ -237,41 +237,99 @@ class CustomComponent(Component):
         )
 
 
-class VFor(Component):
-    # noinspection PyMissingConstructor
-    def __init__(self,
-         model: Renderable,
-         key: PropValueType[str] = None,
-         component: Union[
-             Callable[[PropVar], Component],
-             Callable[[PropVar, PropVar], Component]
-         ] = None):
-        n_args = len(signature(component).parameters)
-        if n_args == 1:
-            p1 = PropVar()
-            component = component(p1)
-            component.props['v-for'] = JSRaw("{} in {}".format(
-                p1.js_var_name, model.js_var_name))
-        elif n_args == 2:
-            p1, p2 = PropVar(), PropVar()
-            component = component(p1, p2)
-            component.props['v-for'] = JSRaw("({}, {}) in {}".format(
-                p1.js_var_name, p2.js_var_name, model.js_var_name))
-        else:
-            raise AssertionError
-        if key is not None:
-            component.props['key'] = key
-        self._model = model
-        self._component = component
+def v_for(
+        model: Renderable,
+        component: Union[
+            Callable[[PropVar], Component],
+            Callable[[PropVar, PropVar], Component]
+        ] = None,
+        key: PropValueType[str] = None):
+    n_args = len(signature(component).parameters)
+    if n_args == 1:
+        p1 = PropVar()
+        component = component(p1)
+        component.props['v-for'] = JSRaw("{} in {}".format(
+            p1.js_var_name, model.js_var_name))
+        if key is None:
+            key = 'index'
+    elif n_args == 2:
+        p1, p2 = PropVar(), PropVar()
+        component = component(p1, p2)
+        component.props['v-for'] = JSRaw("({}, {}) in {}".format(
+            p1.js_var_name, p2.js_var_name, model.js_var_name))
+    else:
+        raise AssertionError
+    if key is not None:
+        component.props['key'] = key
+    if isinstance(model, Reactive):
+        component.dependents.append(model)
+    return component
 
-    @property
-    def vue(self) -> dict:
-        return self._component.vue
 
-    def set_api(self, api: 'Api', _flush: bool = True):
-        if isinstance(self._model, Reactive):
-            self._model.set_api(api, _flush)
-        return self._component.set_api(api, _flush)
+def v_show(
+    condition: Reactive,
+    component: Component
+):
+    _set_prop_safe(component, 'v-show', condition)
+    return component
 
-    def set_children(self, children: ChildrenType):
-        raise AssertionError('Do not set children on VFor')
+
+def v_if(
+    condition: Reactive,
+    component: Component
+):
+    _set_prop_safe(component, 'v-if', condition)
+    return component
+
+
+def v_else(
+    component: Component
+):
+    _set_prop_safe(component, 'v-else', None)
+    return component
+
+
+def v_else_if(
+    condition: Reactive,
+    component: Component
+):
+    _set_prop_safe(component, 'v-else-if', condition)
+    return component
+
+
+def v_once(component: Component):
+    """
+    This directive is rarely used.
+    ref. https://v3.vuejs.org/api/directives.html#v-once
+    """
+    _set_prop_safe(component, 'v-once', None)
+    return component
+
+
+def v_pre(component: Component):
+    """
+    This directive is rarely used.
+    It enables displaying raw mustache tags.
+    ref. https://v3.vuejs.org/api/directives.html#v-pre
+    """
+    _set_prop_safe(component, 'v-pre', None)
+    return component
+
+
+# v_cloak is not necessary since all the components are loaded after Vue is loaded.
+
+
+def _set_prop_safe(component, prop_name, prop_value):
+    if prop_name in component.props:
+        raise AssertionError("When using {}, don't define '{}' prop.".format(
+            prop_name.replace('-', '_'), prop_name))
+    component.props[prop_name] = prop_value
+
+
+def v_html(
+        value: PropValueType[str],
+        component: Component):
+    if component.children:
+        raise AssertionError("Don't set children when using v_html.")
+    _set_prop_safe(component, 'v-html', value)
+
