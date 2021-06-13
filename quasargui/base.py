@@ -252,25 +252,28 @@ class CustomComponent(Component):
 
 
 def v_for(
-        model: Renderable,
+        model: Union[Renderable, list, dict],
         component: Union[
             Callable[[PropVar], Component],
             Callable[[PropVar, PropVar], Component]
         ] = None,
         key: PropValueType[str] = None):
+    if not isinstance(model, Renderable):
+        model = Model(model)
+    model_js = model.js_var_name
     n_args = len(signature(component).parameters)
     if n_args == 1:
         p1 = PropVar()
         component = component(p1)
         component.props['v-for'] = JSRaw("{} in {}".format(
-            p1.js_var_name, model.js_var_name))
+            p1.js_var_name, model_js))
         if key is None:
             key = 'index'
     elif n_args == 2:
         p1, p2 = PropVar(), PropVar()
         component = component(p1, p2)
         component.props['v-for'] = JSRaw("({}, {}) in {}".format(
-            p1.js_var_name, p2.js_var_name, model.js_var_name))
+            p1.js_var_name, p2.js_var_name, model_js))
     else:
         raise AssertionError
     if key is not None:
