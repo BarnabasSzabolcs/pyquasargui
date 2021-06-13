@@ -117,7 +117,10 @@ class Link(Component):
         'props': {
             'target': '_blank'
         },
-        'classes': 'text-primary'
+        'classes': 'text-primary',
+        'styles': {
+            'text-decoration': 'none'
+        }
     }
 
     def __init__(self,
@@ -130,6 +133,7 @@ class Link(Component):
         if children is None and title is None:
             raise AssertionError('either title or children parameter must be set')
         props = build_props(self.defaults['props'], {'href': href})
+        styles = build_props(self.defaults['styles'], styles)
         if props['target'] == '_blank' and children is None:
             children = [Icon('open_in_new')]
         if title is not None:
@@ -149,7 +153,7 @@ class Heading(Component):
                  ):
         if not 1 <= n <= 6:
             raise AssertionError('n must be between 1 and 6')
-        self.component = f'h{n}'
+        self.component = 'h{}'.format(n)
         if text is not None:
             children = [text] + (children or [])
         super().__init__(children=children, classes=classes, styles=styles, events=events)
@@ -191,6 +195,36 @@ class Button(Component):
         super().__init__(classes=classes, styles=styles, props=props, events=events, children=children)
 
 
+class Card(Component):
+    """
+    ref. https://quasar.dev/vue-components/card#qcard-api
+    Use it with CardSection, Separator and CardActions
+    """
+    component = 'q-card'
+
+
+class CardSection(Component):
+    """
+    ref. https://quasar.dev/vue-components/card#qcardsection-api
+    """
+    component = 'q-card-section'
+
+
+class CardActions(Component):
+    """
+    ref. https://quasar.dev/vue-components/card#qcardactions-api
+    """
+    component = 'q-card-actions'
+
+
+class ExpansionItem(Component):
+    """
+    Use it with ListComponent, children: Card, and CardSection within the Card.
+    ref. https://quasar.dev/vue-components/expansion-item#qexpansionitem-api
+    """
+    component = 'q-expansion-item'
+
+
 class Icon(Component):
     component = 'q-icon'
 
@@ -201,8 +235,9 @@ class Icon(Component):
                  classes: ClassesType = None,
                  styles: StylesType = None,
                  events: EventsType = None,
+                 props: PropsType = None,
                  children: ChildrenType = None):
-        props = build_props({}, {}, {
+        props = build_props({}, props, {
             'name': name,
             'size': size,
             'color': color
@@ -217,7 +252,20 @@ class Icon(Component):
 
 
 class PopupProxy(Component):
+    """
+    Creates a pop-up element.
+    eg. InputDate, InputTime, InputDateTime uses it.
+    ref. https://quasar.dev/vue-components/popup-proxy#qpopupproxy-api
+    """
     component = 'q-popup-proxy'
+
+
+class Separator(Component):
+    """
+    A horizontal line.
+    ref. https://quasar.dev/vue-components/separator
+    """
+    component = 'q-separator'
 
 
 class Spinner(Component):
@@ -252,8 +300,8 @@ class Spinner(Component):
         )
         if appearance is not None:
             if appearance not in self.appearances:
-                raise AssertionError(f'Appearance must be one of {self.appearances}')
-            kwargs['component'] = f'q-spinner-{appearance}'
+                raise AssertionError('Appearance must be one of {}'.format(self.appearances))
+            kwargs['component'] = 'q-spinner-{}'.format(appearance)
         super().__init__(**kwargs)
 
 

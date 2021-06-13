@@ -15,6 +15,18 @@ function getPathJs(prop, drop_last_segment) {
   return path.map(v => _.isString(v) ? `['${v}']` : `[${v}]`).join('')
 }
 
+function getBase(prop) {
+  if ('@' in prop) {
+    // Model
+    return `$root.data[${prop['@']}]`
+  } else if ('@p' in prop) {
+    // PropVar
+    return prop['@p']
+  } else {
+    throw Error("Not implemented")
+  }
+}
+
 // ref. https://symfonycasts.com/screencast/vue/vue-instance
 // problem: this solution keeps rerendering unnecessarily when used with q-input
 // alternative solution is to send html code and add it within script tags
@@ -26,56 +38,82 @@ Vue.component('dynamic-component', {
     loadEventFired: false,
   },
   render: function(h) {
-    if (this.id === undefined || this.id === null) {
-      return ''
-    }
-    const d = this.$root.componentStore[this.id]
-    sendLog('descriptor:', d)
-    if (_.isString(d)) {
-      sendLog('rendering:', d)
-      return this.renderTemplate(d)
-    }
-    if (!d.component) {
-      sendLog('rendering:', '(empty)')
-      return ''
-    }
-    d.props['data-component-id'] = this.id.toString()
-    // sendLog(JSON.stringify(d))
-    if (('value' in d.props) && !('input' in d.events)) {
-      const prop = d.props.value
-      const path = getPathJs(prop, true)
-      // The trickery with $set below is necessary 
-      // since array-valued things are not updated properly
-      // if normal 'variable=$event' is used.
-      if ('path' in prop && prop.path.length) {
-        let last = prop.path[prop.path.length - 1]
-        if (_.isString(last)) {
-          last = `'${last}'`
-        }
-        inputEvent = `@input="$set($root.data[${prop['@']}]${path}, ${last}, $event)"`
-      } else {
-        inputEvent = `@input="$root.data[${prop['@']}]=$event"`
-      }
-    } else {
-      inputEvent = ''
-    }
-    if ('load' in d.events && !this.loadEventFired) {
-      window.pywebview.api.call_cb(d.events.load)
-      this.loadEventFired = true
-    }
-    const events = this.renderEvents(d.events)
-    const props = this.renderProps(d.props)
-    const children = this.renderChildren(d.children)
-    const slots = this.renderSlots(d.slots)
-
-    const attrs = [props, events, inputEvent].join(' ')
-    const template = `<${d.component} ${attrs}>${children}${slots}</${d.component}>`
-    // sendLog(Vue.compile(template).render)
+    const template = this.assembleTemplate(this.id, false)
     sendLog('rendering:')
     sendLog(template)
     return this.renderTemplate(template)
   },
   methods: {
+    calculateWithProp(computedId, props){
+      // calculates a Computed within a scoped slot for props
+      if (computedId in this.$root.computed===false){
+        this.$set(this.$root.computed, computedId, {})
+      }
+      const s = JSON.stringify(props)
+      if (s in this.$root.computed[computedId]){
+        return this.$root.computed[computedId][s]
+      }else{
+        this.$set(this.$root.computed[computedId], s, {value: undefined})
+        window.pywebview.api.calculate_computed(computedId, [props])
+          .then(response => {
+            if (this.$root.computed[computedId][s].value !== response){
+              this.$set(this.$root.computed[computedId], s, {value: response})
+            }
+          })
+        return this.$root.computed[computedId][s]
+      }
+    },
+    assembleTemplate(id, recursive) {
+      if (id === undefined || id === null) {
+        return ''
+      }
+      const d = this.$root.componentStore[id]
+      sendLog('descriptor:', d)
+      if (_.isString(d)) {
+        sendLog('rendering:', d)
+        return this.renderTemplate(d)
+      }
+      if (!d.component) {
+        sendLog('rendering:', '(empty)')
+        return ''
+      }
+      d.props['data-component-id'] = id.toString()
+      // sendLog(JSON.stringify(d))
+      if (('value' in d.props) && !('input' in d.events)) {
+        const prop = d.props.value
+        const path = getPathJs(prop, true)
+        // The trickery with $set below is necessary 
+      // The trickery with $set below is necessary 
+        // The trickery with $set below is necessary 
+      // The trickery with $set below is necessary 
+        // The trickery with $set below is necessary 
+        // since array-valued things are not updated properly
+        // if normal 'variable=$event' is used.
+        const base = getBase(prop)
+        if ('path' in prop && prop.path.length) {
+          let last = prop.path[prop.path.length - 1]
+          if (_.isString(last)) {
+            last = `'${last}'`
+          }
+          inputEvent = `@input="$set(${base}${path}, ${last}, $event)"`
+        } else {
+          inputEvent = `@input="${base}=$event"`
+        }
+      } else {
+        inputEvent = ''
+      }
+      if ('load' in d.events && !this.loadEventFired) {
+        window.pywebview.api.call_cb(d.events.load)
+        this.loadEventFired = true
+      }
+      const events = this.renderEvents(d.events)
+      const props = this.renderProps(d.props)
+      const children = this.renderChildren(d.children, recursive)
+      const slots = this.renderSlots(d.slots)
+
+      const attrs = [props, events, inputEvent].join(' ')
+      return `<${d.component} ${attrs}>${children}${slots}</${d.component}>`
+    },
     renderEvents(events) {
       return _.map(events, (cb_id, eventName) => {
         return `@${eventName}="params=>window.pywebview.api.call_cb(${cb_id}, params)"`
@@ -95,6 +133,13 @@ Vue.component('dynamic-component', {
           const modifiers = 'modifiers' in prop ? '.' + prop.modifiers.join('.') : ''
           const path = getPathJs(prop)
           return `${colon}${propName}${modifiers}="$root.data[${modelId}]${path}"`
+        } else if (_.isObject(prop) && '@p' in prop) {
+          // PropVar
+          const propVar = prop['@p']
+          const colon = propName.startsWith('v-') ? '' : ':'
+          const modifiers = 'modifiers' in prop ? '.' + prop.modifiers.join('.') : ''
+          const path = getPathJs(prop)
+          return `${colon}${propName}${modifiers}="${propVar}${path}"`
         } else if (_.isObject(prop) && '$' in prop) {
           // JSFunction
           const colon = propName.startsWith('v-') ? '' : ':'
@@ -108,10 +153,12 @@ Vue.component('dynamic-component', {
         }
       }).join(' ')
     },
-    renderChildren(children) {
+    renderChildren(children, recursive) {
       return _.map(children, child => {
         if (_.isString(child)) {
           return child
+        } else if (recursive){
+          return this.assembleTemplate(child, recursive)
         } else {
           const childComponent = 'dynamic-component'
           child = JSON.stringify(child).replace(/'/g, "&#39;")
@@ -123,18 +170,21 @@ Vue.component('dynamic-component', {
       return _.map(slots, (d, name) => {
         const events = this.renderEvents(d.events)
         const props = this.renderProps(d.props)
-        const children = this.renderChildren(d.children)
+        const arg = 'arg' in d ? `="${d.arg}"` : ''
+        // if there's no arg, normal render, if there's arg, recursive static render.
+        // otherwise the PropVar's cause rendering errors.
+        const children = this.renderChildren(d.children, arg !== '')
         const slots = this.renderSlots(d.slots)
         const attrs = [props, events].join(' ')
-        return `<template v-slot:${name} ${attrs}>${children}${slots}</template>`
+        return `<template v-slot:${name}${arg} ${attrs}>${children}${slots}</template>`
       }).join('')
     },
     renderTemplate(template) {
       // This works even if the template does not have any reactive variables.
       // ref. https://github.com/vuejs/vue/issues/9911
       const compiled = Vue.compile(template)
-      this.$options.staticRenderFns = [];
-      this._staticTrees = [];
+      this.$options.staticRenderFns = []
+      this._staticTrees = []
       compiled.staticRenderFns.map(fn => (this.$options.staticRenderFns.push(fn)))
       return compiled.render.call(this)
     }
@@ -179,6 +229,7 @@ const app = new Vue({
     return {
       mainComponentId: null,
       data: {}, // holds the Model values {id: value}
+      computed: {}, // holds computed values
       componentStore: {}, // holds the Component specifications {id: descriptor}
       debug: false,
     }
@@ -245,6 +296,9 @@ const app = new Vue({
           deep: _.isObject(value)
         })
       }
+    },
+    setComputedValue({id, propsJson, value}){
+      this.$set(this.computed[id], propsJson, value)
     },
     showNotification(params) {
       const longTimeOut = 7000

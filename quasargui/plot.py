@@ -82,8 +82,11 @@ class Plot(Component):
             if not MATPLOTLIB:
                 raise ImportError("Please install matplotlib package to use interactive plots")
         else:
-            raise AssertionError(f'Wrong renderer. Renderer is set to "{self.renderer.value}", '
-                                 f'should be one of {self.renderers}')
+            raise AssertionError(
+                'Wrong renderer. Renderer is set to "{wrong}", '
+                'should be one of {should}'.format(
+                    wrong=self.renderer.value, should=self.renderers
+                ))
 
     def update(self):
         self.set_figure(self.fig)

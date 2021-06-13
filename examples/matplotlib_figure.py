@@ -23,6 +23,7 @@ variance = Model(0.02)
 interactive = Model(False)
 animated = Model(False)
 fig, ax = plt.subplots(1, 1)
+plot = Plot(renderer=Computed(lambda i: 'mpld3' if bool(i) else 'png', interactive))
 
 
 def add_scenario(update_plot=True):
@@ -67,7 +68,6 @@ def redraw_plot():
 
 
 # This example loads the plot on load.
-plot = Plot(renderer=Computed(lambda i: 'mpld3' if bool(i) else 'png', interactive))
 Toggle.defaults['props'] = {
     'color': 'white',
     'keep-color': True,
@@ -86,18 +86,19 @@ layout = Layout(events={'load': redraw_plot}, children=[
     ]),
     Page([
         plot,
-        Div(props={'v-if': interactive}, children=[
-            """
-            Interactive plot is rendered by 
-            <a class="text-primary" style="text-decoration:none" target="_blank" href="https://mpld3.github.io/">
-                mpld3
-                <q-icon name="open_in_new"></q-icon>
-            </a>
-            .
-            """
-        ]),
-        Div(props={'v-if': And(Not(interactive), Not(loading))},
-            children=['Non-interactive plot is rendered by matplotlib as png.'])
+        v_if(
+            interactive,
+            Div(classes='text-center', children=[
+                "Interactive plot is rendered by ",
+                Link('mpld3', 'https://mpld3.github.io/')
+            ])
+        ),
+        v_if(
+            Not(Or(interactive, loading)),
+            Div(classes='text-center', children=[
+                'Non-interactive plot is rendered by matplotlib as png.'
+            ])
+        )
     ]),
     Drawer([Rows([
         Input(label='Number of coinflips', model=n),
@@ -108,7 +109,10 @@ layout = Layout(events={'load': redraw_plot}, children=[
         Button(label='Redraw', events={'click': redraw_plot}, props={'loading': loading}),
         Button(label='Add scenario', events={'click': add_scenario}, props={'disable': loading}),
     ])]),
-    Footer(props={'v-if': calculation_time}, children=['Plotting took ', calculation_time, ' seconds.'])
+    v_if(
+        calculation_time,
+        Footer(['Plotting took ', calculation_time, ' seconds.'])
+    )
 ])
 
 quasargui.run(layout)

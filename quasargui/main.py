@@ -7,7 +7,7 @@ from webview import Window
 from quasargui import QUASAR_GUI_INDEX_PATH
 from quasargui.base import EventCallbacks
 from quasargui.components import Component
-from quasargui.model import Model
+from quasargui.model import Model, Computed
 from quasargui.tools import print_error
 from quasargui.typing import ValueType, PathType
 
@@ -21,7 +21,7 @@ class Api:
         self.window = None
         self.debug = debug
         self.render_debug = render_debug
-        self.set_data_queue = []
+        self.model_data_queue = []
 
     def init(self, window):
         self.window = window
@@ -47,22 +47,21 @@ class Api:
     def set_model_data(self, model_id: int, path: PathType, value: ValueType):
         if self.debug:
             print('set_model_data', model_id, path, value)
-        self.set_data_queue.append({'id': model_id, 'path': path, 'value': value})
+        self.model_data_queue.append({'id': model_id, 'path': path, 'value': value})
 
-    def flush_data(self, data_id=0):
-        if (not self.set_data_queue) or (data_id and self.set_data_queue[0][0] != data_id):
+    def flush_model_data(self, data_id=0):
+        if (not self.model_data_queue) or (data_id and self.model_data_queue[0]['id'] != data_id):
             return
-        result = self.window.evaluate_js(
+        self.window.evaluate_js(
             'app.setData({payload})'.format(
-                payload=json.dumps(self.set_data_queue)
+                payload=json.dumps(self.model_data_queue)
             ))
-        self.set_data_queue = []
-        return result
+        self.model_data_queue = []
 
     def set_component(self, component_vue):
         if self.debug:
             print('set_component', component_vue)
-        return self.window.evaluate_js(
+        self.window.evaluate_js(
             'app.refreshComponent({component_vue})'.format(
                 component_vue=json.dumps(component_vue)))
 
@@ -75,7 +74,7 @@ class Api:
         ))
 
     def show_notification(self, **params: ValueType):
-        return self.window.evaluate_js('app.showNotification({params})'.format(
+        self.window.evaluate_js('app.showNotification({params})'.format(
             params=json.dumps(params)))
 
 
@@ -123,15 +122,31 @@ class JsApi:
             print_error(e)
             raise e
 
+    def calculate_computed(self, computed_id: int, props: any):
+        # noinspection PyProtectedMember
+        return Computed._calculate_for_props_value(computed_id, props)
+
 
 WINDOW, API = 0, 1
 window_api_list: List[Tuple[Window, Api]] = []
 
 
-def run(component: Component, debug: bool = False, _render_debug: bool = False):
+def run(
+        component: Component,
+        title: str = None,
+        debug: bool = False,
+        _render_debug: bool = False,
+):
+    """
+    :param component:
+    :param title: The title of the window.
+    :param debug: Enables right-click inspection in the GUI window.
+    :param _render_debug: this option is for quasargui development.
+    It displays all the rendering in python's standard output.
+    """
     api = Api(component, debug=debug, render_debug=_render_debug)
     window = webview.create_window(
-        'Program',
+        title or 'Program',
         QUASAR_GUI_INDEX_PATH,
         js_api=JsApi(debug=debug),
         min_size=(600, 450))
