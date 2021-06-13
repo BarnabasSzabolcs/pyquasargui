@@ -1,7 +1,7 @@
 import datetime
 from typing import List, Type, Union
 
-from quasargui.base import Component, ComponentWithModel, Slot, JSRaw
+from quasargui.base import Component, ComponentWithModel, LabeledComponent, Slot, JSRaw
 from quasargui.components import Div, Button, Icon, PopupProxy
 from quasargui.model import Model
 from quasargui.tools import build_props, merge_classes
@@ -67,23 +67,20 @@ class Input(ComponentWithModel):
         return self.api.call_component_method(self.id, 'resetValidation')
 
 
-class Toggle(ComponentWithModel):
+class FilePicker(LabeledComponent):
+    """
+    Use rather InputFile
+    ref. https://quasar.dev/vue-components/file-picker#qfile-api
+    """
+    component = 'q-file'
+
+
+class Toggle(LabeledComponent):
     """
     ref. https://quasar.dev/vue-components/toggle#qtoggle-api
     """
     component = 'q-toggle'
     defaults = {'props': {}}
-
-    def __init__(self,
-                 label: str = None,
-                 model: Model = None,
-                 classes: ClassesType = None,
-                 styles: StylesType = None,
-                 props: PropsType = None,
-                 events: EventsType = None,
-                 children: ChildrenType = None):
-        props = build_props({}, props, {'label': label})
-        super().__init__(model=model, classes=classes, styles=styles, props=props, events=events, children=children)
 
 
 class Knob(ComponentWithModel):
@@ -124,7 +121,8 @@ class InputStr(Input):
 
 
 class InputBool(ComponentWithModel):
-    def __init__(self, label: str = None,
+    def __init__(self,
+                 label: str = None,
                  model: Model = None,
                  appearance: str = None,
                  classes: ClassesType = None,
@@ -249,7 +247,11 @@ class InputFloat(_NumericInput):
     _type = float
 
 
-class InputFile(ComponentWithModel):
+class InputFile(LabeledComponent):
+    """
+    A handily set-up FilePicker.
+    ref. https://quasar.dev/vue-components/file-picker#qfile-api
+    """
     component = 'q-file'
     defaults = {
         'props': {
@@ -264,7 +266,8 @@ class InputFile(ComponentWithModel):
                  icon: str = 'attachment',
                  icon_left: bool = True,
                  button_caption: str = 'Browse',
-                 button_left: bool = True,
+                 button_left: bool = False,
+                 button_props: PropsType = None,
                  classes: ClassesType = None,
                  styles: StylesType = None,
                  props: PropsType = None,
@@ -276,25 +279,25 @@ class InputFile(ComponentWithModel):
         :param appearance: 'icon' (default) or 'browse'.
         :param icon: icon if appearance == 'icon'
         :param icon_left: the position of the icon if appearance == 'icon'
-        :param button_caption: if appearance == 'button'
-        :param button_left: the position of the button if appearance == 'button'
+        :param button_caption: if appearance == 'browse'
+        :param button_left: the position of the button if appearance == 'browse'
+        :param button_props: the props parameter for the browse button if appearance == 'browse'
         :param classes:
         :param styles:
         :param props:
         :param events:
         :param children:
         """
-        props = build_props({}, props, {'label': label})
         children = children or []
         if appearance == 'icon':
             slots = [
                 Slot('prepend' if icon_left else 'append', [Icon(icon)])
             ]
             children = slots + children
-        elif appearance == 'button':
+        elif appearance == 'browse':
             slots = [
                 Slot('prepend' if button_left else 'append', [
-                    Button(button_caption, events={
+                    Button(button_caption, props=button_props, events={
                         'click': JSRaw(
                             """
                             (function(e){
@@ -309,6 +312,7 @@ class InputFile(ComponentWithModel):
         else:
             raise NotImplementedError
         super().__init__(
+            label=label,
             model=model,
             classes=classes,
             styles=styles,

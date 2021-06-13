@@ -190,6 +190,19 @@ class ComponentWithModel(Component):
         self._model.value = value
 
 
+class LabeledComponent(ComponentWithModel):
+    def __init__(self,
+                 label: str = None,
+                 model: Model = None,
+                 classes: ClassesType = None,
+                 styles: StylesType = None,
+                 props: PropsType = None,
+                 events: EventsType = None,
+                 children: ChildrenType = None):
+        props = build_props({}, props, {'label': label})
+        super().__init__(model=model, classes=classes, styles=styles, props=props, events=events, children=children)
+
+
 class Slot(Component):
     component = 'template'
 

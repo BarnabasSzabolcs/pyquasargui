@@ -18,6 +18,7 @@ my_datetime.add_callback(lambda: my_datetime.api.show_notification(
 form1 = Form(styles={'max-width': '20em', 'margin': '0 auto'}, children=[
     Heading(5, 'Inputs by value type'),
     InputStr('str input'),  # Input
+    InputStr('str input - type textarea', type='textarea'),
 
     InputInt('int input slider [-3, 3]', appearance='slider', min=-3, max=3),  # input, knob or slider
     InputInt('int input [-3, 3]', min=-3, max=3),  # input, knob or slider
@@ -33,14 +34,15 @@ form1 = Form(styles={'max-width': '20em', 'margin': '0 auto'}, children=[
     InputTime('time input', my_time),  # Input + popup Time
     InputDateTime('datetime input', my_datetime),  # Input + popup date + popup time
     InputFile('file input', appearance='icon'),  # File with attachment icon
-    InputFile('file input', appearance='button'),  # File with browse button
+    InputFile('file input', appearance='browse'),  # File with browse button
     # InputChoice(), # radio, buttons, select
     # InputList(),  # tags, select, checkbox (OptionGroup), toggle (OptionGroup)
 
     Heading(5, 'Inputs by Quasar components'),
     Input('vanilla input'),
+    Input('textarea input', type='textarea'),
     Input('oldschool number input', type='number'),
-    # FilePicker(),
+    FilePicker('vanilla file picker'),
     # Select(), TagsInput(), Radio(), ButtonToggle(),
     Slider(model=Model()),
     # Range(Model()),  # OptionGroup(type="checkbox"), # radio, toggle
