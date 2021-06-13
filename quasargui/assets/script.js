@@ -44,20 +44,24 @@ Vue.component('dynamic-component', {
     return this.renderTemplate(template)
   },
   methods: {
-    calculateWithProp(computedId, props){
+    calculateWithProp(computedId, props) {
       // calculates a Computed within a scoped slot for props
-      if (computedId in this.$root.computed===false){
+      if (computedId in this.$root.computed === false) {
         this.$set(this.$root.computed, computedId, {})
       }
       const s = JSON.stringify(props)
-      if (s in this.$root.computed[computedId]){
+      if (s in this.$root.computed[computedId]) {
         return this.$root.computed[computedId][s]
-      }else{
-        this.$set(this.$root.computed[computedId], s, {value: undefined})
+      } else {
+        this.$set(this.$root.computed[computedId], s, {
+          value: undefined
+        })
         window.pywebview.api.calculate_computed(computedId, [props])
           .then(response => {
-            if (this.$root.computed[computedId][s].value !== response){
-              this.$set(this.$root.computed[computedId], s, {value: response})
+            if (this.$root.computed[computedId][s].value !== response) {
+              this.$set(this.$root.computed[computedId], s, {
+                value: response
+              })
             }
           })
         return this.$root.computed[computedId][s]
@@ -82,10 +86,6 @@ Vue.component('dynamic-component', {
       if (('value' in d.props) && !('input' in d.events)) {
         const prop = d.props.value
         const path = getPathJs(prop, true)
-        // The trickery with $set below is necessary 
-      // The trickery with $set below is necessary 
-        // The trickery with $set below is necessary 
-      // The trickery with $set below is necessary 
         // The trickery with $set below is necessary 
         // since array-valued things are not updated properly
         // if normal 'variable=$event' is used.
@@ -157,7 +157,7 @@ Vue.component('dynamic-component', {
       return _.map(children, child => {
         if (_.isString(child)) {
           return child
-        } else if (recursive){
+        } else if (recursive) {
           return this.assembleTemplate(child, recursive)
         } else {
           const childComponent = 'dynamic-component'
@@ -297,7 +297,11 @@ const app = new Vue({
         })
       }
     },
-    setComputedValue({id, propsJson, value}){
+    setComputedValue({
+      id,
+      propsJson,
+      value
+    }) {
       this.$set(this.computed[id], propsJson, value)
     },
     showNotification(params) {
