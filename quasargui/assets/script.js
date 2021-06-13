@@ -5,7 +5,7 @@ function createEventCB(id) {
 }
 
 function sendLog() {
-  if (app.debug)
+  if (window.debug)
     window.pywebview.api.print_log(arguments)
 }
 
@@ -231,12 +231,11 @@ const app = new Vue({
       data: {}, // holds the Model values {id: value}
       computed: {}, // holds computed values
       componentStore: {}, // holds the Component specifications {id: descriptor}
-      debug: false,
     }
   },
   methods: {
     setDebug(debug) {
-      this.debug = debug
+      window.debug = debug
       if (debug) {
         setTimeout(() => {
           document.getElementById('debug').style.display = 'block'
@@ -288,7 +287,6 @@ const app = new Vue({
       const idIsNew = id in this.data === false
       this.$set(this.data, id, value)
       if (idIsNew) {
-        sendLog('_.isObject(value)', _.isObject(value))
         this.$watch(`data.${id}`, {
           handler: v => {
             window.pywebview.api.set_model_value(id, v)
