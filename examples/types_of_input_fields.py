@@ -5,15 +5,15 @@ from quasargui import *
 
 my_date = Model(None)
 my_date.add_callback(lambda: my_date.api.show_notification(
-    message=f'Selected date: {my_date.value} ({type(my_date.value)}).'
+    message='Selected date: {} ({}).'.format(my_date.value, type(my_date.value))
 ))
 my_time = Model(None)
 my_time.add_callback(lambda: my_time.api.show_notification(
-    message=f'Selected time: {my_time.value} ({type(my_time.value)}).'
+    message='Selected time: {} ({}).'.format(my_time.value, type(my_time.value))
 ))
 my_datetime = DateTimeModel(dt.now())
 my_datetime.add_callback(lambda: my_datetime.api.show_notification(
-    message=f'Selected date and time: {my_datetime.value} ({type(my_datetime.value)}).'
+    message='Selected date and time: {} ({}).'.format(my_datetime.value, type(my_datetime.value))
 ))
 form1 = Form(styles={'max-width': '20em', 'margin': '0 auto'}, children=[
     Heading(5, 'Inputs by value type'),
@@ -28,6 +28,7 @@ form1 = Form(styles={'max-width': '20em', 'margin': '0 auto'}, children=[
     InputDate('date input', my_date),  # Input + popup Date
     InputTime('time input', my_time),  # Input + popup Time
     InputDateTime('datetime input', my_datetime),  # Input + popup date + popup time
+    # InputFile(appearance='browse'),  # File with attachment icon or browse button
     # InputChoice(), # radio, buttons, select
     # InputList(),  # tags, select, checkbox (OptionGroup), toggle (OptionGroup)
 
