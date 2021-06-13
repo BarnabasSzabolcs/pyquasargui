@@ -1,3 +1,4 @@
+import textwrap
 from inspect import signature
 from typing import Optional, TYPE_CHECKING, Dict, Callable, Union, List
 
@@ -36,7 +37,7 @@ class JSRaw(Renderable):
     def __init__(self, code: str):
         if '"' in code:
             raise AssertionError('JSFunction code cannot contain \'"\'.')
-        self.code = code
+        self.code = textwrap.dedent(code)
 
     def render_as_data(self) -> dict:
         return {'$': self.code}
@@ -64,7 +65,7 @@ class Component:
         if not hasattr(self, 'props'):
             self.props = build_props(self.defaults.get('props', {}), props or {})
         events = events or {}
-        self.events = {event: EventCallbacks.register(cb)
+        self.events = {event: EventCallbacks.register(cb) if isinstance(cb, Callable) else cb.render_as_data()
                        for event, cb in events.items()}
         self._children = children or []
         self.api: Optional['Api'] = None
@@ -332,4 +333,3 @@ def v_html(
     if component.children:
         raise AssertionError("Don't set children when using v_html.")
     _set_prop_safe(component, 'v-html', value)
-

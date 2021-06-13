@@ -115,8 +115,13 @@ Vue.component('dynamic-component', {
       return `<${d.component} ${attrs}>${children}${slots}</${d.component}>`
     },
     renderEvents(events) {
-      return _.map(events, (cb_id, eventName) => {
-        return `@${eventName}="params=>window.pywebview.api.call_cb(${cb_id}, params)"`
+      return _.map(events, (cb, eventName) => {
+        if (_.isNumber(cb)) {
+          const cb_id = cb
+          return `@${eventName}="params=>window.pywebview.api.call_cb(${cb_id}, params)"`
+        } else if ('$' in cb){
+          return `@${eventName}="${cb['$']}"`
+        }
       }).join(' ')
     },
     renderProps(props) {
