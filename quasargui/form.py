@@ -120,6 +120,21 @@ class OptionGroup(ComponentWithModel):
             'inline': True,
         }}
 
+    def __init__(self,
+                 model: Renderable = None,
+                 children: ChildrenType = None,
+                 classes: ClassesType = None,
+                 styles: StylesType = None,
+                 props: PropsType = None,
+                 events: EventsType = None):
+        self._model = model or Model([])
+        super().__init__(model=self._model,
+                         children=children,
+                         classes=classes,
+                         styles=styles,
+                         props=props,
+                         events=events)
+
 
 class Knob(ComponentWithModel):
     component = 'q-knob'
@@ -229,7 +244,7 @@ class _NumericInput(ComponentWithModel):
             control_props = build_props({'snap': self._type == int}, props)
             control_props = build_props(self.defaults['control_props'], control_props)
             if self._type == float:
-                control_props = build_props({'step': (max-min)/1000}, control_props)
+                control_props = build_props({'step': (max - min) / 1000}, control_props)
             control_props = build_props({
                 'label-position': 'before' if appearance == 'knob' else 'top'
             }, control_props, special_props)
@@ -297,7 +312,8 @@ class InputChoice(LabeledComponent):
                  label: str = None,
                  model: Model = None,
                  choices: Union[Renderable, list] = None,
-                 appearance: str = 'radio',
+                 multiple: bool = False,
+                 appearance: str = 'auto',
                  item_props: PropsType = None,
                  label_props: PropsType = None,
                  props: PropsType = None,
@@ -307,13 +323,25 @@ class InputChoice(LabeledComponent):
         """
         :param label:
         :param model:
-        :param appearance: 'radio' (default) or 'buttons' or 'select'.
+            the value of the model depends on the choices parameter (and the item_props).
+            List[str] choice format yields the displayed label as model value,
+            List[dict] format yields the value of 'value' field as value, if dict has only 'label' and 'value' fields.
+            Otherwise List[dict] format yields the whole dict of the selected item.
+            This behavior can be overridden with item_props
+            that is sent to Select ('select'), OptionGroup ('radio') or ButtonToggle ('buttons') as props parameter.
+        :param choices: format is ['choice 1', 'choice 2', ...] or [{'label':'Choice 1', 'value': 1}, ...].
+        :param appearance:
+            if multiple=False: 'auto', 'radio', 'buttons' or 'select'.
+            'auto' means 'radio' for small lists, 'select' for large lists.
+            if multiple=True: 'auto', 'checkboxes', 'toggles', 'select' or 'tags'
+            'auto' means 'checkboxes' for small lists, 'select' for large lists, 'tags' if choices is None.
         :param item_props: The props for the items. (also if appearance=='select', props for the Select)
         :param classes:
         :param styles:
         :param label_props:
         :param events:
         """
+
         def is_lvc(choices_):
             """
             is_label_value_choice
@@ -324,13 +352,41 @@ class InputChoice(LabeledComponent):
             except Exception:
                 return False
 
-        if appearance in {'radio', 'buttons'}:
+        allowed_appearances = {'auto', 'radio', 'checkboxes', 'toggles', 'buttons', 'select', 'tags'}
+        if appearance not in allowed_appearances:
+            raise AssertionError('Wrong appearance {}. Must be one of {}'.format(appearance, allowed_appearances))
+        if appearance in {'radio', 'buttons'} and multiple:
+            raise AssertionError('appearance=={} can be only used if multiple==False'.format(appearance))
+        elif appearance in {'checkboxes', 'tags'} and not multiple:
+            raise AssertionError('appearance=={} can be only used if multiple==True'.format(appearance))
+
+        if appearance == 'auto':
+            # auto is for providing the user a reasonable default.
+            if isinstance(choices, list):
+                n_choices = len(choices)
+            elif isinstance(choices, Reactive):
+                n_choices = len(choices.value)
+            else:
+                n_choices = 0
+            if multiple:
+                appearance = (
+                    'tags' if n_choices == 0 else
+                    'checkboxes' if n_choices <= 20 else
+                    'select'
+                )
+            else:
+                appearance = 'radio' if 0 < n_choices <= 5 else 'select'
+
+        if appearance in {'radio', 'buttons', 'checkboxes', 'toggles'}:
             if (isinstance(choices, list) and len(choices)
                     and isinstance(choices[0], str)):
                 choices = [{'label': choice, 'value': choice} for choice in choices]
             default_item_props = build_props(
                 self.defaults['item_props'],
-                {'type': 'radio'} if appearance == 'radio' else {})
+                {'type': 'radio'} if appearance == 'radio' else
+                {'type': 'checkbox'} if appearance == 'checkboxes' else
+                {'type': 'toggle'} if appearance == 'toggles' else
+                {})
             item_props = build_props(
                 default_item_props,
                 item_props,
@@ -338,7 +394,8 @@ class InputChoice(LabeledComponent):
             children = [
                 Div([label], props=label_props),
             ]
-            if appearance == 'radio':
+            if appearance in {'radio', 'checkboxes', 'toggles'}:
+                del item_props['clearable']
                 children += [OptionGroup(model=model, props=item_props)]
             elif appearance == 'buttons':
                 children += [ButtonToggle(model=model, props=item_props)]
@@ -355,11 +412,16 @@ class InputChoice(LabeledComponent):
             item_props = build_props(
                 default_props,
                 item_props,
-                {'options': choices}
+                {
+                    'options': choices,
+                    'multiple': multiple,
+                }
             )
             children = [Select(label, model, props=item_props)]
+        elif appearance == 'tags':
+            children = [TagsInput(label, model)]
         else:
-            raise NotImplementedError
+            raise NotImplementedError('appearance=={} is not implemented.'.format(appearance))
         super().__init__(
             label=label,
             model=model,

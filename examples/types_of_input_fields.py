@@ -45,10 +45,13 @@ form1 = Form(styles={'max-width': '20em', 'margin': '0 auto'}, children=[
     InputChoice('input choice - user friendly', model=choice, choices=choices, appearance='buttons'),
     InputChoice('input choice - user friendly', model=choice, choices=choices, appearance='select'),
 
-    # InputList(appearance='tags'),
-    # InputList(appearance='select'),
-    # InputList(appearance='checkbox'),  # checkbox (OptionGroup)
-    # InputList(appearance='toggle'),  # toggle (OptionGroup)
+    InputChoice('input choice - multiple, checkboxes', appearance='checkboxes', multiple=True, choices=choices),
+    InputChoice('input choice - multiple, toggles', appearance='toggles', multiple=True, choices=choices),
+    InputChoice('input choice - multiple, select', appearance='select', multiple=True, choices=choices),
+    # InputChoice('input choice - multiple, tags', appearance='tags', multiple=True),
+
+    # InputObject(),  # this is going to be a textarea, the idea is to support assigning arbitrary data.
+    # InputCode(),  # since python can execute code, why not enable the user to do it?
 
     InputColor('color input'),  # Input + popup Color
     InputDate('date input', my_date),  # Input + popup Date
