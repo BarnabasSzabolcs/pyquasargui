@@ -3,7 +3,7 @@ from typing import List, Type, Union
 
 from quasargui.base import Component, ComponentWithModel, LabeledComponent, Slot, JSRaw
 from quasargui.components import Div, Button, Icon, PopupProxy
-from quasargui.model import Model
+from quasargui.model import Model, Renderable, Computed, Reactive
 from quasargui.tools import build_props, merge_classes
 from quasargui.typing import ClassesType, StylesType, PropsType, EventsType, PropValueType, ChildrenType
 
@@ -65,6 +65,13 @@ class Input(ComponentWithModel):
 
     def reset_validation(self):
         return self.api.call_component_method(self.id, 'resetValidation')
+
+
+class Select(LabeledComponent):
+    """
+    ref. https://quasar.dev/vue-components/select#qselect-api
+    """
+    component = 'q-select'
 
 
 class FilePicker(LabeledComponent):
@@ -245,6 +252,80 @@ class InputInt(_NumericInput):
 
 class InputFloat(_NumericInput):
     _type = float
+
+
+class InputChoice(LabeledComponent):
+    component = 'div'
+    defaults = {
+        'item_props': {}
+    }
+
+    def __init__(self,
+                 label: str = None,
+                 model: Model = None,
+                 choices: Union[Renderable, list] = None,
+                 appearance: str = 'radio',
+                 item_props: PropsType = None,
+                 classes: ClassesType = None,
+                 styles: StylesType = None,
+                 props: PropsType = None,
+                 events: EventsType = None):
+        """
+        :param label:
+        :param model:
+        :param appearance: 'radio' (default) or 'buttons' or 'select'.
+        :param item_props: The props for the items. (also if appearance=='select', props for the Select)
+        :param classes:
+        :param styles:
+        :param props:
+        :param events:
+        """
+        def is_lvc(choices_):
+            """
+            is_label_value_choice
+            """
+            try:
+                return set(choices_[0].keys()) == {'label', 'value'}
+            except Exception:
+                return False
+
+        if appearance == 'radio':
+            children = [
+                # TODO v_for Radio within a Div or a Label
+            ]
+        elif appearance == 'buttons':
+            children = [
+                # TODO v_for OptionGroup within a Div or a Label
+            ]
+        elif appearance == 'select':
+            if isinstance(choices, Reactive):
+                is_label_value_choice = Computed(is_lvc, choices)
+            else:
+                is_label_value_choice = is_lvc(choices)
+            default_props = {
+                'emit-value': is_label_value_choice,
+                'map-options': is_label_value_choice
+            }
+            default_props = build_props(default_props, self.defaults['item_props'])
+            item_props = build_props(
+                default_props,
+                item_props,
+                {'options': choices}
+            )
+            children = [
+                Select(label, model, props=item_props)
+            ]
+        else:
+            raise NotImplementedError
+        super().__init__(
+            label=label,
+            model=model,
+            classes=classes,
+            styles=styles,
+            props=props,
+            events=events,
+            children=children
+        )
 
 
 class InputFile(LabeledComponent):

@@ -15,6 +15,15 @@ my_datetime = DateTimeModel(dt.now())
 my_datetime.add_callback(lambda: my_datetime.api.show_notification(
     message='Selected date and time: {} ({}).'.format(my_datetime.value, type(my_datetime.value))
 ))
+
+choices = [
+    {'label': 'Alpha (a)', 'value': 'a'},
+    {'label': 'Bravo (b)', 'value': 'b'},
+    {'label': 'Charlie (c)', 'value': 'c'}
+]
+choice = Model()
+choice.add_callback(lambda: layout.notify('Selected: {}'.format(choice.value)))
+
 form1 = Form(styles={'max-width': '20em', 'margin': '0 auto'}, children=[
     Heading(5, 'Inputs by value type'),
     InputStr('str input'),  # Input
@@ -29,14 +38,22 @@ form1 = Form(styles={'max-width': '20em', 'margin': '0 auto'}, children=[
     InputBool('bool input', appearance='toggle'),  # toggle or checkbox
     InputBool('bool input', appearance='checkbox'),  # toggle or checkbox
 
+    InputChoice('input choice', choices=['a', 'b', 'c'], appearance='radio'),
+    InputChoice('input choice', choices=['a', 'b', 'c'], appearance='buttons'),
+    InputChoice('input choice', choices=['a', 'b', 'c'], appearance='select'),
+    InputChoice('input choice - user friendly', model=choice, choices=choices, appearance='select'),
+
+    # InputList(appearance='tags'),
+    # InputList(appearance='select'),
+    # InputList(appearance='checkbox'),  # checkbox (OptionGroup)
+    # InputList(appearance='toggle'),  # toggle (OptionGroup)
+
     InputColor('color input'),  # Input + popup Color
     InputDate('date input', my_date),  # Input + popup Date
     InputTime('time input', my_time),  # Input + popup Time
     InputDateTime('datetime input', my_datetime),  # Input + popup date + popup time
     InputFile('file input', appearance='icon'),  # File with attachment icon
     InputFile('file input', appearance='browse'),  # File with browse button
-    # InputChoice(), # radio, buttons, select
-    # InputList(),  # tags, select, checkbox (OptionGroup), toggle (OptionGroup)
 
     Heading(5, 'Inputs by Quasar components'),
     Input('vanilla input'),
