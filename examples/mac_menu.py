@@ -1,3 +1,10 @@
+"""
+From this example you can learn how to set a menu,
+and how to declare it dynamically (eg. for internationalization).
+
+At the moment, the menu only works for Mac/Cocoa render.
+"""
+
 from quasargui import *
 
 
@@ -20,7 +27,20 @@ menu = [
 ]
 
 
-layout = Div(classes='text-center q-ma-lg',
-             children=['Click on a menu'])
+def switch_menu():
+    new_menu = [
+        {'title': 'Alternative action', 'action': lambda: layout.notify("Alternative action")},
+    ]
+    if layout.api.menu[0]['title'] != new_menu[0]['title']:
+        layout.api.set_menu(new_menu)
+    else:
+        layout.api.set_menu(menu)
+
+
+layout = Rows(
+    classes='q-ma-lg',
+    children=[
+        'Click on a menu',
+        Button('replace menu', classes='text-white bg-grey-7', events={'click': switch_menu})])
 
 run(layout, menu=menu)

@@ -96,6 +96,7 @@ class Api:
             where menuSpec is {'title': str, 'children': [menuSpec], 'key': str, 'icon': ...}
         :return:
         """
+        self.menu = menuspec
         if self.is_cocoa:
             from quasargui.platforms.cocoa import set_menu_cocoa
             set_menu_cocoa(self.window, menuspec)
