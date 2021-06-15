@@ -9,15 +9,22 @@ from quasargui.base import EventCallbacks
 from quasargui.components import Component
 from quasargui.model import Model, Computed
 from quasargui.tools import print_error
-from quasargui.typing import ValueType, PathType
+from quasargui.typing import ValueType, PathType, MenuSpecType
 
 
 class Api:
     """
     python -> js
     """
-    def __init__(self, main_component: Component, debug: bool = False, render_debug: bool = False):
+
+    def __init__(self,
+                 main_component: Component,
+                 menu: MenuSpecType = None,
+                 debug: bool = False,
+                 render_debug: bool = False
+                 ):
         self.main_component = main_component
+        self.menu = menu
         self.window = None
         self.debug = debug
         self.render_debug = render_debug
@@ -25,6 +32,8 @@ class Api:
 
     def init(self, window):
         self.window = window
+        if self.menu is not None:
+            self.set_menu(self.menu)
         window.evaluate_js('app.setDebug({render_debug})'.format(
             render_debug=json.dumps(self.render_debug)
         ))
@@ -77,12 +86,31 @@ class Api:
         self.window.evaluate_js('app.showNotification({params})'.format(
             params=json.dumps(params)))
 
+    @property
+    def is_cocoa(self):
+        return self.window.gui.__name__ == 'webview.platforms.cocoa'
+
+    def set_menu(self, menuspec: MenuSpecType):
+        """
+        :param menuspec: [menuSpecApp, menuSpec1, menuSpec2, ...]
+            where menuSpec is {'title': str, 'children': [menuSpec], 'key': str, 'icon': ...}
+        :return:
+        """
+        if self.is_cocoa:
+            from quasargui.platforms.cocoa import set_menu_cocoa
+            set_menu_cocoa(self.window, menuspec)
+        else:
+            raise NotImplementedError(
+                'Please be patient until system menus are implemented for your platform.'
+            )
+
 
 # noinspection PyMethodMayBeStatic
 class JsApi:
     """
     js -> python
     """
+
     def __init__(self, debug):
         self.debug = debug
 
@@ -134,17 +162,22 @@ window_api_list: List[Tuple[Window, Api]] = []
 def run(
         component: Component,
         title: str = None,
+        menu: MenuSpecType = None,
         debug: bool = False,
         _render_debug: bool = False,
 ):
     """
     :param component:
+    :param menu: [menuSpec1, menuSpec2, ...]
+            where menuSpec is {'title': str, 'children': [menuSpec], 'key': str, 'icon': ...}
+            if menuSpec is None or {}, a separator is displayed
+            (See quasargui.main.Api.set_menu's menuspec)
     :param title: The title of the window.
     :param debug: Enables right-click inspection in the GUI window.
     :param _render_debug: this option is for quasargui development.
     It displays all the rendering in python's standard output.
     """
-    api = Api(component, debug=debug, render_debug=_render_debug)
+    api = Api(main_component=component, menu=menu, debug=debug, render_debug=_render_debug)
     window = webview.create_window(
         title or 'Program',
         QUASAR_GUI_INDEX_PATH,
