@@ -177,17 +177,16 @@ class InputBool(ComponentWithModel):
     def __init__(self,
                  label: str = None,
                  model: Model = None,
-                 appearance: str = None,
+                 appearance: str = 'checkbox',
                  classes: ClassesType = None,
                  styles: StylesType = None,
                  props: PropsType = None,
                  events: EventsType = None,
                  children: List[Slot] = None):
         self.component = {
-            'input': 'q-input',
             'checkbox': 'q-checkbox',
             'toggle': 'q-toggle'
-        }[appearance or 'input']
+        }[appearance]
         model = model or Model(False)
         model.set_conversion(bool, bool)
         props = build_props({}, props, {'label': label})
@@ -312,7 +311,7 @@ class InputChoice(LabeledComponent):
                  label: str = None,
                  model: Model = None,
                  choices: Union[Renderable, list] = None,
-                 multiple: bool = False,
+                 multiple: bool = None,
                  appearance: str = 'auto',
                  item_props: PropsType = None,
                  label_props: PropsType = None,
@@ -352,12 +351,18 @@ class InputChoice(LabeledComponent):
             except Exception:
                 return False
 
+        single_only_appearances = {'radio', 'buttons'}
+        multiple_only_appearances = {'checkboxes', 'toggles', 'tags'}
+
+        if multiple is None:
+            multiple = appearance in multiple_only_appearances
+
         allowed_appearances = {'auto', 'radio', 'checkboxes', 'toggles', 'buttons', 'select', 'tags'}
         if appearance not in allowed_appearances:
             raise AssertionError('Wrong appearance {}. Must be one of {}'.format(appearance, allowed_appearances))
-        if appearance in {'radio', 'buttons'} and multiple:
+        if appearance in single_only_appearances and multiple:
             raise AssertionError('appearance=={} can be only used if multiple==False'.format(appearance))
-        elif appearance in {'checkboxes', 'tags'} and not multiple:
+        elif appearance in multiple_only_appearances and not multiple:
             raise AssertionError('appearance=={} can be only used if multiple==True'.format(appearance))
 
         if appearance == 'auto':

@@ -35,20 +35,20 @@ form1 = Form(styles={'max-width': '20em', 'margin': '0 auto'}, children=[
     InputFloat('float input [0.0, 100.0]', appearance='knob'),  # input, knob or slider
     InputFloat('float input [-3.0, 3.0]', appearance='slider', min=-3.0, max=3.0),  # input, knob or slider
 
-    InputBool('bool input', appearance='toggle'),  # toggle or checkbox
-    InputBool('bool input', appearance='checkbox'),  # toggle or checkbox
+    InputBool('bool input'),
+    InputBool('bool input', appearance='toggle'),
 
-    InputChoice('input choice', choices=['a', 'b', 'c'], appearance='radio'),
+    InputChoice('input choice', choices=['a', 'b', 'c']),
     InputChoice('input choice', choices=['a', 'b', 'c'], appearance='buttons'),
-    InputChoice('input choice', choices=['a', 'b', 'c'], appearance='select'),
-    InputChoice('input choice - user friendly', model=choice, choices=choices, appearance='radio'),
-    InputChoice('input choice - user friendly', model=choice, choices=choices, appearance='buttons'),
-    InputChoice('input choice - user friendly', model=choice, choices=choices, appearance='select'),
+    InputChoice('input choice', choices=['a', 'b', 'c', 'd', 'e', 'f']),
+    InputChoice('input choice - custom label', model=choice, choices=choices, appearance='radio'),
+    InputChoice('input choice - custom label', model=choice, choices=choices, appearance='buttons'),
+    InputChoice('input choice - custom label', model=choice, choices=choices, appearance='select'),
 
-    InputChoice('input choice - multiple, checkboxes', appearance='checkboxes', multiple=True, choices=choices),
-    InputChoice('input choice - multiple, toggles', appearance='toggles', multiple=True, choices=choices),
-    InputChoice('input choice - multiple, select', appearance='select', multiple=True, choices=choices),
-    # InputChoice('input choice - multiple, tags', appearance='tags', multiple=True),
+    InputChoice('input choice - checkboxes', appearance='checkboxes', choices=choices),
+    InputChoice('input choice - toggles', appearance='toggles', choices=choices),
+    InputChoice('input choice - select multiple', appearance='select', multiple=True, choices=choices),
+    InputChoice('input choice - tags', appearance='tags'),
 
     # InputObject(),  # this is going to be a textarea, the idea is to support assigning arbitrary data.
     # InputCode(),  # since python can execute code, why not enable the user to do it?
