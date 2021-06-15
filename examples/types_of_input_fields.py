@@ -41,6 +41,8 @@ form1 = Form(styles={'max-width': '20em', 'margin': '0 auto'}, children=[
     InputChoice('input choice', choices=['a', 'b', 'c'], appearance='radio'),
     InputChoice('input choice', choices=['a', 'b', 'c'], appearance='buttons'),
     InputChoice('input choice', choices=['a', 'b', 'c'], appearance='select'),
+    InputChoice('input choice - user friendly', model=choice, choices=choices, appearance='radio'),
+    InputChoice('input choice - user friendly', model=choice, choices=choices, appearance='buttons'),
     InputChoice('input choice - user friendly', model=choice, choices=choices, appearance='select'),
 
     # InputList(appearance='tags'),

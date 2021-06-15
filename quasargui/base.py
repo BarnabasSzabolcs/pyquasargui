@@ -257,7 +257,9 @@ def v_for(
             Callable[[PropVar], Component],
             Callable[[PropVar, PropVar], Component]
         ] = None,
-        key: PropValueType[str] = None):
+        key: PropValueType[str] = None
+) -> Component:
+
     if not isinstance(model, Renderable):
         model = Model(model)
     model_js = model.js_var_name
@@ -286,7 +288,7 @@ def v_for(
 def v_show(
     condition: Reactive,
     component: Component
-):
+) -> Component:
     _set_prop_safe(component, 'v-show', condition)
     return component
 
@@ -294,14 +296,14 @@ def v_show(
 def v_if(
     condition: Reactive,
     component: Component
-):
+) -> Component:
     _set_prop_safe(component, 'v-if', condition)
     return component
 
 
 def v_else(
     component: Component
-):
+) -> Component:
     _set_prop_safe(component, 'v-else', None)
     return component
 
@@ -309,12 +311,12 @@ def v_else(
 def v_else_if(
     condition: Reactive,
     component: Component
-):
+) -> Component:
     _set_prop_safe(component, 'v-else-if', condition)
     return component
 
 
-def v_once(component: Component):
+def v_once(component: Component) -> Component:
     """
     This directive is rarely used.
     ref. https://v3.vuejs.org/api/directives.html#v-once
@@ -323,7 +325,7 @@ def v_once(component: Component):
     return component
 
 
-def v_pre(component: Component):
+def v_pre(component: Component) -> Component:
     """
     This directive is rarely used.
     It enables displaying raw mustache tags.
@@ -336,7 +338,7 @@ def v_pre(component: Component):
 # v_cloak is not necessary since all the components are loaded after Vue is loaded.
 
 
-def _set_prop_safe(component, prop_name, prop_value):
+def _set_prop_safe(component, prop_name, prop_value) -> None:
     if prop_name in component.props:
         raise AssertionError("When using {}, don't define '{}' prop.".format(
             prop_name.replace('-', '_'), prop_name))
@@ -345,7 +347,9 @@ def _set_prop_safe(component, prop_name, prop_value):
 
 def v_html(
         value: PropValueType[str],
-        component: Component):
+        component: Component
+) -> Component:
     if component.children:
         raise AssertionError("Don't set children when using v_html.")
     _set_prop_safe(component, 'v-html', value)
+    return component

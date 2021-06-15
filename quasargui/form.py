@@ -8,19 +8,6 @@ from quasargui.tools import build_props, merge_classes
 from quasargui.typing import ClassesType, StylesType, PropsType, EventsType, PropValueType, ChildrenType
 
 
-class Form(Component):
-    component = 'form'
-    defaults = {'classes': 'q-gutter-md'}
-
-    def __init__(self,
-                 children: ChildrenType = None,
-                 classes: ClassesType = None,
-                 styles: StylesType = None,
-                 events: EventsType = None,
-                 ):
-        super().__init__(children=children, classes=classes, styles=styles, events=events)
-
-
 class Input(ComponentWithModel):
     """
     ref. https://quasar.dev/vue-components/input#qinput-api
@@ -82,12 +69,56 @@ class FilePicker(LabeledComponent):
     component = 'q-file'
 
 
+class Form(Component):
+    component = 'form'
+    defaults = {'classes': 'q-gutter-md'}
+
+    def __init__(self,
+                 children: ChildrenType = None,
+                 classes: ClassesType = None,
+                 styles: StylesType = None,
+                 events: EventsType = None,
+                 ):
+        super().__init__(children=children, classes=classes, styles=styles, events=events)
+
+
+class Radio(LabeledComponent):
+    """
+    Probably better is to use OptionGroup (a group of radio's).
+    ref. https://quasar.dev/vue-components/radio#qradio-api
+    """
+    component = 'q-radio'
+    defaults = {'props': {}}
+
+
 class Toggle(LabeledComponent):
     """
     ref. https://quasar.dev/vue-components/toggle#qtoggle-api
     """
     component = 'q-toggle'
     defaults = {'props': {}}
+
+
+class ButtonToggle(ComponentWithModel):
+    """
+    A group of buttons from which one is active at a time.
+    ref. https://quasar.dev/vue-components/button-toggle#qbtntoggle-api
+    """
+    component = 'q-btn-toggle'
+    defaults = {'props': {
+        'unelevated': True
+    }}
+
+
+class OptionGroup(ComponentWithModel):
+    """
+    prop 'label' does not work in Quasar.
+    """
+    component = 'q-option-group'
+    defaults = {
+        'props': {
+            'inline': True,
+        }}
 
 
 class Knob(ComponentWithModel):
@@ -257,7 +288,9 @@ class InputFloat(_NumericInput):
 class InputChoice(LabeledComponent):
     component = 'div'
     defaults = {
-        'item_props': {}
+        'item_props': {
+            'clearable': True  # this prop does not work with radio, with everything else it does.
+        }
     }
 
     def __init__(self,
@@ -266,9 +299,10 @@ class InputChoice(LabeledComponent):
                  choices: Union[Renderable, list] = None,
                  appearance: str = 'radio',
                  item_props: PropsType = None,
+                 label_props: PropsType = None,
+                 props: PropsType = None,
                  classes: ClassesType = None,
                  styles: StylesType = None,
-                 props: PropsType = None,
                  events: EventsType = None):
         """
         :param label:
@@ -277,26 +311,37 @@ class InputChoice(LabeledComponent):
         :param item_props: The props for the items. (also if appearance=='select', props for the Select)
         :param classes:
         :param styles:
-        :param props:
+        :param label_props:
         :param events:
         """
         def is_lvc(choices_):
             """
             is_label_value_choice
             """
+            # noinspection PyBroadException
             try:
                 return set(choices_[0].keys()) == {'label', 'value'}
             except Exception:
                 return False
 
-        if appearance == 'radio':
+        if appearance in {'radio', 'buttons'}:
+            if (isinstance(choices, list) and len(choices)
+                    and isinstance(choices[0], str)):
+                choices = [{'label': choice, 'value': choice} for choice in choices]
+            default_item_props = build_props(
+                self.defaults['item_props'],
+                {'type': 'radio'} if appearance == 'radio' else {})
+            item_props = build_props(
+                default_item_props,
+                item_props,
+                {'options': choices})
             children = [
-                # TODO v_for Radio within a Div or a Label
+                Div([label], props=label_props),
             ]
-        elif appearance == 'buttons':
-            children = [
-                # TODO v_for OptionGroup within a Div or a Label
-            ]
+            if appearance == 'radio':
+                children += [OptionGroup(model=model, props=item_props)]
+            elif appearance == 'buttons':
+                children += [ButtonToggle(model=model, props=item_props)]
         elif appearance == 'select':
             if isinstance(choices, Reactive):
                 is_label_value_choice = Computed(is_lvc, choices)
@@ -312,9 +357,7 @@ class InputChoice(LabeledComponent):
                 item_props,
                 {'options': choices}
             )
-            children = [
-                Select(label, model, props=item_props)
-            ]
+            children = [Select(label, model, props=item_props)]
         else:
             raise NotImplementedError
         super().__init__(
