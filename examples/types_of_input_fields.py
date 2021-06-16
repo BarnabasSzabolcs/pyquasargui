@@ -65,7 +65,7 @@ form1 = Form(styles={'max-width': '20em', 'margin': '0 auto'}, children=[
     Input('textarea input', type='textarea'),
     Input('oldschool number input', type='number'),
     FilePicker('vanilla file picker'),
-    # Select(), TagsInput(), Radio(), ButtonToggle(),
+    # Select(), VueTagsInput(), Radio(), ButtonToggle(),
     Slider(model=Model()),
     # Range(Model()),  # OptionGroup(type="checkbox"), # radio, toggle
     Toggle(),  # Checkbox(),

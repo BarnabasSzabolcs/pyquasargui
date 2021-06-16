@@ -70,7 +70,7 @@ class FilePicker(LabeledComponent):
 
 
 class Form(Component):
-    component = 'form'
+    component = 'q-form'
     defaults = {'classes': 'q-gutter-md'}
 
     def __init__(self,
@@ -80,6 +80,21 @@ class Form(Component):
                  events: EventsType = None,
                  ):
         super().__init__(children=children, classes=classes, styles=styles, events=events)
+
+
+class Field(LabeledComponent):
+    """
+    It is a wrapper for custom form fields.
+    Basically it provides a label for a field.
+
+    model parameter is for prop 'clearable'
+    (if True, and the clear button is pressed, it sets the model to None).
+    ref. https://quasar.dev/vue-components/field#qfield-api
+    """
+    component = 'q-field'
+    defaults = {'props': {
+        # 'stack-label': True
+    }}
 
 
 class Radio(LabeledComponent):
@@ -127,7 +142,13 @@ class OptionGroup(ComponentWithModel):
                  styles: StylesType = None,
                  props: PropsType = None,
                  events: EventsType = None):
-        self._model = model or Model([])
+        props = props or {}
+        if model is not None:
+            self._model = model
+        elif props.get('type', 'radio') == 'radio':
+            self._model = Model('')
+        else:
+            self._model = Model([])
         super().__init__(model=self._model,
                          children=children,
                          classes=classes,
@@ -137,6 +158,9 @@ class OptionGroup(ComponentWithModel):
 
 
 class Knob(ComponentWithModel):
+    """
+    ref. https://quasar.dev/vue-components/knob#qknob-api
+    """
     component = 'q-knob'
     defaults = {
         'props': {
@@ -149,7 +173,22 @@ class Knob(ComponentWithModel):
 
 
 class Slider(ComponentWithModel):
+    """
+    ref. https://quasar.dev/vue-components/slider#qslider-api
+    """
     component = 'q-slider'
+    defaults = {
+        'props': {
+            'label': True
+        }
+    }
+
+
+class Range(ComponentWithModel):
+    """
+    ref. https://quasar.dev/vue-components/range#qrange-api
+    """
+    component = 'q-range'
     defaults = {
         'props': {
             'label': True
@@ -422,9 +461,23 @@ class InputChoice(LabeledComponent):
                     'multiple': multiple,
                 }
             )
-            children = [Select(label, model, props=item_props)]
+            children = [Select(label=label, model=model, props=item_props)]
         elif appearance == 'tags':
-            children = [TagsInput(label, model)]
+            label_props = build_props({
+                'hide-bottom-space': True
+            }, label_props)
+            item_props = build_props({
+                'placeholder': '',
+                'add-on-key': [13, ','],
+                # 'separators': [',']
+            }, item_props)
+            children = [
+                Field(label=label, model=model, props=label_props, children=[
+                    Slot('control', [
+                        VueTagsInput(model=model, props=item_props)
+                    ])
+                ]),
+            ]
         else:
             raise NotImplementedError('appearance=={} is not implemented.'.format(appearance))
         super().__init__(
@@ -709,3 +762,33 @@ class InputColor(_InputWithPicker):
     @staticmethod
     def _to_python(s):
         return s
+
+
+class VueTagsInput(ComponentWithModel):
+    """
+    see http://www.vue-tags-input.com/#/examples/hooks
+    Note that model points to 'tags' property,
+    'v-model' can be accessed via self.current_tag.
+    """
+    component = 'vue-tags-input'
+    script_sources = ['vue-tags-input.2.1.0.js']
+    style_sources = ['vue-tags-input.css']
+
+    def __init__(self,
+                 model: Model = None,
+                 classes: ClassesType = None,
+                 styles: StylesType = None,
+                 props: PropsType = None):
+        props = build_props({}, props, {
+            'tags': model or Model([])
+        })
+        events = {
+            'tags-changed': lambda new_tags: model.set_value(new_tags)
+        }
+        self.current_tag = Model('')
+        super().__init__(
+            model=self.current_tag,
+            props=props,
+            classes=classes,
+            styles=styles,
+            events=events)
