@@ -123,7 +123,21 @@ class ButtonToggle(ComponentWithModel):
     defaults = {'props': {
         'unelevated': True
     }}
-
+    def __init__(self,
+                 model: Renderable = None,
+                 options: PropValueType = None,
+                 children: ChildrenType = None,
+                 classes: ClassesType = None,
+                 styles: StylesType = None,
+                 props: PropsType = None,
+                 events: EventsType = None):
+        props = build_props({}, props, {'options': options})
+        super().__init__(model=model,
+                         children=children,
+                         classes=classes,
+                         styles=styles,
+                         props=props,
+                         events=events)
 
 class OptionGroup(ComponentWithModel):
     """
@@ -135,14 +149,20 @@ class OptionGroup(ComponentWithModel):
             'inline': True,
         }}
 
+    # noinspection PyShadowingBuiltins
     def __init__(self,
                  model: Renderable = None,
+                 type: PropValueType[str] = None,
+                 options: PropValueType = None,
                  children: ChildrenType = None,
                  classes: ClassesType = None,
                  styles: StylesType = None,
                  props: PropsType = None,
                  events: EventsType = None):
-        props = props or {}
+        props = build_props(props or {}, {
+            'type': type,
+            'options': options,
+        })
         if model is not None:
             self._model = model
         elif props.get('type', 'radio') == 'radio':
@@ -433,16 +453,20 @@ class InputChoice(LabeledComponent):
                 {})
             item_props = build_props(
                 default_item_props,
-                item_props,
-                {'options': choices})
+                item_props)
             children = [
                 Div([label], props=label_props),
             ]
             if appearance in {'radio', 'checkboxes', 'toggles'}:
                 del item_props['clearable']
-                children += [OptionGroup(model=model, props=item_props)]
+                type = {
+                    'radio': 'radio',
+                    'checkboxes': 'checkbox',
+                    'toggles': 'toggle',
+                }[appearance]
+                children += [OptionGroup(model=model, type=type, options=choices, props=item_props)]
             elif appearance == 'buttons':
-                children += [ButtonToggle(model=model, props=item_props)]
+                children += [ButtonToggle(model=model, options=choices, props=item_props)]
         elif appearance == 'select':
             if isinstance(choices, Reactive):
                 is_label_value_choice = Computed(is_lvc, choices)
