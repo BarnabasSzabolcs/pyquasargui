@@ -61,7 +61,7 @@ class Component:
                  events: EventsType = None):
         if not hasattr(self, 'classes'):
             self.classes = merge_classes(self.defaults.get('classes', ''), classes or '')
-        self.styles = styles or {}
+        self.styles = build_props(self.defaults.get('styles', {}), styles or {})
         if not hasattr(self, 'props'):
             self.props = build_props(self.defaults.get('props', {}), props or {})
         events = events or {}
@@ -118,8 +118,11 @@ class Component:
         return d_base
 
     def set_api(self, api: 'Api', _flush: bool = True):
-        # noinspection PyAttributeOutsideInit
         self.api = api
+        if hasattr(self, 'script_sources'):
+            self.api.import_scripts(self.script_sources)
+        if hasattr(self, 'style_sources'):
+            self.api.import_styles(self.style_sources)
         for child in self._children:
             if hasattr(child, 'set_api'):
                 child.set_api(api, _flush=False)
@@ -252,25 +255,30 @@ class CustomComponent(Component):
 
 
 def v_for(
-        model: Renderable,
+        model: Union[Renderable, list, dict],
         component: Union[
             Callable[[PropVar], Component],
             Callable[[PropVar, PropVar], Component]
         ] = None,
-        key: PropValueType[str] = None):
+        key: PropValueType[str] = None
+) -> Component:
+
+    if not isinstance(model, Renderable):
+        model = Model(model)
+    model_js = model.js_var_name
     n_args = len(signature(component).parameters)
     if n_args == 1:
         p1 = PropVar()
         component = component(p1)
         component.props['v-for'] = JSRaw("{} in {}".format(
-            p1.js_var_name, model.js_var_name))
+            p1.js_var_name, model_js))
         if key is None:
             key = 'index'
     elif n_args == 2:
         p1, p2 = PropVar(), PropVar()
         component = component(p1, p2)
         component.props['v-for'] = JSRaw("({}, {}) in {}".format(
-            p1.js_var_name, p2.js_var_name, model.js_var_name))
+            p1.js_var_name, p2.js_var_name, model_js))
     else:
         raise AssertionError
     if key is not None:
@@ -283,7 +291,7 @@ def v_for(
 def v_show(
     condition: Reactive,
     component: Component
-):
+) -> Component:
     _set_prop_safe(component, 'v-show', condition)
     return component
 
@@ -291,14 +299,14 @@ def v_show(
 def v_if(
     condition: Reactive,
     component: Component
-):
+) -> Component:
     _set_prop_safe(component, 'v-if', condition)
     return component
 
 
 def v_else(
     component: Component
-):
+) -> Component:
     _set_prop_safe(component, 'v-else', None)
     return component
 
@@ -306,12 +314,12 @@ def v_else(
 def v_else_if(
     condition: Reactive,
     component: Component
-):
+) -> Component:
     _set_prop_safe(component, 'v-else-if', condition)
     return component
 
 
-def v_once(component: Component):
+def v_once(component: Component) -> Component:
     """
     This directive is rarely used.
     ref. https://v3.vuejs.org/api/directives.html#v-once
@@ -320,7 +328,7 @@ def v_once(component: Component):
     return component
 
 
-def v_pre(component: Component):
+def v_pre(component: Component) -> Component:
     """
     This directive is rarely used.
     It enables displaying raw mustache tags.
@@ -333,7 +341,7 @@ def v_pre(component: Component):
 # v_cloak is not necessary since all the components are loaded after Vue is loaded.
 
 
-def _set_prop_safe(component, prop_name, prop_value):
+def _set_prop_safe(component, prop_name, prop_value) -> None:
     if prop_name in component.props:
         raise AssertionError("When using {}, don't define '{}' prop.".format(
             prop_name.replace('-', '_'), prop_name))
@@ -342,7 +350,9 @@ def _set_prop_safe(component, prop_name, prop_value):
 
 def v_html(
         value: PropValueType[str],
-        component: Component):
+        component: Component
+) -> Component:
     if component.children:
         raise AssertionError("Don't set children when using v_html.")
     _set_prop_safe(component, 'v-html', value)
+    return component

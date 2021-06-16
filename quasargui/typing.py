@@ -8,6 +8,8 @@ if TYPE_CHECKING:
     # noinspection PyUnresolvedReferences
     from quasargui.components import Component
 
+MenuSpecType = List[Union[dict, None]]
+
 EventsType = Dict[str, Union[Callable[[...], Any], 'JSRaw']]
 ClassesType = str
 StylesType = Dict[str, str]

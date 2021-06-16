@@ -119,7 +119,7 @@ Vue.component('dynamic-component', {
         if (_.isNumber(cb)) {
           const cb_id = cb
           return `@${eventName}="params=>window.pywebview.api.call_cb(${cb_id}, params)"`
-        } else if ('$' in cb){
+        } else if ('$' in cb) {
           return `@${eventName}="${cb['$']}"`
         }
       }).join(' ')
@@ -306,6 +306,21 @@ const app = new Vue({
       value
     }) {
       this.$set(this.computed[id], propsJson, value)
+    },
+    addScripts(sources) {
+      sources.forEach(src => {
+        const node = document.createElement('script')
+        node.setAttribute('src', src)
+        document.body.appendChild(node)
+      })
+    },
+    addStyles(sources) {
+      sources.forEach(src => {
+        const node = document.createElement('link')
+        node.setAttribute('rel', 'stylesheet')
+        node.setAttribute('href', src)
+        document.head.appendChild(node)
+      })
     },
     showNotification(params) {
       const longTimeOut = 7000

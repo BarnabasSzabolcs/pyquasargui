@@ -2,7 +2,7 @@
 import base64
 
 # noinspection PyUnresolvedReferences
-from quasargui.base import Component
+from quasargui.base import Component, LabeledComponent
 from quasargui.tools import merge_classes, build_props
 from quasargui.typing import PropValueType, ClassesType, StylesType, EventsType, ChildrenType, PropsType
 
@@ -217,12 +217,17 @@ class CardActions(Component):
     component = 'q-card-actions'
 
 
-class ExpansionItem(Component):
+class ExpansionItem(LabeledComponent):
     """
     Use it with ListComponent, children: Card, and CardSection within the Card.
     ref. https://quasar.dev/vue-components/expansion-item#qexpansionitem-api
     """
     component = 'q-expansion-item'
+    defaults = {
+        'props': {
+            'expand-separator': True
+        }
+    }
 
 
 class Icon(Component):
@@ -249,6 +254,10 @@ class Icon(Component):
             events=events,
             children=children
         )
+
+
+class QList(Component):
+    component = 'q-list'
 
 
 class PopupProxy(Component):
@@ -310,6 +319,13 @@ class Splitter(Component):
     reference: https://quasar.dev/vue-components/splitter
     """
     component = 'q-splitter'
+
+
+class Toolbar(Component):
+    """
+    reference: https://quasar.dev/vue-components/toolbar
+    """
+    component = 'q-toolbar'
 
 
 class Tooltip(Component):

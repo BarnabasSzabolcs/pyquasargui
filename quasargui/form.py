@@ -3,22 +3,9 @@ from typing import List, Type, Union
 
 from quasargui.base import Component, ComponentWithModel, LabeledComponent, Slot, JSRaw
 from quasargui.components import Div, Button, Icon, PopupProxy
-from quasargui.model import Model
+from quasargui.model import Model, Renderable, Computed, Reactive
 from quasargui.tools import build_props, merge_classes
 from quasargui.typing import ClassesType, StylesType, PropsType, EventsType, PropValueType, ChildrenType
-
-
-class Form(Component):
-    component = 'form'
-    defaults = {'classes': 'q-gutter-md'}
-
-    def __init__(self,
-                 children: ChildrenType = None,
-                 classes: ClassesType = None,
-                 styles: StylesType = None,
-                 events: EventsType = None,
-                 ):
-        super().__init__(children=children, classes=classes, styles=styles, events=events)
 
 
 class Input(ComponentWithModel):
@@ -67,12 +54,56 @@ class Input(ComponentWithModel):
         return self.api.call_component_method(self.id, 'resetValidation')
 
 
+class Select(LabeledComponent):
+    """
+    ref. https://quasar.dev/vue-components/select#qselect-api
+    """
+    component = 'q-select'
+
+
 class FilePicker(LabeledComponent):
     """
     Use rather InputFile
     ref. https://quasar.dev/vue-components/file-picker#qfile-api
     """
     component = 'q-file'
+
+
+class Form(Component):
+    component = 'q-form'
+    defaults = {'classes': 'q-gutter-md'}
+
+    def __init__(self,
+                 children: ChildrenType = None,
+                 classes: ClassesType = None,
+                 styles: StylesType = None,
+                 events: EventsType = None,
+                 ):
+        super().__init__(children=children, classes=classes, styles=styles, events=events)
+
+
+class Field(LabeledComponent):
+    """
+    It is a wrapper for custom form fields.
+    Basically it provides a label for a field.
+
+    model parameter is for prop 'clearable'
+    (if True, and the clear button is pressed, it sets the model to None).
+    ref. https://quasar.dev/vue-components/field#qfield-api
+    """
+    component = 'q-field'
+    defaults = {'props': {
+        # 'stack-label': True
+    }}
+
+
+class Radio(LabeledComponent):
+    """
+    Probably better is to use OptionGroup (a group of radio's).
+    ref. https://quasar.dev/vue-components/radio#qradio-api
+    """
+    component = 'q-radio'
+    defaults = {'props': {}}
 
 
 class Toggle(LabeledComponent):
@@ -83,7 +114,73 @@ class Toggle(LabeledComponent):
     defaults = {'props': {}}
 
 
+class ButtonToggle(ComponentWithModel):
+    """
+    A group of buttons from which one is active at a time.
+    ref. https://quasar.dev/vue-components/button-toggle#qbtntoggle-api
+    """
+    component = 'q-btn-toggle'
+    defaults = {'props': {
+        'unelevated': True
+    }}
+    def __init__(self,
+                 model: Renderable = None,
+                 options: PropValueType = None,
+                 children: ChildrenType = None,
+                 classes: ClassesType = None,
+                 styles: StylesType = None,
+                 props: PropsType = None,
+                 events: EventsType = None):
+        props = build_props({}, props, {'options': options})
+        super().__init__(model=model,
+                         children=children,
+                         classes=classes,
+                         styles=styles,
+                         props=props,
+                         events=events)
+
+class OptionGroup(ComponentWithModel):
+    """
+    prop 'label' does not work in Quasar.
+    """
+    component = 'q-option-group'
+    defaults = {
+        'props': {
+            'inline': True,
+        }}
+
+    # noinspection PyShadowingBuiltins
+    def __init__(self,
+                 model: Renderable = None,
+                 type: PropValueType[str] = None,
+                 options: PropValueType = None,
+                 children: ChildrenType = None,
+                 classes: ClassesType = None,
+                 styles: StylesType = None,
+                 props: PropsType = None,
+                 events: EventsType = None):
+        props = build_props(props or {}, {
+            'type': type,
+            'options': options,
+        })
+        if model is not None:
+            self._model = model
+        elif props.get('type', 'radio') == 'radio':
+            self._model = Model('')
+        else:
+            self._model = Model([])
+        super().__init__(model=self._model,
+                         children=children,
+                         classes=classes,
+                         styles=styles,
+                         props=props,
+                         events=events)
+
+
 class Knob(ComponentWithModel):
+    """
+    ref. https://quasar.dev/vue-components/knob#qknob-api
+    """
     component = 'q-knob'
     defaults = {
         'props': {
@@ -96,7 +193,22 @@ class Knob(ComponentWithModel):
 
 
 class Slider(ComponentWithModel):
+    """
+    ref. https://quasar.dev/vue-components/slider#qslider-api
+    """
     component = 'q-slider'
+    defaults = {
+        'props': {
+            'label': True
+        }
+    }
+
+
+class Range(ComponentWithModel):
+    """
+    ref. https://quasar.dev/vue-components/range#qrange-api
+    """
+    component = 'q-range'
     defaults = {
         'props': {
             'label': True
@@ -124,17 +236,16 @@ class InputBool(ComponentWithModel):
     def __init__(self,
                  label: str = None,
                  model: Model = None,
-                 appearance: str = None,
+                 appearance: str = 'checkbox',
                  classes: ClassesType = None,
                  styles: StylesType = None,
                  props: PropsType = None,
                  events: EventsType = None,
                  children: List[Slot] = None):
         self.component = {
-            'input': 'q-input',
             'checkbox': 'q-checkbox',
             'toggle': 'q-toggle'
-        }[appearance or 'input']
+        }[appearance]
         model = model or Model(False)
         model.set_conversion(bool, bool)
         props = build_props({}, props, {'label': label})
@@ -191,7 +302,7 @@ class _NumericInput(ComponentWithModel):
             control_props = build_props({'snap': self._type == int}, props)
             control_props = build_props(self.defaults['control_props'], control_props)
             if self._type == float:
-                control_props = build_props({'step': (max-min)/1000}, control_props)
+                control_props = build_props({'step': (max - min) / 1000}, control_props)
             control_props = build_props({
                 'label-position': 'before' if appearance == 'knob' else 'top'
             }, control_props, special_props)
@@ -245,6 +356,163 @@ class InputInt(_NumericInput):
 
 class InputFloat(_NumericInput):
     _type = float
+
+
+class InputChoice(LabeledComponent):
+    component = 'div'
+    defaults = {
+        'item_props': {
+            'clearable': True  # this prop does not work with radio, with everything else it does.
+        }
+    }
+
+    def __init__(self,
+                 label: str = None,
+                 model: Model = None,
+                 choices: Union[Renderable, list] = None,
+                 multiple: bool = None,
+                 appearance: str = 'auto',
+                 item_props: PropsType = None,
+                 label_props: PropsType = None,
+                 props: PropsType = None,
+                 classes: ClassesType = None,
+                 styles: StylesType = None,
+                 events: EventsType = None):
+        """
+        :param label:
+        :param model:
+            the value of the model depends on the choices parameter (and the item_props).
+            List[str] choice format yields the displayed label as model value,
+            List[dict] format yields the value of 'value' field as value, if dict has only 'label' and 'value' fields.
+            Otherwise List[dict] format yields the whole dict of the selected item.
+            This behavior can be overridden with item_props
+            that is sent to Select ('select'), OptionGroup ('radio') or ButtonToggle ('buttons') as props parameter.
+        :param choices: format is ['choice 1', 'choice 2', ...] or [{'label':'Choice 1', 'value': 1}, ...].
+        :param appearance:
+            if multiple=False: 'auto', 'radio', 'buttons' or 'select'.
+            'auto' means 'radio' for small lists, 'select' for large lists.
+            if multiple=True: 'auto', 'checkboxes', 'toggles', 'select' or 'tags'
+            'auto' means 'checkboxes' for small lists, 'select' for large lists, 'tags' if choices is None.
+        :param item_props: The props for the items. (also if appearance=='select', props for the Select)
+        :param classes:
+        :param styles:
+        :param label_props:
+        :param events:
+        """
+
+        def is_lvc(choices_):
+            """
+            is_label_value_choice
+            """
+            # noinspection PyBroadException
+            try:
+                return set(choices_[0].keys()) == {'label', 'value'}
+            except Exception:
+                return False
+
+        single_only_appearances = {'radio', 'buttons'}
+        multiple_only_appearances = {'checkboxes', 'toggles', 'tags'}
+
+        if multiple is None:
+            multiple = appearance in multiple_only_appearances
+
+        allowed_appearances = {'auto', 'radio', 'checkboxes', 'toggles', 'buttons', 'select', 'tags'}
+        if appearance not in allowed_appearances:
+            raise AssertionError('Wrong appearance {}. Must be one of {}'.format(appearance, allowed_appearances))
+        if appearance in single_only_appearances and multiple:
+            raise AssertionError('appearance=={} can be only used if multiple==False'.format(appearance))
+        elif appearance in multiple_only_appearances and not multiple:
+            raise AssertionError('appearance=={} can be only used if multiple==True'.format(appearance))
+
+        if appearance == 'auto':
+            # auto is for providing the user a reasonable default.
+            if isinstance(choices, list):
+                n_choices = len(choices)
+            elif isinstance(choices, Reactive):
+                n_choices = len(choices.value)
+            else:
+                n_choices = 0
+            if multiple:
+                appearance = (
+                    'tags' if n_choices == 0 else
+                    'checkboxes' if n_choices <= 20 else
+                    'select'
+                )
+            else:
+                appearance = 'radio' if 0 < n_choices <= 5 else 'select'
+
+        if appearance in {'radio', 'buttons', 'checkboxes', 'toggles'}:
+            if (isinstance(choices, list) and len(choices)
+                    and isinstance(choices[0], str)):
+                choices = [{'label': choice, 'value': choice} for choice in choices]
+            default_item_props = build_props(
+                self.defaults['item_props'],
+                {'type': 'radio'} if appearance == 'radio' else
+                {'type': 'checkbox'} if appearance == 'checkboxes' else
+                {'type': 'toggle'} if appearance == 'toggles' else
+                {})
+            item_props = build_props(
+                default_item_props,
+                item_props)
+            children = [
+                Div([label], props=label_props),
+            ]
+            if appearance in {'radio', 'checkboxes', 'toggles'}:
+                del item_props['clearable']
+                type = {
+                    'radio': 'radio',
+                    'checkboxes': 'checkbox',
+                    'toggles': 'toggle',
+                }[appearance]
+                children += [OptionGroup(model=model, type=type, options=choices, props=item_props)]
+            elif appearance == 'buttons':
+                children += [ButtonToggle(model=model, options=choices, props=item_props)]
+        elif appearance == 'select':
+            if isinstance(choices, Reactive):
+                is_label_value_choice = Computed(is_lvc, choices)
+            else:
+                is_label_value_choice = is_lvc(choices)
+            default_props = {
+                'emit-value': is_label_value_choice,
+                'map-options': is_label_value_choice
+            }
+            default_props = build_props(default_props, self.defaults['item_props'])
+            item_props = build_props(
+                default_props,
+                item_props,
+                {
+                    'options': choices,
+                    'multiple': multiple,
+                }
+            )
+            children = [Select(label=label, model=model, props=item_props)]
+        elif appearance == 'tags':
+            label_props = build_props({
+                'hide-bottom-space': True
+            }, label_props)
+            item_props = build_props({
+                'placeholder': '',
+                'add-on-key': [13, ','],
+                # 'separators': [',']
+            }, item_props)
+            children = [
+                Field(label=label, model=model, props=label_props, children=[
+                    Slot('control', [
+                        VueTagsInput(model=model, props=item_props)
+                    ])
+                ]),
+            ]
+        else:
+            raise NotImplementedError('appearance=={} is not implemented.'.format(appearance))
+        super().__init__(
+            label=label,
+            model=model,
+            classes=classes,
+            styles=styles,
+            props=props,
+            events=events,
+            children=children
+        )
 
 
 class InputFile(LabeledComponent):
@@ -518,3 +786,33 @@ class InputColor(_InputWithPicker):
     @staticmethod
     def _to_python(s):
         return s
+
+
+class VueTagsInput(ComponentWithModel):
+    """
+    see http://www.vue-tags-input.com/#/examples/hooks
+    Note that model points to 'tags' property,
+    'v-model' can be accessed via self.current_tag.
+    """
+    component = 'vue-tags-input'
+    script_sources = ['vue-tags-input.2.1.0.js']
+    style_sources = ['vue-tags-input.css']
+
+    def __init__(self,
+                 model: Model = None,
+                 classes: ClassesType = None,
+                 styles: StylesType = None,
+                 props: PropsType = None):
+        props = build_props({}, props, {
+            'tags': model or Model([])
+        })
+        events = {
+            'tags-changed': lambda new_tags: model.set_value(new_tags)
+        }
+        self.current_tag = Model('')
+        super().__init__(
+            model=self.current_tag,
+            props=props,
+            classes=classes,
+            styles=styles,
+            events=events)
