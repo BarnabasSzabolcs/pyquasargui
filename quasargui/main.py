@@ -29,6 +29,8 @@ class Api:
         self.debug = debug
         self.render_debug = render_debug
         self.model_data_queue = []
+        self.scripts_imported = set()
+        self.styles_imported = set()
 
     def init(self, window):
         self.window = window
@@ -81,6 +83,20 @@ class Api:
         return self.window.evaluate_js('app.callComponentMethod({params})'.format(
             params=json.dumps({'component_id': component_id, 'method': method})
         ))
+
+    def import_scripts(self, scripts: List[str]):
+        not_added = [script for script in scripts if script not in self.scripts_imported]
+        if not not_added:
+            return
+        self.scripts_imported |= set(not_added)
+        self.window.evaluate_js('app.addScripts({})'.format(json.dumps(not_added)))
+
+    def import_styles(self, styles: List[str]):
+        not_added = [styles for styles in styles if styles not in self.scripts_imported]
+        if not not_added:
+            return
+        self.styles_imported |= set(not_added)
+        self.window.evaluate_js('app.addStyles({})'.format(json.dumps(not_added)))
 
     def show_notification(self, **params: ValueType):
         self.window.evaluate_js('app.showNotification({params})'.format(

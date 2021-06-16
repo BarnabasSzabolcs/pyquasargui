@@ -61,7 +61,7 @@ class Component:
                  events: EventsType = None):
         if not hasattr(self, 'classes'):
             self.classes = merge_classes(self.defaults.get('classes', ''), classes or '')
-        self.styles = styles or {}
+        self.styles = build_props(self.defaults.get('styles', {}), styles or {})
         if not hasattr(self, 'props'):
             self.props = build_props(self.defaults.get('props', {}), props or {})
         events = events or {}
@@ -118,8 +118,11 @@ class Component:
         return d_base
 
     def set_api(self, api: 'Api', _flush: bool = True):
-        # noinspection PyAttributeOutsideInit
         self.api = api
+        if hasattr(self, 'script_sources'):
+            self.api.import_scripts(self.script_sources)
+        if hasattr(self, 'style_sources'):
+            self.api.import_styles(self.style_sources)
         for child in self._children:
             if hasattr(child, 'set_api'):
                 child.set_api(api, _flush=False)
