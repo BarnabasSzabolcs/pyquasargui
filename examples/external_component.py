@@ -1,7 +1,6 @@
 """
-A script is imported only once, automatically, before its component is first used.
+(A script is imported only once, automatically, before its component is first used.)
 """
-
 from quasargui import *
 
 this_dir = dirname(__file__)
@@ -21,15 +20,24 @@ class MyWrappedComponent(ComponentWithModel):
     component = 'my-custom-component'
 
 
+class MySingleFileComponent(SingleFileComponent):
+    vue_source = join(this_dir, 'external_vue.vue')
+
+
 model = Model(3)
 layout = Layout([
     Page([
         MyComponent([
-            'This is my basic component, written in python, also importing some external script.',
-            Div(['external value: ', JSRaw('externalValue')])
+            Heading(5, 'MyComponent', classes='q-my-sm'),
+            'written in python, also importing some external script.',
+            Div([
+                'value of externalValue: ',
+                JSRaw('externalValue'),
+                ' (externalValue is a variable in external_script.js)'])
         ]),
         MyWrappedComponent(model),
+        MySingleFileComponent(props={'value': model})
     ])
 ])
 
-run(layout, debug=True, _render_debug=True)
+run(layout, title='External component demonstration')

@@ -1,3 +1,16 @@
+function registerSfc(component_name, script, style) {
+  let node
+  node = document.createElement('script')
+  node.innerHTML = script
+  document.body.appendChild(node)
+
+  node = document.createElement('style')
+  node.innerHTML = style
+  document.head.appendChild(node)
+
+  Vue.component(component_name, window[component_name])
+}
+
 function createEventCB(id) {
   return (params) => {
     window.pywebview.api.call_cb(id, params)

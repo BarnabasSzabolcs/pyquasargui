@@ -1,4 +1,5 @@
 import json
+import re
 from typing import List, Tuple, Dict, Union, Callable
 
 import webview
@@ -139,6 +140,34 @@ class Api:
         cb_id = EventCallbacks.register(cb)
         self.window.evaluate_js('app.setKeyShortcut({key}, {cb_id})'.format(
             key=json.dumps(key), cb_id=json.dumps(cb_id)))
+
+    def register_sfc(self, component_name: str, vue_file_path: str):
+        with open(vue_file_path, 'r') as f:
+            code = f.read()
+            try:
+                template = code.split('<template>')[1].split('</template>')[0]
+            except IndexError:
+                raise AssertionError('<template>...</template> is not found in {}'.format(vue_file_path))
+            try:
+                script = code.split('<script>')[1].split('</script>')[0]
+            except IndexError:
+                raise AssertionError('<script>...</script> is not found in {}'.format(vue_file_path))
+            try:
+                style = code.split('<style>')[1].split('</style>')[0]
+            except IndexError:
+                style = ''
+        script = re.sub(
+            'export +default *{',
+            'var {component_name} = {{template: `{template}`,'.format(
+                component_name=component_name,
+                template=template.replace('`', '\\`')
+            ),
+            script)
+        self.window.evaluate_js('registerSfc({component_name}, {script}, {style})'.format(
+            component_name=json.dumps(component_name),
+            script=json.dumps(script),
+            style=json.dumps(style)
+        ))
 
 
 # noinspection PyMethodMayBeStatic

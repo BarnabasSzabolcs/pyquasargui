@@ -1,3 +1,4 @@
+import os
 import textwrap
 from inspect import signature
 from typing import Optional, TYPE_CHECKING, Dict, Callable, Union, List
@@ -179,7 +180,7 @@ class ComponentWithModel(Component):
                  events: EventsType = None):
         self._model = model or Model(None)
         props = props or {}
-        props['value'] = self._model.render_as_data()
+        props['value'] = self._model
         super().__init__(children=children,
                          classes=classes,
                          styles=styles,
@@ -368,3 +369,55 @@ def v_html(
         raise AssertionError("Don't set children when using v_html.")
     _set_prop_safe(component, 'v-html', value)
     return component
+
+
+class SingleFileComponent(Component):
+    """
+    Extend this component to add your external component, written in .vue.
+    ```
+    class YourSFC(SingleFileComponent):
+        vue_source = 'path/to/your.vue'
+    ```
+    Note: the sfv support is limited (it does not handle imports and styles other than css).
+
+    If you want to import a more serious vue component,
+
+    1. compile your source into .umd.js
+    2. create your class like the following:
+    ```
+    class YourComponentName(Component):
+        script_source = ['path/to/your.umd.js']
+        component = 'your-component-name'
+
+    class YourOtherComponentName(Component):
+        script_source = ['path/to/your.umd.js']
+        component = 'your-other-component-name'
+    ```
+    A script is only included once.
+    """
+    vue_source: str = ''  # override this with your .vue path
+    component = None
+
+    def __init__(self,
+                 children: ChildrenType = None,
+                 classes: ClassesType = None,
+                 styles: StylesType = None,
+                 props: PropsType = None,
+                 events: EventsType = None):
+        if not isinstance(self.__class__.vue_source, str):
+            raise TypeError('vue_source must be str')
+        if self.__class__.component is None:
+            component_name = self.vue_source.split(os.path.sep)[-1].rsplit('.vue', 1)[0]
+            self.__class__.component = component_name
+
+        super().__init__(
+            children=children,
+            classes=classes,
+            styles=styles,
+            props=props,
+            events=events
+        )
+        self.dependents.append(
+            lambda api:
+                api.register_sfc(self.__class__.component, self.vue_source))
+
