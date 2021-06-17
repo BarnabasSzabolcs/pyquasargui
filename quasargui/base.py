@@ -42,6 +42,7 @@ class JSRaw(Renderable):
     def render_as_data(self) -> dict:
         return {'$': self.code}
 
+    @property
     def js_var_name(self) -> str:
         return self.code
 
@@ -53,6 +54,8 @@ class Component:
     max_id = 0
     component = 'div'
     defaults = {}
+    script_sources: List[str] = []
+    style_sources: List[str] = []
 
     def __init__(self,
                  children: ChildrenType = None,
@@ -122,9 +125,9 @@ class Component:
 
     def set_api(self, api: 'Api', _flush: bool = True):
         self.api = api
-        if hasattr(self, 'script_sources'):
+        if self.script_sources:
             self.api.import_scripts(self.script_sources)
-        if hasattr(self, 'style_sources'):
+        if self.style_sources:
             self.api.import_styles(self.style_sources)
         for child in self._children:
             if hasattr(child, 'set_api'):

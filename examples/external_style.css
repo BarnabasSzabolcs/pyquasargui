@@ -1,0 +1,8 @@
+.my-component, .my-custom-component{
+    padding: 20px;
+    margin: 40px;
+    border: 1px dashed black;
+}
+.my-custom-component{
+    border-color: blue;
+}
