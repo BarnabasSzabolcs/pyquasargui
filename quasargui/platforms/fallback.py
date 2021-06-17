@@ -2,7 +2,7 @@ import json
 from typing import TYPE_CHECKING
 
 from quasargui.base import Component
-from quasargui.components import Bar, Menu, QList, Button, QItem, QItemSection, Icon, Separator
+from quasargui.components import Bar, Menu, QList, Button, QItem, QItemSection, Icon, Separator, Tooltip
 from quasargui.typing import MenuSpecType
 
 if TYPE_CHECKING:
@@ -48,13 +48,26 @@ def assemble_top_menu(spec) -> Component:
             ]
         )
     else:
-        return Button(
+        if 'key' in spec:
+            tooltip = [Tooltip([
+                '(Ctrl{shift}+{key})</span>'.format(
+                    shift='+Shift' if spec['key'].isupper() else '',
+                    key=spec['key'].upper()
+                )
+            ])]
+        else:
+            tooltip = []
+        button = Button(
             props=props,
             classes=classes,
             styles=styles,
             events={'click': spec['action']} if 'action' in spec else None,
-            children=[spec['title']]
+            children=[spec['title']] + tooltip
         )
+        if 'key' in spec:
+            button.dependents.append(
+                lambda api: api.set_key_shortcut(spec['key'], spec['action']))
+        return button
 
 
 def assemble_menu(menuspec: MenuSpecType, top_level: bool = False) -> Component:
@@ -68,22 +81,34 @@ def assemble_menu(menuspec: MenuSpecType, top_level: bool = False) -> Component:
                 },
                 children=[
                     QItemSection([spec['title']]),
-                    QItemSection(
-                        props={'side': True},
-                        children=[Icon('keyboard_arrow_right')]
-                    ),
+                    QItemSection([Icon('keyboard_arrow_right')], props={'side': True}),
                     assemble_menu(spec['children'])
                 ])
         else:
+            children = [
+                QItemSection([spec['title']])
+            ]
+            if 'key' in spec:
+                shortcut_indicator = QItemSection(
+                    props={'side': True},
+                    children=[
+                        'Ctrl{shift}+{key}'.format(
+                            shift='' if spec['key'].islower() else '+Shift',
+                            key=spec['key'].upper())
+                    ]
+                )
+                shortcut_indicator.dependents.append(
+                    lambda api: api.set_key_shortcut(spec['key'], spec['action']))
+                children += [shortcut_indicator]
+
             return QItem(
                 props={
                     'clickable': True,
                     'v-close-popup': None
                 },
-                children=[
-                    QItemSection([spec['title']])
-                ],
+                children=children,
                 events={'click': spec['action']} if 'action' in spec else None)
+
     if top_level:
         props = {
             # 'offset': [0, 0]

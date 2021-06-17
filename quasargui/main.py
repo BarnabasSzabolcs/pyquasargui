@@ -1,5 +1,5 @@
 import json
-from typing import List, Tuple, Dict, Union
+from typing import List, Tuple, Dict, Union, Callable
 
 import webview
 from webview import Window
@@ -134,6 +134,11 @@ class Api:
         else:
             from quasargui.platforms.fallback import set_menu as set_menu_fallback
             set_menu_fallback(self, menuspec)
+
+    def set_key_shortcut(self, key: str, cb: Callable):
+        cb_id = EventCallbacks.register(cb)
+        self.window.evaluate_js('app.setKeyShortcut({key}, {cb_id})'.format(
+            key=json.dumps(key), cb_id=json.dumps(cb_id)))
 
 
 # noinspection PyMethodMayBeStatic
