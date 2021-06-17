@@ -10,6 +10,9 @@ if TYPE_CHECKING:
 
 
 def set_menu(api: 'Api', menuspec: MenuSpecType):
+    if not menuspec:
+        api.window.evaluate_js('app.setMenu(false)')
+        return
     menu = assemble_menu_bar(menuspec)
     menu.set_api(api)
     api.window.evaluate_js('app.setMenu({component})'.format(

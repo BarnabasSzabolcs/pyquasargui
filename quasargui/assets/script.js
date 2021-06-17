@@ -38,6 +38,9 @@ Vue.component('dynamic-component', {
     loadEventFired: false,
   },
   render: function(h) {
+    if (!this.id){
+      return this.renderTemplate('<div></div>')
+    }
     const template = this.assembleTemplate(this.id, false)
     sendLog('rendering:')
     sendLog(template)
@@ -253,8 +256,12 @@ const app = new Vue({
       this.mainComponentId = id
     },
     setMenu(component) {
-      const id = this.registerComponent(component)
-      this.menuId = id
+      if (component === false) {
+        this.menuId = null
+      } else {
+        const id = this.registerComponent(component)
+        this.menuId = id
+      }
     },
     registerComponent(component, refresh = false) {
       if (refresh || (component.id in this.componentStore === false)) {
