@@ -61,3 +61,11 @@ def set_path_value(dic: Union[dict, list], path: PathType, value: any) -> None:
     for p in path[:-1]:
         target = target[p]
     target[path[-1]] = value
+
+
+def static_vars(**kwargs):
+    def decorate(func):
+        for k in kwargs:
+            setattr(func, k, kwargs[k])
+        return func
+    return decorate

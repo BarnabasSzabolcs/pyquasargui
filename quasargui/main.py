@@ -1,5 +1,5 @@
 import json
-from typing import List, Tuple
+from typing import List, Tuple, Dict, Union, Callable
 
 import webview
 from webview import Window
@@ -106,20 +106,39 @@ class Api:
     def is_cocoa(self):
         return self.window.gui.__name__ == 'webview.platforms.cocoa'
 
-    def set_menu(self, menuspec: MenuSpecType):
+    def set_menu(self, menuspec: Union[MenuSpecType, Dict[str, MenuSpecType]]):
         """
+        If menuspec is a list then the menu is the same for all platforms,
+        if menuspec is a dict then menuspec is set platform-specific.
+        (eg. {'cocoa': [{'title': 'Cocoa menu'}], 'default': []})  # no menu if not cocoa.
         :param menuspec: [menuSpecApp, menuSpec1, menuSpec2, ...]
             where menuSpec is {'title': str, 'children': [menuSpec], 'key': str, 'icon': ...}
+            or {'cocoa': [... menu spec for cocoa...], 'default': [... menu spec fallback ...]}
         :return:
         """
+        if isinstance(menuspec, dict):
+            if 'default' not in menuspec:
+                AssertionError('Please set "default" menuspec as a fallback option.')
+
+            if self.is_cocoa and 'cocoa' in menuspec:
+                menuspec = menuspec['cocoa']
+            if self.is_cocoa and 'mac' in menuspec:
+                menuspec = menuspec['mac']
+            else:
+                menuspec = menuspec['default']
+
         self.menu = menuspec
         if self.is_cocoa:
-            from quasargui.platforms.cocoa import set_menu_cocoa
+            from quasargui.platforms.cocoa import set_menu as set_menu_cocoa
             set_menu_cocoa(self.window, menuspec)
         else:
-            raise NotImplementedError(
-                'Please be patient until system menus are implemented for your platform.'
-            )
+            from quasargui.platforms.fallback import set_menu as set_menu_fallback
+            set_menu_fallback(self, menuspec)
+
+    def set_key_shortcut(self, key: str, cb: Callable):
+        cb_id = EventCallbacks.register(cb)
+        self.window.evaluate_js('app.setKeyShortcut({key}, {cb_id})'.format(
+            key=json.dumps(key), cb_id=json.dumps(cb_id)))
 
 
 # noinspection PyMethodMayBeStatic

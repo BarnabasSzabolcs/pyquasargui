@@ -164,6 +164,10 @@ class Heading(Component):
 ########################
 
 
+class Bar(Component):
+    component = 'q-bar'
+
+
 class Button(Component):
     """
     ref. https://quasar.dev/vue-components/button#qbtn-api
@@ -256,8 +260,20 @@ class Icon(Component):
         )
 
 
+class QItem(Component):
+    component = 'q-item'
+
+
+class QItemSection(Component):
+    component = 'q-item-section'
+
+
 class QList(Component):
     component = 'q-list'
+
+
+class Menu(Component):
+    component = 'q-menu'
 
 
 class PopupProxy(Component):

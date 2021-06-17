@@ -38,6 +38,9 @@ Vue.component('dynamic-component', {
     loadEventFired: false,
   },
   render: function(h) {
+    if (!this.id) {
+      return this.renderTemplate('<div></div>')
+    }
     const template = this.assembleTemplate(this.id, false)
     sendLog('rendering:')
     sendLog(template)
@@ -233,10 +236,24 @@ const app = new Vue({
   data: function() {
     return {
       mainComponentId: null,
+      menuId: null,
       data: {}, // holds the Model values {id: value}
       computed: {}, // holds computed values
       componentStore: {}, // holds the Component specifications {id: descriptor}
+      keyShortcuts: {}
     }
+  },
+  created() {
+    document.addEventListener('keydown', (event) => {
+      if (
+        event.metaKey == true &&
+        event.key in this.keyShortcuts
+      ) {
+        const cbId = this.keyShortcuts[event.key]
+        window.pywebview.api.call_cb(cbId, {})
+        event.preventDefault()
+      }
+    })
   },
   methods: {
     setDebug(debug) {
@@ -250,6 +267,17 @@ const app = new Vue({
     setMainComponent(component) {
       const id = this.registerComponent(component)
       this.mainComponentId = id
+    },
+    setMenu(component) {
+      if (component === false) {
+        this.menuId = null
+      } else {
+        const id = this.registerComponent(component)
+        this.menuId = id
+      }
+    },
+    setKeyShortcut(key, cbId) {
+      this.keyShortcuts[key] = cbId
     },
     registerComponent(component, refresh = false) {
       if (refresh || (component.id in this.componentStore === false)) {

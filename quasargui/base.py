@@ -4,7 +4,7 @@ from typing import Optional, TYPE_CHECKING, Dict, Callable, Union, List
 
 from quasargui.model import Renderable, Reactive, Model, PropVar
 from quasargui.tools import build_props, merge_classes
-from quasargui.typing import ChildrenType, ClassesType, StylesType, PropsType, EventsType, PropValueType
+from quasargui.typing import ChildrenType, ClassesType, StylesType, PropsType, EventsType, PropValueType, EventCBType
 
 if TYPE_CHECKING:
     from quasargui.main import Api
@@ -51,6 +51,7 @@ class Component:
     A renderable GUI component.
     """
     max_id = 0
+    component = 'div'
     defaults = {}
 
     def __init__(self,
@@ -65,12 +66,14 @@ class Component:
         if not hasattr(self, 'props'):
             self.props = build_props(self.defaults.get('props', {}), props or {})
         events = events or {}
-        self.events = {event: EventCallbacks.register(cb) if isinstance(cb, Callable) else cb.render_as_data()
-                       for event, cb in events.items()}
+        self._events = {
+            event: EventCallbacks.register(cb) if isinstance(cb, Callable) else cb.render_as_data()
+            for event, cb in events.items()
+        }
         self._children = children or []
         self.api: Optional['Api'] = None
         # other objects that should be attached to the api when this Component is attached:
-        self.dependents: List[Union[Component, Reactive]] = []
+        self.dependents: List[Union[Component, Reactive, Callable[['Api'], None]]] = []
         Component.max_id += 1
         self.id = Component.max_id
 
@@ -100,7 +103,7 @@ class Component:
         result.update({
             'id': self.id,
             'component': getattr(self, 'component', None),
-            'events': self.events,
+            'events': self._events,
             'props': props,
             'children': [child if isinstance(child, str) else
                          child.render_mustache() if isinstance(child, Renderable) else
@@ -127,7 +130,10 @@ class Component:
             if hasattr(child, 'set_api'):
                 child.set_api(api, _flush=False)
         for dependent in self.dependents:
-            dependent.set_api(api, _flush=False)
+            if isinstance(dependent, Callable):
+                dependent(api)
+            else:
+                dependent.set_api(api, _flush=False)
         for prop in self.props.values():
             if isinstance(prop, Reactive):
                 prop.set_api(api, _flush=False)
@@ -155,6 +161,9 @@ class Component:
     def update(self):
         if self.api is not None:
             self.api.set_component(self.vue)
+
+    def add_event(self, event: str, cb: EventCBType):
+        self._events[event] = EventCallbacks.register(cb) if isinstance(cb, Callable) else cb.render_as_data()
 
 
 class ComponentWithModel(Component):

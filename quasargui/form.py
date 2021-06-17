@@ -103,7 +103,10 @@ class Radio(LabeledComponent):
     ref. https://quasar.dev/vue-components/radio#qradio-api
     """
     component = 'q-radio'
-    defaults = {'props': {}}
+
+
+class Checkbox(LabeledComponent):
+    component = 'q-checkbox'
 
 
 class Toggle(LabeledComponent):
@@ -111,7 +114,6 @@ class Toggle(LabeledComponent):
     ref. https://quasar.dev/vue-components/toggle#qtoggle-api
     """
     component = 'q-toggle'
-    defaults = {'props': {}}
 
 
 class ButtonToggle(ComponentWithModel):
@@ -123,6 +125,7 @@ class ButtonToggle(ComponentWithModel):
     defaults = {'props': {
         'unelevated': True
     }}
+
     def __init__(self,
                  model: Renderable = None,
                  options: PropValueType = None,
@@ -138,6 +141,7 @@ class ButtonToggle(ComponentWithModel):
                          styles=styles,
                          props=props,
                          events=events)
+
 
 class OptionGroup(ComponentWithModel):
     """
@@ -459,12 +463,12 @@ class InputChoice(LabeledComponent):
             ]
             if appearance in {'radio', 'checkboxes', 'toggles'}:
                 del item_props['clearable']
-                type = {
+                type_ = {
                     'radio': 'radio',
                     'checkboxes': 'checkbox',
                     'toggles': 'toggle',
                 }[appearance]
-                children += [OptionGroup(model=model, type=type, options=choices, props=item_props)]
+                children += [OptionGroup(model=model, type=type_, options=choices, props=item_props)]
             elif appearance == 'buttons':
                 children += [ButtonToggle(model=model, options=choices, props=item_props)]
         elif appearance == 'select':

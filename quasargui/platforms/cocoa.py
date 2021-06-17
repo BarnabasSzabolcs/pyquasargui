@@ -12,7 +12,7 @@ from webview.platforms.cocoa import BrowserView
 from quasargui.typing import MenuSpecType
 
 
-def set_menu_cocoa(window: Window, menuspec: MenuSpecType):
+def set_menu(window: Window, menuspec: MenuSpecType):
     sleep(0.3)  # MAC bug: if the sleep is less, the menu does not render properly
     if window.gui.__name__ != 'webview.platforms.cocoa':
         raise AssertionError('set_menu_cocoa can be only called when using Mac/cocoa. '
