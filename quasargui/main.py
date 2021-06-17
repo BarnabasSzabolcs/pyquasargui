@@ -114,12 +114,11 @@ class Api:
         """
         self.menu = menuspec
         if self.is_cocoa:
-            from quasargui.platforms.cocoa import set_menu_cocoa
+            from quasargui.platforms.cocoa import set_menu as set_menu_cocoa
             set_menu_cocoa(self.window, menuspec)
         else:
-            raise NotImplementedError(
-                'Please be patient until system menus are implemented for your platform.'
-            )
+            from quasargui.platforms.fallback import set_menu as set_menu_fallback
+            set_menu_fallback(self, menuspec)
 
 
 # noinspection PyMethodMayBeStatic

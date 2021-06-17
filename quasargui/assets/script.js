@@ -233,6 +233,7 @@ const app = new Vue({
   data: function() {
     return {
       mainComponentId: null,
+      menuId: null,
       data: {}, // holds the Model values {id: value}
       computed: {}, // holds computed values
       componentStore: {}, // holds the Component specifications {id: descriptor}
@@ -250,6 +251,10 @@ const app = new Vue({
     setMainComponent(component) {
       const id = this.registerComponent(component)
       this.mainComponentId = id
+    },
+    setMenu(component) {
+      const id = this.registerComponent(component)
+      this.menuId = id
     },
     registerComponent(component, refresh = false) {
       if (refresh || (component.id in this.componentStore === false)) {

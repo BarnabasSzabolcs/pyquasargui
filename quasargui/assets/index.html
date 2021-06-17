@@ -11,7 +11,8 @@
 
 <body>
   <div id="q-app">
-    <dynamic-component :id="mainComponentId"></dynamic-component>
+    <dynamic-component :id="menuId" v-if="menuId"></dynamic-component>
+    <dynamic-component :id="mainComponentId" v-if="mainComponentId"></dynamic-component>
 <!--    <component-->
 <!--            :is="mainComponent.component"-->
 <!--            v-bind="mainComponent.props"-->
