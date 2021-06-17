@@ -51,6 +51,7 @@ class Component:
     A renderable GUI component.
     """
     max_id = 0
+    component = 'div'
     defaults = {}
 
     def __init__(self,

@@ -81,16 +81,17 @@ form1 = Form(styles={'max-width': '30em', 'margin': '0 auto'}, children=[
                 Input('textarea input', type='textarea'),
                 Input('oldschool number input', type='number'),
                 FilePicker('vanilla file picker'),
-                Select(),
+                Select('select'),
+                Checkbox('checkbox'),
+                Radio('radio'),
+                Toggle('toggle'),
                 VueTagsInput(),
-                Radio(),
                 ButtonToggle(props={'options': choices}),
                 Slider(model=Model()),
                 Range(Model()),
                 OptionGroup(type="checkbox", options=choices),
                 OptionGroup(type="radio", options=choices),
                 OptionGroup(type="toggle", options=choices),
-                Toggle(),  # Checkbox(),
                 TimePicker(Model()),
                 DatePicker(Model()),
             ])])]
@@ -102,4 +103,4 @@ layout = Layout([
     Page([form1])
 ])
 
-quasargui.run(layout, debug=True, _render_debug=True)
+quasargui.run(layout)
