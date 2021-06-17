@@ -1,6 +1,6 @@
 import datetime
 from abc import ABCMeta
-from typing import TYPE_CHECKING, Callable, List, Dict, Generic, TypeVar
+from typing import TYPE_CHECKING, Callable, List, Dict, Generic, TypeVar, Union
 
 from quasargui.tools import print_error, get_path, set_path_value
 from quasargui.typing import ValueType, PathType, PathSegmentType
@@ -256,7 +256,7 @@ class Computed(Reactive, Generic[T]):
     max_id = 0
     computed_dic: Dict[int, 'Computed'] = {}
 
-    def __init__(self, fun: Callable[[...], T], *args: Reactive):
+    def __init__(self, fun: Callable[[...], T], *args: Union[Reactive, PropVar]):
         """
         :param fun: is assumed to be an idempotent function (that its value changes only if args changes)
         :param args:

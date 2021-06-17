@@ -60,6 +60,9 @@ Vue.component('dynamic-component', {
     return this.renderTemplate(template)
   },
   methods: {
+    ref(ref){
+      return this.$refs[ref]
+    },
     calculateWithProp(computedId, props) {
       // calculates a Computed within a scoped slot for props
       if (computedId in this.$root.computed === false) {
@@ -122,23 +125,17 @@ Vue.component('dynamic-component', {
         window.pywebview.api.call_cb(d.events.load)
         this.loadEventFired = true
       }
-      const events = this.renderEvents(d.events)
+      const classes = this.renderClasses(d.classes)
       const props = this.renderProps(d.props)
+      const events = this.renderEvents(d.events)
       const children = this.renderChildren(d.children, recursive)
       const slots = this.renderSlots(d.slots)
 
-      const attrs = [props, events, inputEvent].join(' ')
+      const attrs = [classes, props, events, inputEvent].join(' ')
       return `<${d.component} ${attrs}>${children}${slots}</${d.component}>`
     },
-    renderEvents(events) {
-      return _.map(events, (cb, eventName) => {
-        if (_.isNumber(cb)) {
-          const cb_id = cb
-          return `@${eventName}="params=>window.pywebview.api.call_cb(${cb_id}, params)"`
-        } else if ('$' in cb) {
-          return `@${eventName}="${cb['$']}"`
-        }
-      }).join(' ')
+    renderClasses(classes) {
+      return classes.length ? `class="${classes}"`: ''
     },
     renderProps(props) {
       return _.map(props, (prop, propName) => {
@@ -174,6 +171,16 @@ Vue.component('dynamic-component', {
         }
       }).join(' ')
     },
+    renderEvents(events) {
+      return _.map(events, (cb, eventName) => {
+        if (_.isNumber(cb)) {
+          const cb_id = cb
+          return `@${eventName}="params=>window.pywebview.api.call_cb(${cb_id}, params)"`
+        } else if ('$' in cb) {
+          return `@${eventName}="${cb['$']}"`
+        }
+      }).join(' ')
+    },
     renderChildren(children, recursive) {
       return _.map(children, child => {
         if (_.isString(child)) {
@@ -189,14 +196,15 @@ Vue.component('dynamic-component', {
     },
     renderSlots(slots) {
       return _.map(slots, (d, name) => {
-        const events = this.renderEvents(d.events)
+        const classes = this.renderClasses(d.classes)
         const props = this.renderProps(d.props)
+        const events = this.renderEvents(d.events)
         const arg = 'arg' in d ? `="${d.arg}"` : ''
         // if there's no arg, normal render, if there's arg, recursive static render.
         // otherwise the PropVar's cause rendering errors.
         const children = this.renderChildren(d.children, arg !== '')
         const slots = this.renderSlots(d.slots)
-        const attrs = [props, events].join(' ')
+        const attrs = [classes, props, events].join(' ')
         return `<template v-slot:${name}${arg} ${attrs}>${children}${slots}</template>`
       }).join('')
     },

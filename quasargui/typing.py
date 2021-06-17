@@ -4,7 +4,7 @@ if TYPE_CHECKING:
     # noinspection PyUnresolvedReferences
     from quasargui.base import JSRaw
     # noinspection PyUnresolvedReferences
-    from quasargui.model import Model, Reactive
+    from quasargui.model import Model, Renderable
     # noinspection PyUnresolvedReferences
     from quasargui.components import Component
 
@@ -15,7 +15,7 @@ EventsType = Dict[str, EventCBType]
 ClassesType = str
 StylesType = Dict[str, str]
 
-ChildrenType = List[Union['Component', str, 'Reactive']]
+ChildrenType = List[Union['Component', str, 'Renderable']]
 ValueType = Union[bool, int, float, str, list, dict, None]
 PathSegmentType = Union[str, int]
 PathType = List[PathSegmentType]

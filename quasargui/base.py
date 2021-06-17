@@ -88,8 +88,6 @@ class Component:
             for k, v in self.props.items()
         }
         classes = self.classes if isinstance(self.classes, str) else " ".join(cs for cs in self.classes)
-        if classes:
-            props.update({'class': classes})
         styles = ";".join('{k}:{v}'.format(k=k, v=v) for k, v in self.styles.items())
         if styles:
             props.update({'style': styles})
@@ -97,24 +95,35 @@ class Component:
         if hasattr(self, '_prop_var'):
             result['arg'] = self._prop_var.js_var_name
         children = self._children
-        if any([isinstance(child, type) for child in children]):
-            raise AssertionError(
-                "{children} should be not a type but an object (Did you forget to add '()'?)".format(
-                    children=', '.join(str(child) for child in children if isinstance(child, type))))
 
         slots = {slot.name: slot.vue for slot in children if isinstance(slot, Slot)}
         slots = {name: value for name, value in slots.items() if len(value['children'])}
-        result.update({
-            'id': self.id,
-            'component': getattr(self, 'component', None),
-            'events': self._events,
-            'props': props,
-            'children': [child if isinstance(child, str) else
-                         child.render_mustache() if isinstance(child, Renderable) else
-                         child.vue
-                         for child in children if not isinstance(child, Slot)],
-            'slots': slots
-        })
+        try:
+            result.update({
+                'id': self.id,
+                'component': getattr(self, 'component', None),
+                'events': self._events,
+                'props': props,
+                'classes': classes,
+                'children': [child if isinstance(child, str) else
+                             child.render_mustache() if isinstance(child, Renderable) else
+                             child.vue
+                             for child in children if not isinstance(child, Slot)],
+                'slots': slots
+            })
+        except AttributeError as e:
+            wrong_children = [child for child in children if
+                              not (isinstance(child, str) or
+                                   isinstance(child, Renderable) or
+                                   isinstance(child, Component))]
+            if wrong_children:
+                type_children = [child for child in wrong_children if isinstance(child, type)]
+                if type_children:
+                    raise AssertionError(
+                        "{children} should be not a type but an object (Did you forget to add '()'?)".format(
+                            children=', '.join(str(child) for child in type_children)))
+            else:
+                raise e
         return result
 
     def _merge_vue(self, d: dict) -> dict:
@@ -420,4 +429,3 @@ class SingleFileComponent(Component):
         self.dependents.append(
             lambda api:
                 api.register_sfc(self.__class__.component, self.vue_source))
-
