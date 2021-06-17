@@ -1,3 +1,5 @@
+window.debug = false
+
 function registerSfc(component_name, script, style) {
   let node
   node = document.createElement('script')
@@ -60,7 +62,7 @@ Vue.component('dynamic-component', {
     return this.renderTemplate(template)
   },
   methods: {
-    ref(ref){
+    ref(ref) {
       return this.$refs[ref]
     },
     calculateWithProp(computedId, props) {
@@ -135,7 +137,7 @@ Vue.component('dynamic-component', {
       return `<${d.component} ${attrs}>${children}${slots}</${d.component}>`
     },
     renderClasses(classes) {
-      return classes.length ? `class="${classes}"`: ''
+      return classes.length ? `class="${classes}"` : ''
     },
     renderProps(props) {
       return _.map(props, (prop, propName) => {
