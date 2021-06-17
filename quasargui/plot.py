@@ -49,6 +49,7 @@ class Plot(Component):
     ref. https://docs.bokeh.org/en/latest/docs/reference/embed.html#bokeh.embed.file_html
     otherwise a bokeh server needs to start in the background - which is also not impossible...
     """
+    script_sources = ['mpld3-figure.js']
     defaults = {
         'render': 'png',  # other choice: 'mpld3'
     }
