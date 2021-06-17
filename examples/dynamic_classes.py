@@ -57,4 +57,4 @@ layout = Layout([Page(classes='q-ma-lg easyread', children=[
     Toggle('Make text large', is_large, props={'left-label': True})
 ])])
 
-run(layout, 'static vs dynamic classes', debug=True, _render_debug=True)
+run(layout, 'Dynamic vs static classes')
