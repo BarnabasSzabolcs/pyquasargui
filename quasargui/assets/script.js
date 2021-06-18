@@ -196,6 +196,11 @@ Vue.component('dynamic-component', {
     },
     renderSlots(slots) {
       return _.map(slots, (d, name) => {
+        if (name == '' || name == 'default') {
+          name = ''
+        } else {
+          name = ':' + name
+        }
         const classes = this.renderClasses(d.classes)
         const props = this.renderProps(d.props)
         const events = this.renderEvents(d.events)
@@ -205,7 +210,7 @@ Vue.component('dynamic-component', {
         const children = this.renderChildren(d.children, arg !== '')
         const slots = this.renderSlots(d.slots)
         const attrs = [classes, props, events].join(' ')
-        return `<template v-slot:${name}${arg} ${attrs}>${children}${slots}</template>`
+        return `<template v-slot${name}${arg} ${attrs}>${children}${slots}</template>`
       }).join('')
     },
     renderTemplate(template) {

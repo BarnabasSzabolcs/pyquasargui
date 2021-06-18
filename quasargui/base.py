@@ -229,6 +229,19 @@ class LabeledComponent(ComponentWithModel):
 
 
 class Slot(Component):
+    """
+    Represents a vue v-slot, to be used in children parameter of a Component.
+
+    To access scoped slots,
+    ```
+    Component(children=[
+        Slot('name', lambda prop: [... children ...])
+    ])
+    ```
+    prop is a PropVar that behaves similarly to a Model.
+
+    To access default slot, set name = 'default' (or '').
+    """
     component = 'template'
 
     def __init__(self,

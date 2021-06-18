@@ -2,8 +2,8 @@ from typing import List, Union
 
 from quasargui.base import Component, ComponentWithModel
 from quasargui.callbacks import toggle
-from quasargui.quasar_components import QButton
 from quasargui.model import Model, Reactive
+from quasargui.quasar_components import QButton
 from quasargui.tools import merge_classes, build_props
 from quasargui.typing import EventsType, ClassesType, StylesType, PropsType, ChildrenType, PropValueType
 
@@ -239,5 +239,36 @@ class QSpace(Component):
     component = 'q-space'
 
 
-class QAvatar(Component):
-    component = 'q-avatar'
+class QBreadcrumbsElement(Component):
+    """
+    ref. https://quasar.dev/vue-components/breadcrumbs#qbreadcrumbsel-api
+    """
+    component = 'q-breadcrumbs-el'
+
+
+class QBreadcrumbs(Component):
+    """
+    ref. https://quasar.dev/vue-components/breadcrumbs#qbreadcrumbs-api
+    """
+    component = 'q-breadcrumbs'
+
+    def __init__(self,
+                 children: List[QBreadcrumbsElement] = None,
+                 classes: ClassesType = None,
+                 styles: StylesType = None,
+                 props: PropsType = None,
+                 events: EventsType = None):
+        super().__init__(
+            children=children,
+            classes=classes,
+            styles=styles,
+            props=props,
+            events=events)
+
+
+class QBar(Component):
+    """
+    ref. https://quasar.dev/vue-components/bar#qbar-api
+    """
+    component = 'q-bar'
+

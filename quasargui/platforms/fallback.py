@@ -2,7 +2,8 @@ import json
 from typing import TYPE_CHECKING
 
 from quasargui.base import Component
-from quasargui.quasar_components import QBar, QButton, QItem, QItemSection, QList, QMenu, QSeparator, QTooltip
+from quasargui.quasar_components import QButton, QItem, QItemSection, QList, QMenu, QSeparator, QTooltip, QIcon
+from quasargui.layout import QBar
 from quasargui.typing import MenuSpecType
 
 if TYPE_CHECKING:

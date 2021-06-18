@@ -18,6 +18,12 @@ def merge_classes(*args) -> str:
 
 
 def build_props(defaults: dict, props: dict, specials: dict = None) -> dict:
+    """
+    :param defaults:
+    :param props: overrides defaults (always)
+    :param specials: only adds/overrides a default value if a special value is not None.
+    :return:
+    """
     my_props = {}
     my_props.update(defaults)
     props = props or {}
