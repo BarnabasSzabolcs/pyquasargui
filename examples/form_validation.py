@@ -24,7 +24,7 @@ def on_reset():
     input_age.reset_validation()
 
 
-Input.defaults['props'].update({
+QInput.defaults['props'].update({
     'filled': True,
     'lazy-rules': True
 })
@@ -32,17 +32,17 @@ Input.defaults['props'].update({
 
 accept = Model(False)
 
-input_name = Input('Your name *', props={
+input_name = QInput('Your name *', props={
     'hint': 'Name and surname',
     'rules': JSRaw("[ val => val && val.length > 0 || 'Please type something']")
 })
-input_age = Input('Your age *', type='number', props={
+input_age = QInput('Your age *', type='number', props={
     'rules': JSRaw("""[
               val => val !== null && val !== '' || 'Please type your age',
               val => val > 0 && val < 100 || 'Please type a real age'
             ]""")
 })
-validate_on_submit = Form(
+validate_on_submit = QForm(
     styles={'max-width': '30em', 'margin': '0 auto'},
     events={
         'submit.prevent.stop': on_submit,
@@ -55,20 +55,20 @@ validate_on_submit = Form(
         ]),
         input_name,
         input_age,
-        Toggle('I accept the license and terms', accept),
+        QToggle('I accept the license and terms', accept),
         Columns([
-            Button('Submit', type='submit', color='primary', props={
+            QButton('Submit', type='submit', color='primary', props={
                 'unelevated': False
             }),
-            Button('Reset', type='reset', color='primary', props={
+            QButton('Reset', type='reset', color='primary', props={
                 'flat': True
             })
         ])
     ])
 
-layout = Layout([
-    Header(['Form validation <small>- on submit</small>']),
-    Page([validate_on_submit])
+layout = QLayout([
+    QHeader(['Form validation <small>- on submit</small>']),
+    QPage([validate_on_submit])
 ])
 
 quasargui.run(layout, debug=True)

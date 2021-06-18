@@ -29,7 +29,7 @@ def reset_colors():
 
 
 buttons = [
-    Button(
+    QButton(
         label=str(i),
         color=colors[i],
         props={'padding': 'xs xs'},
@@ -43,11 +43,11 @@ buttons = [
 result_layout = Rows(classes='q-ma-lg', children=[
     "(placeholder for the buttons)",
     Columns(classes='q-gutter-x-xs q-my-md', children=[
-        Button(
+        QButton(
             label='Back',
             color='grey-7',
             events={'click': lambda: set_main_component(form_layout)}),
-        Button(
+        QButton(
             label='Reset',
             color='grey-7',
             events={'click': lambda: reset_colors()})
@@ -80,7 +80,7 @@ form_layout = Rows(
     classes='q-ma-lg q-gutter-md',
     children=[
         '<h5>Dynamic components</h5>',
-        Input(
+        QInput(
             label='Enter a number between 1 and 100',
             model=n_buttons,
             styles={'min-width': "30em"}),
@@ -90,7 +90,7 @@ form_layout = Rows(
                 classes="q-ml-sm",
                 children=["You have entered: ", n_buttons])
         ),
-        Button(
+        QButton(
             label='ok',
             props={'color': 'primary'},
             events={'click': show_buttons_table})

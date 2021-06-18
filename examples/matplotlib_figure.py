@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 
 import quasargui
 from quasargui import *
+from quasargui.plot import Plot
 
 loading = Model[bool](True)
 calculation_time = Model(0.0)
@@ -68,23 +69,23 @@ def redraw_plot():
 
 
 # This example loads the plot on load.
-Toggle.defaults['props'] = {
+QToggle.defaults['props'] = {
     'color': 'white',
     'keep-color': True,
     'left-label': True
 }
-layout = Layout(events={'load': redraw_plot}, children=[
-    Header([
-        Toolbar([
-            ToolbarTitle([
-                Icon('insights', 'lg', classes='q-mx-md'),
+layout = QLayout(events={'load': redraw_plot}, children=[
+    QHeader([
+        QToolbar([
+            QToolbarTitle([
+                QIcon('insights', 'lg', classes='q-mx-md'),
                 'Plot demo <small>- Stock simulation by coin flip</small>'
             ]),
-            Toggle(label='Interactive', model=interactive),
-            Toggle(label='Animated', model=animated)
+            QToggle(label='Interactive', model=interactive),
+            QToggle(label='Animated', model=animated)
         ])
     ]),
-    Page([
+    QPage([
         plot,
         v_if(
             interactive,
@@ -100,18 +101,18 @@ layout = Layout(events={'load': redraw_plot}, children=[
             ])
         )
     ]),
-    Drawer([Rows([
-        Input(label='Number of coinflips', model=n),
-        Input(label='Number of screnarios', model=n_processes),
-        Input(label='Start value (S_0)', model=start),
-        Input(label='Drift (μ)', model=drift),
-        Input(label='Variance (σ)', model=variance),
-        Button(label='Redraw', events={'click': redraw_plot}, props={'loading': loading}),
-        Button(label='Add scenario', events={'click': add_scenario}, props={'disable': loading}),
+    QDrawer([Rows([
+        QInput(label='Number of coinflips', model=n),
+        QInput(label='Number of screnarios', model=n_processes),
+        QInput(label='Start value (S_0)', model=start),
+        QInput(label='Drift (μ)', model=drift),
+        QInput(label='Variance (σ)', model=variance),
+        QButton(label='Redraw', events={'click': redraw_plot}, props={'loading': loading}),
+        QButton(label='Add scenario', events={'click': add_scenario}, props={'disable': loading}),
     ])]),
     v_if(
         calculation_time,
-        Footer(['Plotting took ', calculation_time, ' seconds.'])
+        QFooter(['Plotting took ', calculation_time, ' seconds.'])
     )
 ])
 

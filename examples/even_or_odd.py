@@ -7,9 +7,9 @@ even = Computed(lambda x, y: (x+y) % 2 == 0, a, b)
 odd = Computed(lambda x: not x, even)
 
 layout = Rows([
-    Input('a', model=a),
+    QInput('a', model=a),
     '+',
-    Input('b', model=b),
+    QInput('b', model=b),
     v_if(even, Div(['is even'])),
     v_if(odd, Div(['is odd'])),
 ])

@@ -25,8 +25,8 @@ class MySingleFileComponent(SingleFileComponent):
 
 
 model = Model(3)
-layout = Layout([
-    Page([
+layout = QLayout([
+    QPage([
         MyComponent([
             Heading(5, 'MyComponent', classes='q-my-sm'),
             'written in python, also importing some external script.',

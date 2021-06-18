@@ -1,263 +1,33 @@
+"""
+Improved controls for data input.
+The logic is that you choose your datatype
+and a corresponding appearance that fits.
+
+Everything is set up for convenience.
+"""
+
 import datetime
 from typing import List, Type, Union
 
 from quasargui.base import Component, ComponentWithModel, LabeledComponent, Slot, JSRaw
-from quasargui.components import Div, Button, Icon, PopupProxy
+from quasargui.components import Div
 from quasargui.model import Model, Renderable, Computed, Reactive
+from quasargui.quasar_components import QButton, QEditor, QIcon, QPopupProxy
+from quasargui.quasar_form import (
+    QInput, QSelect, QField, QButtonToggle, QOptionGroup, QKnob, QSlider,
+    QTimePicker, QDatePicker, QColorPicker)
 from quasargui.tools import build_props, merge_classes
-from quasargui.typing import ClassesType, StylesType, PropsType, EventsType, PropValueType, ChildrenType
+from quasargui.typing import ClassesType, StylesType, PropsType, EventsType
 
 
-class Input(ComponentWithModel):
-    """
-    ref. https://quasar.dev/vue-components/input#qinput-api
-    """
-    component = 'q-input'
-    defaults = {'props': {}}
-
-    # noinspection PyShadowingBuiltins
-    def __init__(self,
-                 label: str = None,
-                 model: Model = None,
-                 type: PropValueType[str] = None,
-                 classes: ClassesType = None,
-                 styles: StylesType = None,
-                 props: PropsType = None,
-                 events: EventsType = None,
-                 children: List[Slot] = None):
-        props = build_props({}, props, {
-            'label': label,
-            'type': type,
-        })
-        if props.get('type', '') == 'number':
-            model = model or Model('')
-            model.modifiers.add('number')
-        used_slots = {slot.name for slot in children or []}
-        bottom_slots = {'error', 'hint', 'counter'}
-        bottom_slots_used = used_slots & bottom_slots
-        if bottom_slots_used and 'bottom-slots' not in props:
-            props['bottom-slots'] = True
-        if 'label' in used_slots and 'label-slot' not in props:
-            props['label-slot'] = True
-        super().__init__(
-            model=model,
-            classes=classes,
-            styles=styles,
-            props=props,
-            events=events,
-            children=children)
-
-    def validate(self):
-        return self.api.call_component_method(self.id, 'validate')
-
-    def reset_validation(self):
-        return self.api.call_component_method(self.id, 'resetValidation')
-
-
-class Editor(Component):
-    """
-    Editor does not work for some reason :(
-
-    ref. https://quasar.dev/vue-components/editor
-    """
-    component = 'q-editor'
-
-    def __init__(self,
-                 model: Model = None,
-                 classes: ClassesType = None,
-                 styles: StylesType = None,
-                 props: PropsType = None,
-                 children: List[Slot] = None,
-                 events: EventsType = None):
-        model = model or Model('')
-        props = props or {}
-        props['v-model'] = model
-        super().__init__(classes=classes, styles=styles, children=children, props=props, events=events)
-
-
-class Select(LabeledComponent):
-    """
-    ref. https://quasar.dev/vue-components/select#qselect-api
-    """
-    component = 'q-select'
-
-
-class FilePicker(LabeledComponent):
-    """
-    Use rather InputFile
-    ref. https://quasar.dev/vue-components/file-picker#qfile-api
-    """
-    component = 'q-file'
-
-
-class Form(Component):
-    component = 'q-form'
-    defaults = {'classes': 'q-gutter-md'}
-
-    def __init__(self,
-                 children: ChildrenType = None,
-                 classes: ClassesType = None,
-                 styles: StylesType = None,
-                 events: EventsType = None,
-                 ):
-        super().__init__(children=children, classes=classes, styles=styles, events=events)
-
-
-class Field(LabeledComponent):
-    """
-    It is a wrapper for custom form fields.
-    Basically it provides a label for a field.
-
-    model parameter is for prop 'clearable'
-    (if True, and the clear button is pressed, it sets the model to None).
-    ref. https://quasar.dev/vue-components/field#qfield-api
-    """
-    component = 'q-field'
-    defaults = {'props': {
-        # 'stack-label': True
-    }}
-
-
-class Radio(LabeledComponent):
-    """
-    Probably better is to use OptionGroup (a group of radio's).
-    ref. https://quasar.dev/vue-components/radio#qradio-api
-    """
-    component = 'q-radio'
-
-
-class Checkbox(LabeledComponent):
-    component = 'q-checkbox'
-
-
-class Toggle(LabeledComponent):
-    """
-    ref. https://quasar.dev/vue-components/toggle#qtoggle-api
-    """
-    component = 'q-toggle'
-
-
-class ButtonToggle(ComponentWithModel):
-    """
-    A group of buttons from which one is active at a time.
-    ref. https://quasar.dev/vue-components/button-toggle#qbtntoggle-api
-    """
-    component = 'q-btn-toggle'
-    defaults = {'props': {
-        'unelevated': True
-    }}
-
-    def __init__(self,
-                 model: Renderable = None,
-                 options: PropValueType = None,
-                 children: ChildrenType = None,
-                 classes: ClassesType = None,
-                 styles: StylesType = None,
-                 props: PropsType = None,
-                 events: EventsType = None):
-        props = build_props({}, props, {'options': options})
-        super().__init__(model=model,
-                         children=children,
-                         classes=classes,
-                         styles=styles,
-                         props=props,
-                         events=events)
-
-
-class OptionGroup(ComponentWithModel):
-    """
-    prop 'label' does not work in Quasar.
-    """
-    component = 'q-option-group'
-    defaults = {
-        'props': {
-            'inline': True,
-        }}
-
-    # noinspection PyShadowingBuiltins
-    def __init__(self,
-                 model: Renderable = None,
-                 type: PropValueType[str] = None,
-                 options: PropValueType = None,
-                 children: ChildrenType = None,
-                 classes: ClassesType = None,
-                 styles: StylesType = None,
-                 props: PropsType = None,
-                 events: EventsType = None):
-        props = build_props(props or {}, {
-            'type': type,
-            'options': options,
-        })
-        if model is not None:
-            self._model = model
-        elif props.get('type', 'radio') == 'radio':
-            self._model = Model('')
-        else:
-            self._model = Model([])
-        super().__init__(model=self._model,
-                         children=children,
-                         classes=classes,
-                         styles=styles,
-                         props=props,
-                         events=events)
-
-
-class Knob(ComponentWithModel):
-    """
-    ref. https://quasar.dev/vue-components/knob#qknob-api
-    """
-    component = 'q-knob'
-    defaults = {
-        'props': {
-            'track-color': 'grey-3',
-            'color': 'primary',
-            'unelevated': True,
-            'show-value': True
-        }
-    }
-
-
-class Slider(ComponentWithModel):
-    """
-    ref. https://quasar.dev/vue-components/slider#qslider-api
-    """
-    component = 'q-slider'
-    defaults = {
-        'props': {
-            'label': True
-        }
-    }
-
-
-class Range(ComponentWithModel):
-    """
-    ref. https://quasar.dev/vue-components/range#qrange-api
-    """
-    component = 'q-range'
-    defaults = {
-        'props': {
-            'label': True
-        }
-    }
-
-
-class TimePicker(ComponentWithModel):
-    component = 'q-time'
-
-
-class DatePicker(ComponentWithModel):
-    component = 'q-date'
-
-
-class ColorPicker(ComponentWithModel):
-    component = 'q-color'
-
-
-class InputStr(Input):
+class InputStr(QInput):
     """This is just an alias for the sake of completeness"""
 
 
 class InputText(Component):
+    """
+    NOTE: This component does not work.
+    """
     defaults = {
         'label_classes': 'q-mt-sm'
     }
@@ -290,7 +60,7 @@ class InputText(Component):
             self.component = 'div'
             children = [
                 label,
-                Editor(model=model, classes=classes, styles=styles, props=props, events=events, children=children)
+                QEditor(model=model, classes=classes, styles=styles, props=props, events=events, children=children)
             ]
             label_classes = merge_classes(self.defaults['label_classes'], label_classes)
             super().__init__(classes=label_classes, children=children)
@@ -373,7 +143,7 @@ class _NumericInput(ComponentWithModel):
         if appearance in {'knob', 'slider'}:
             min = 0 if min is None else min
             max = 100 if max is None else max
-            component_class = {'knob': Knob, 'slider': Slider}[appearance]
+            component_class = {'knob': QKnob, 'slider': QSlider}[appearance]
 
             control_props = build_props({'snap': self._type == int}, props)
             control_props = build_props(self.defaults['control_props'], control_props)
@@ -462,14 +232,14 @@ class InputChoice(LabeledComponent):
             List[dict] format yields the value of 'value' field as value, if dict has only 'label' and 'value' fields.
             Otherwise List[dict] format yields the whole dict of the selected item.
             This behavior can be overridden with item_props
-            that is sent to Select ('select'), OptionGroup ('radio') or ButtonToggle ('buttons') as props parameter.
+            that is sent to QSelect ('select'), QOptionGroup ('radio') or QButtonToggle ('buttons') as props parameter.
         :param choices: format is ['choice 1', 'choice 2', ...] or [{'label':'Choice 1', 'value': 1}, ...].
         :param appearance:
             if multiple=False: 'auto', 'radio', 'buttons' or 'select'.
             'auto' means 'radio' for small lists, 'select' for large lists.
             if multiple=True: 'auto', 'checkboxes', 'toggles', 'select' or 'tags'
             'auto' means 'checkboxes' for small lists, 'select' for large lists, 'tags' if choices is None.
-        :param item_props: The props for the items. (also if appearance=='select', props for the Select)
+        :param item_props: The props for the items. (also if appearance=='select', props for the QSelect)
         :param classes:
         :param styles:
         :param label_props:
@@ -540,9 +310,9 @@ class InputChoice(LabeledComponent):
                     'checkboxes': 'checkbox',
                     'toggles': 'toggle',
                 }[appearance]
-                children += [OptionGroup(model=model, type=type_, options=choices, props=item_props)]
+                children += [QOptionGroup(model=model, type=type_, options=choices, props=item_props)]
             elif appearance == 'buttons':
-                children += [ButtonToggle(model=model, options=choices, props=item_props)]
+                children += [QButtonToggle(model=model, options=choices, props=item_props)]
         elif appearance == 'select':
             if isinstance(choices, Reactive):
                 is_label_value_choice = Computed(is_lvc, choices)
@@ -561,7 +331,7 @@ class InputChoice(LabeledComponent):
                     'multiple': multiple,
                 }
             )
-            children = [Select(label=label, model=model, props=item_props)]
+            children = [QSelect(label=label, model=model, props=item_props)]
         elif appearance == 'tags':
             label_props = build_props({
                 'hide-bottom-space': True
@@ -572,7 +342,7 @@ class InputChoice(LabeledComponent):
                 # 'separators': [',']
             }, item_props)
             children = [
-                Field(label=label, model=model, props=label_props, children=[
+                QField(label=label, model=model, props=label_props, children=[
                     Slot('control', [
                         VueTagsInput(model=model, props=item_props)
                     ])
@@ -635,13 +405,13 @@ class InputFile(LabeledComponent):
         children = children or []
         if appearance == 'icon':
             slots = [
-                Slot('prepend' if icon_left else 'append', [Icon(icon)])
+                Slot('prepend' if icon_left else 'append', [QIcon(icon)])
             ]
             children = slots + children
         elif appearance == 'browse':
             slots = [
                 Slot('prepend' if button_left else 'append', [
-                    Button(button_caption, props=button_props, events={
+                    QButton(button_caption, props=button_props, events={
                         'click': JSRaw(
                             """
                             (function(e){
@@ -723,7 +493,7 @@ class _InputWithPicker(ComponentWithModel):
     def _create_popup_slots(self, model):
         slots = []
         for position, icon, picker_class in self.defaults['popup_slots']:
-            popup = PopupProxy(
+            popup = QPopupProxy(
                 props=self.defaults['popup_props'],
                 children=[picker_class(
                     model,
@@ -731,7 +501,7 @@ class _InputWithPicker(ComponentWithModel):
                     children=[self._popup_buttons()])
                 ])
             slots.append(Slot(position, [
-                Icon(name=icon, classes='cursor-pointer', children=[popup])
+                QIcon(name=icon, classes='cursor-pointer', children=[popup])
             ]))
         return slots
 
@@ -744,7 +514,7 @@ class _InputWithPicker(ComponentWithModel):
         return Div(
             classes=self.defaults['popup_row_classes'],
             children=[
-                Button(props=self.defaults['button_props'])
+                QButton(props=self.defaults['button_props'])
             ])
 
     @classmethod
@@ -776,7 +546,7 @@ class InputTime(_InputWithPicker):
             'format24h': True
         },
         'popup_slots': [
-            ('append', 'access_time', TimePicker),
+            ('append', 'access_time', QTimePicker),
         ]
     }
     defaults = _InputWithPicker._build_defaults(_InputWithPicker.defaults, defaults)
@@ -798,7 +568,7 @@ class InputDate(_InputWithPicker):
         },
         'picker_props': {},
         'popup_slots': [
-            ('append', 'event', DatePicker),
+            ('append', 'event', QDatePicker),
         ]
     }
     defaults = _InputWithPicker._build_defaults(_InputWithPicker.defaults, defaults)
@@ -822,8 +592,8 @@ class InputDateTime(_InputWithPicker):
             'mask': 'YYYY-MM-DD HH:mm',
         },
         'popup_slots': [
-            ('prepend', 'event', DatePicker),
-            ('append', 'access_time', TimePicker),
+            ('prepend', 'event', QDatePicker),
+            ('append', 'access_time', QTimePicker),
         ]
     }
     defaults = _InputWithPicker._build_defaults(_InputWithPicker.defaults, defaults)
@@ -854,7 +624,7 @@ class InputColor(_InputWithPicker):
         },
         'picker_props': {},
         'popup_slots': [
-            ('append', 'colorize', ColorPicker),
+            ('append', 'colorize', QColorPicker),
         ]
     }
     defaults = _InputWithPicker._build_defaults(_InputWithPicker.defaults, defaults)

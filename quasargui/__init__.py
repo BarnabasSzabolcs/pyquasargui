@@ -10,7 +10,8 @@ from quasargui.main import run, set_main_component
 from quasargui.base import *
 from quasargui.callbacks import *
 from quasargui.components import *
-from quasargui.form import *
+from quasargui.quasar_components import *
+from quasargui.quasar_form import *
+from quasargui.quasar_form_improved import *
 from quasargui.layout import *
 from quasargui.model import *
-from quasargui.plot import Plot

@@ -45,7 +45,7 @@ text_no_conflict = Div(
         *get_classes('no_conflict')
     ])
 
-layout = Layout([Page(classes='q-ma-lg easyread', children=[
+layout = QLayout([QPage(classes='q-ma-lg easyread', children=[
     Heading(5, 'Dynamic vs static classes'),
     "Be careful not to mix classes with overlapping meanings. <br>" 
     "Props's class always comes second in class html attribute.",
@@ -54,7 +54,7 @@ layout = Layout([Page(classes='q-ma-lg easyread', children=[
         text_lg_sm,
         text_no_conflict
     ]),
-    Toggle('Make text large', is_large, props={'left-label': True})
+    QToggle('Make text large', is_large, props={'left-label': True})
 ])])
 
 run(layout, 'Dynamic vs static classes')
