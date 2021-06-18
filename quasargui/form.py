@@ -54,6 +54,27 @@ class Input(ComponentWithModel):
         return self.api.call_component_method(self.id, 'resetValidation')
 
 
+class Editor(Component):
+    """
+    Editor does not work for some reason :(
+
+    ref. https://quasar.dev/vue-components/editor
+    """
+    component = 'q-editor'
+
+    def __init__(self,
+                 model: Model = None,
+                 classes: ClassesType = None,
+                 styles: StylesType = None,
+                 props: PropsType = None,
+                 children: List[Slot] = None,
+                 events: EventsType = None):
+        model = model or Model('')
+        props = props or {}
+        props['v-model'] = model
+        super().__init__(classes=classes, styles=styles, children=children, props=props, events=events)
+
+
 class Select(LabeledComponent):
     """
     ref. https://quasar.dev/vue-components/select#qselect-api
@@ -236,7 +257,58 @@ class InputStr(Input):
     """This is just an alias for the sake of completeness"""
 
 
-class InputBool(ComponentWithModel):
+class InputText(Component):
+    defaults = {
+        'label_classes': 'q-mt-sm'
+    }
+
+    def __init__(self,
+                 label: str = None,
+                 model: Model = None,
+                 appearance: str = 'editor',
+                 classes: ClassesType = None,
+                 label_classes: ClassesType = None,
+                 styles: StylesType = None,
+                 props: PropsType = None,
+                 events: EventsType = None,
+                 children: List[Slot] = None):
+        """
+        :param label:
+        :param model:
+        :param appearance: 'editor' or 'textarea'
+        :param classes:
+        :param styles:
+        :param props:
+        :param events:
+        :param children:
+        """
+        model = model or Model('')
+        if appearance == 'editor':
+            raise NotImplementedError('Cannot use appearance == "editor" '
+                                      'at the moment since it is not editable for some reason'
+                                      'and we couldn\'t fix it.')
+            self.component = 'div'
+            children = [
+                label,
+                Editor(model=model, classes=classes, styles=styles, props=props, events=events, children=children)
+            ]
+            label_classes = merge_classes(self.defaults['label_classes'], label_classes)
+            super().__init__(classes=label_classes, children=children)
+        else:
+            self.component = 'q-input'
+            props = build_props({'type': 'textarea'}, props, {
+                'label': label,
+                'v-model': model
+            })
+            super().__init__(
+                classes=classes,
+                styles=styles,
+                props=props,
+                events=events,
+                children=children)
+
+
+class InputBool(LabeledComponent):
     def __init__(self,
                  label: str = None,
                  model: Model = None,
@@ -252,8 +324,8 @@ class InputBool(ComponentWithModel):
         }[appearance]
         model = model or Model(False)
         model.set_conversion(bool, bool)
-        props = build_props({}, props, {'label': label})
         super().__init__(
+            label=label,
             model=model,
             classes=classes,
             styles=styles,
