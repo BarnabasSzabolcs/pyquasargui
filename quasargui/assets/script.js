@@ -1,5 +1,3 @@
-window.debug = false
-
 function registerSfc(component_name, script, style) {
   let node
   node = document.createElement('script')
@@ -20,7 +18,7 @@ function createEventCB(id) {
 }
 
 function sendLog() {
-  if (window.debug)
+  if (app._data.debug)
     window.pywebview.api.print_log(arguments)
 }
 
@@ -228,6 +226,7 @@ const app = new Vue({
     return {
       mainComponentId: null,
       menuId: null,
+      debug: false,
       data: {}, // holds the Model values {id: value}
       computed: {}, // holds computed values
       componentStore: {}, // holds the Component specifications {id: descriptor}
@@ -248,7 +247,7 @@ const app = new Vue({
   },
   methods: {
     setDebug(debug) {
-      window.debug = debug
+      this.debug = debug
       if (debug) {
         setTimeout(() => {
           document.getElementById('debug').style.display = 'block'
