@@ -1,7 +1,7 @@
 import json
 import re
 import weakref
-from typing import List, Tuple, Dict, Union
+from typing import List, Tuple, Dict, Union, Optional
 
 import webview
 from webview import Window
@@ -46,9 +46,11 @@ class Api:
                  debug: bool = False,
                  render_debug: bool = False,
                  ):
+        if main_component.api is not None:
+            raise AssertionError('A component can be only attached to a single window at a time.')
         self.main_component = main_component
         self.menu = menu
-        self.window = None
+        self._window = None
         self.debug = debug
         self.render_debug = render_debug
         self.model_data_queue = []
@@ -57,7 +59,7 @@ class Api:
         self.plugins = self.plugins_class(self)
 
     def init(self, window):
-        self.window = window
+        self._window = window
         if self.menu is not None:
             self.set_menu(self.menu)
         window.evaluate_js('app.setDebug({render_debug})'.format(
@@ -66,6 +68,81 @@ class Api:
         self.set_main_component(self.main_component)
         self.plugins.init()
 
+    def close_window(self, exit_if_last: bool = True):
+        """
+        :param exit_if_last: exists app if this was the last window
+        """
+        global window_api_list
+        self.main_component.remove_api()
+        window_api_list = [
+            (window, api) for window, api in window_api_list
+            if self._window != window]
+        window = self._window
+        self._window = None
+        window.destroy()
+        if exit_if_last and not window_api_list:
+            exit(0)
+
+    def set_window_title(self, title=str):
+        self._window.set_title(title)
+
+    def toggle_fullscreen(self):
+        self._window.toggle_fullscreen()
+
+    def minimize_window(self):
+        self._window.minimize()
+
+    def restore_window(self):
+        self._window.restore()
+
+    def hide_window(self):
+        self._window.hide()
+
+    def show_window(self):
+        self._window.show()
+
+    def move_window(self, position: Tuple[int, int]):
+        self._window.move(*position)
+
+    def resize_window(self, size: Tuple[Optional[int], Optional[int]]):
+        if size[0] is None:
+            size = (self._window.width, size[1])
+        if size[1] is None:
+            size = (size[0], self._window.height)
+        self._window.resize(*size)
+
+    def show_save_dialog(self, directory: str = '', save_filename: str = ''):
+        """
+        :param directory: Initial directory
+        :param save_filename: Default filename.
+        :return: A tuple of selected files, None if cancelled.
+        """
+        return self._window.create_file_dialog(
+            webview.SAVE_DIALOG, directory=directory, save_filename=save_filename)
+
+    def show_open_dialog(self, directory: str = '', file_types=(), allow_multiple: bool = False):
+        """
+        :param directory: Initial directory
+        :param file_types: Allowed file types in open file dialog. Should be a tuple of strings in the format:
+            filetypes = ('Description (*.extension[;*.extension[;...]])', ...)
+        :param allow_multiple: Allow multiple selection.
+        :return: A tuple of selected files, None if cancelled.
+        """
+        return self._window.create_file_dialog(
+            webview.OPEN_DIALOG, directory=directory, file_types=file_types, allow_multiple=allow_multiple)
+
+    def show_folder_dialog(self, directory: str = ''):
+        """
+        :param directory: Initial directory
+        :return: A tuple of selected folders, None if cancelled.
+        """
+        return self._window.create_file_dialog(
+            webview.FOLDER_DIALOG, directory=directory)
+
+    def evaluate_js(self, code):
+        if self._window is not None:
+            self._window.evaluate_js(code)
+
     def set_main_component(self, component: Component):
         component.set_api(self)
         cmd = 'app.setMainComponent({component})'.format(
@@ -73,10 +150,10 @@ class Api:
         )
         if self.debug:
             print(cmd)
-        self.window.evaluate_js(cmd)
+        self._window.evaluate_js(cmd)
 
     def get_model_data(self, data_id: int):
-        return self.window.evaluate_js('app.getData({data_id})'.format(
+        return self._window.evaluate_js('app.getData({data_id})'.format(
             data_id=data_id
         ))
 
@@ -88,7 +165,7 @@ class Api:
     def flush_model_data(self, data_id=0):
         if (not self.model_data_queue) or (data_id and self.model_data_queue[0]['id'] != data_id):
             return
-        self.window.evaluate_js(
+        self._window.evaluate_js(
             'app.setData({payload})'.format(
                 payload=json.dumps(self.model_data_queue)
             ))
@@ -97,7 +174,7 @@ class Api:
     def set_component(self, component_vue):
         if self.debug:
             print('set_component', component_vue)
-        self.window.evaluate_js(
+        self._window.evaluate_js(
             'app.refreshComponent({component_vue})'.format(
                 component_vue=json.dumps(component_vue)))
 
@@ -105,7 +182,7 @@ class Api:
         """
         eg. call_component_method(12, 'validate()')
         """
-        return self.window.evaluate_js('app.callComponentMethod({params})'.format(
+        return self._window.evaluate_js('app.callComponentMethod({params})'.format(
             params=json.dumps({'component_id': component_id, 'method': method})
         ))
 
@@ -114,18 +191,18 @@ class Api:
         if not not_added:
             return
         self.scripts_imported |= set(not_added)
-        self.window.evaluate_js('app.addScripts({})'.format(json.dumps(not_added)))
+        self._window.evaluate_js('app.addScripts({})'.format(json.dumps(not_added)))
 
     def import_styles(self, styles: List[str]):
         not_added = [styles for styles in styles if styles not in self.scripts_imported]
         if not not_added:
             return
         self.styles_imported |= set(not_added)
-        self.window.evaluate_js('app.addStyles({})'.format(json.dumps(not_added)))
+        self._window.evaluate_js('app.addStyles({})'.format(json.dumps(not_added)))
 
     @property
     def is_cocoa(self):
-        return self.window.gui.__name__ == 'webview.platforms.cocoa'
+        return self._window.gui.__name__ == 'webview.platforms.cocoa'
 
     def set_menu(self, menuspec: Union[MenuSpecType, Dict[str, MenuSpecType]]):
         """
@@ -151,13 +228,13 @@ class Api:
         self.menu = menuspec
         if self.is_cocoa:
             from quasargui.platforms.cocoa import set_menu as set_menu_cocoa
-            set_menu_cocoa(self.window, menuspec)
+            set_menu_cocoa(self._window, menuspec)
         else:
             from quasargui.platforms.fallback import set_menu as set_menu_fallback
             set_menu_fallback(self, menuspec)
 
     def set_key_shortcut(self, key: str, cb: EventCBType):
-        self.window.evaluate_js('app.setKeyShortcut({key}, {cb})'.format(
+        self._window.evaluate_js('app.setKeyShortcut({key}, {cb})'.format(
             key=json.dumps(key),
             cb=json.dumps(EventCallbacks.render_cb(cb))
         ))
@@ -184,7 +261,7 @@ class Api:
                 template=template.replace('`', '\\`')
             ),
             script)
-        self.window.evaluate_js('registerSfc({component_name}, {script}, {style})'.format(
+        self._window.evaluate_js('registerSfc({component_name}, {script}, {style})'.format(
             component_name=json.dumps(component_name),
             script=json.dumps(script),
             style=json.dumps(style)
@@ -243,40 +320,108 @@ class JsApi:
 
 WINDOW, API = 0, 1
 window_api_list: List[Tuple[Window, Api]] = []
+STARTED = False
 
 
 def run(
         component: Component,
         title: str = None,
         menu: MenuSpecType = None,
+        min_size: Tuple[int, int] = None,
+        size: Tuple[Optional[int], Optional[int]] = (None, None),
+        position: Tuple[Optional[int], Optional[int]] = (None, None),
+        frameless: bool = False,
+        fullscreen: bool = False,
+        localization: dict = None,
         debug: bool = False,
         _render_debug: bool = False,
-        plugins = Plugins
 ):
     """
-    :param component:
+    :param localization: i18n strings for the main menu items.
+            See: https://pywebview.flowrl.com/examples/localization.html
+    :param component: the component to load as main component.
     :param menu: [menuSpec1, menuSpec2, ...]
             where menuSpec is {'title': str, 'children': [menuSpec], 'key': str, 'icon': ...}
             if menuSpec is None or {}, a separator is displayed
             (See quasargui.main.Api.set_menu's menuspec)
     :param title: The title of the window.
+    :param min_size:
+    :param size:
+    :param position:
+    :param frameless:
+    :param fullscreen:
     :param debug: Enables right-click inspection in the GUI window.
     :param _render_debug: this option is for quasargui development.
     It displays all the rendering in python's standard output.
+    """
+    api, window = create_window(component,
+                                title=title,
+                                menu=menu,
+                                min_size=min_size,
+                                size=size,
+                                position=position,
+                                frameless=frameless,
+                                fullscreen=fullscreen,
+                                debug=debug,
+                                _render_debug=_render_debug)
+    webview.start(lambda window_: start_app(api, window_), window, debug=debug, localization=localization or {})
+
+
+def start_app(api, window):
+    global STARTED
+    api.init(window)
+    STARTED = True
+
+
+def create_window(
+        component: Component,
+        title: str = None,
+        menu: MenuSpecType = None,
+        min_size: Tuple[int, int] = None,
+        size: Tuple[Optional[int], Optional[int]] = (None, None),
+        position: Tuple[Optional[int], Optional[int]] = (None, None),
+        frameless: bool = False,
+        fullscreen: bool = False,
+        debug: bool = None,
+        _render_debug: bool = None,
+) -> Tuple[Api, Window]:
+    """
+    Creates a new window.
+    :param component: a component that is not attached to any window yet.
+    :param title:
+    :param menu:
+    :param min_size:
+    :param size:
+    :param position:
+    :param frameless:
+    :param fullscreen:
+    :param debug: Enables right-click inspection in the GUI window.
+    :param _render_debug: this option is for quasargui development.
+    It displays all the rendering in python's standard output.
+    :return:
     """
     api = Api(main_component=component, menu=menu, debug=debug, render_debug=_render_debug)
     window = webview.create_window(
         title or 'Program',
         QUASAR_GUI_INDEX_PATH,
         js_api=JsApi(debug=debug),
-        min_size=(600, 450))
+        min_size=min_size or (200, 100),
+        x=position[0],
+        y=position[1],
+        width=size[0] or 800,
+        height=size[1] or 600,
+        frameless=frameless,
+        fullscreen=fullscreen
+    )
     window_api_list.append((window, api))
-    webview.start(api.init, window, debug=debug)
+    if STARTED:
+        api.init(window)
+    return api, window
 
 
-def set_main_component(component: Component):
-    if len(window_api_list) != 1:
-        raise AssertionError(
-            'This function only works for a single window. '
-            'Otherwise use layout.api.set_main_component()')
-    window_api_list[0][API].set_main_component(component)
+def set_main_component(component: Component, window_index: int = 0):
+    try:
+        api = window_api_list[window_index][API]
+    except IndexError:
+        raise AssertionError('No such window: {}'.format(window_index))
+    api.set_main_component(component)

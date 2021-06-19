@@ -15,6 +15,10 @@ Changelog
 - v-if, v-for, stc. as props, with Computed or Model as dynamically updated value
 - deep Model's
 - ability to add external scripts and styles
+- dark mode
+- Quasar plugins (notify, dialog, dark, ...) via component.api.plugins
+- window can be handled directly via component.api
+- handles multiple windows
 - known issues:
   - 'change' event does not fire (workaround: use Model.add_callback)
   - QEditor is not editable (no workaround)

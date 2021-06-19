@@ -160,6 +160,18 @@ class Component:
         if _flush:
             api.flush_model_data()
 
+    def remove_api(self):
+        self.api = None
+        for child in self._children:
+            if hasattr(child, 'remove_api'):
+                child.remove_api()
+        for dependent in self.dependents:
+            if not isinstance(dependent, Callable):
+                dependent.remove_api()
+        for prop in self.props.values():
+            if isinstance(prop, Reactive):
+                prop.remove_api()
+
     @property
     def children(self):
         return self._children
@@ -196,10 +208,7 @@ class ComponentWithModel(Component):
                          styles=styles,
                          props=props,
                          events=events)
-
-    def set_api(self, api: 'Api', _flush: bool = True):
-        super().set_api(api, _flush=_flush)
-        self._model.set_api(api, _flush=_flush)
+        self.dependents.append(self._model)
 
     @property
     def model(self):
