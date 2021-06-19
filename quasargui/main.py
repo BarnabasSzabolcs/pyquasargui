@@ -329,10 +329,16 @@ def run(
         menu: MenuSpecType = None,
         min_size: Tuple[int, int] = None,
         size: Tuple[Optional[int], Optional[int]] = (None, None),
+        position: Tuple[Optional[int], Optional[int]] = (None, None),
+        frameless: bool = False,
+        fullscreen: bool = False,
+        localization: dict = None,
         debug: bool = False,
         _render_debug: bool = False,
 ):
     """
+    :param localization: i18n strings for the main menu items.
+            See: https://pywebview.flowrl.com/examples/localization.html
     :param component: the component to load as main component.
     :param menu: [menuSpec1, menuSpec2, ...]
             where menuSpec is {'title': str, 'children': [menuSpec], 'key': str, 'icon': ...}
@@ -341,6 +347,9 @@ def run(
     :param title: The title of the window.
     :param min_size:
     :param size:
+    :param position:
+    :param frameless:
+    :param fullscreen:
     :param debug: Enables right-click inspection in the GUI window.
     :param _render_debug: this option is for quasargui development.
     It displays all the rendering in python's standard output.
@@ -350,9 +359,12 @@ def run(
                                 menu=menu,
                                 min_size=min_size,
                                 size=size,
+                                position=position,
+                                frameless=frameless,
+                                fullscreen=fullscreen,
                                 debug=debug,
                                 _render_debug=_render_debug)
-    webview.start(lambda window_: start_app(api, window_), window, debug=debug)
+    webview.start(lambda window_: start_app(api, window_), window, debug=debug, localization=localization or {})
 
 
 def start_app(api, window):
@@ -367,9 +379,11 @@ def create_window(
         menu: MenuSpecType = None,
         min_size: Tuple[int, int] = None,
         size: Tuple[Optional[int], Optional[int]] = (None, None),
+        position: Tuple[Optional[int], Optional[int]] = (None, None),
+        frameless: bool = False,
+        fullscreen: bool = False,
         debug: bool = None,
         _render_debug: bool = None,
-        position: Tuple[Optional[int], Optional[int]] = (None, None)
 ) -> Tuple[Api, Window]:
     """
     Creates a new window.
@@ -379,6 +393,8 @@ def create_window(
     :param min_size:
     :param size:
     :param position:
+    :param frameless:
+    :param fullscreen:
     :param debug: Enables right-click inspection in the GUI window.
     :param _render_debug: this option is for quasargui development.
     It displays all the rendering in python's standard output.
@@ -393,7 +409,9 @@ def create_window(
         x=position[0],
         y=position[1],
         width=size[0] or 800,
-        height=size[1] or 600
+        height=size[1] or 600,
+        frameless=frameless,
+        fullscreen=fullscreen
     )
     window_api_list.append((window, api))
     if STARTED:
