@@ -7,7 +7,7 @@ from quasargui.main import create_window
 
 def create_new_window():
     layout = create_layout('New window')
-    create_window(layout, position=(randint(1, 100), randint(1, 100)))
+    create_window(layout, position=(randint(1, 100), randint(1, 100)), size=(400, 400))
     sleep(0.5)
     layout.api.plugins.notify(message='A brand new window!', type='positive')
 
@@ -29,6 +29,16 @@ def create_layout(title):
         immediate=True
     )
     is_fullscreen = Model(False)
+    width = Model(400)
+    width.add_callback(
+        lambda: width.api.resize_window((width.value, None)) if 300 <= width.value <= 1000 else None,
+        immediate=True
+    )
+    height = Model(400)
+    height.add_callback(
+        lambda: height.api.resize_window((None, height.value)) if 300 <= height.value <= 1000 else None,
+        immediate=True
+    )
 
     layout = QLayout([
         QHeader([QToolbar([
@@ -45,8 +55,10 @@ def create_layout(title):
         ])]),
         QPage([
             Rows([
-                QInput('Window title', title_model),
-                QButton('Create new window', events={'click': create_new_window})
+                InputStr('Window title', title_model),
+                QButton('Create new window', events={'click': create_new_window}),
+                QInput('Resize window width', width, type='number'),
+                QInput('Resize window height', height, type='number'),
             ])
         ])
     ])
@@ -54,4 +66,4 @@ def create_layout(title):
 
 
 layout = create_layout('Main window')
-run(layout)
+run(layout, size=(400, 400))

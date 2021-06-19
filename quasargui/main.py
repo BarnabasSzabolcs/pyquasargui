@@ -1,7 +1,7 @@
 import json
 import re
 import weakref
-from typing import List, Tuple, Dict, Union
+from typing import List, Tuple, Dict, Union, Optional
 
 import webview
 from webview import Window
@@ -77,8 +77,9 @@ class Api:
         window_api_list = [
             (window, api) for window, api in window_api_list
             if self._window != window]
-        self._window.destroy()
+        window = self._window
         self._window = None
+        window.destroy()
         if exit_if_last and not window_api_list:
             exit(0)
 
@@ -103,7 +104,11 @@ class Api:
     def move_window(self, position: Tuple[int, int]):
         self._window.move(*position)
 
-    def resize_window(self, size: Tuple[int, int]):
+    def resize_window(self, size: Tuple[Optional[int], Optional[int]]):
+        if size[0] is None:
+            size = (self._window.width, size[1])
+        if size[1] is None:
+            size = (size[0], self._window.height)
         self._window.resize(*size)
 
     def show_save_dialog(self, directory: str = '', save_filename: str = ''):
@@ -135,8 +140,8 @@ class Api:
             webview.FOLDER_DIALOG, directory=directory)
 
     def evaluate_js(self, code):
-        assert (self._window is not None)
-        self._window.evaluate_js(code)
+        if self._window is not None:
+            self._window.evaluate_js(code)
 
     def set_main_component(self, component: Component):
         component.set_api(self)
@@ -322,7 +327,8 @@ def run(
         component: Component,
         title: str = None,
         menu: MenuSpecType = None,
-        min_size: Tuple[int, int] = (0, 0),
+        min_size: Tuple[int, int] = None,
+        size: Tuple[Optional[int], Optional[int]] = (None, None),
         debug: bool = False,
         _render_debug: bool = False,
 ):
@@ -334,11 +340,18 @@ def run(
             (See quasargui.main.Api.set_menu's menuspec)
     :param title: The title of the window.
     :param min_size:
+    :param size:
     :param debug: Enables right-click inspection in the GUI window.
     :param _render_debug: this option is for quasargui development.
     It displays all the rendering in python's standard output.
     """
-    api, window = create_window(component, title, menu, min_size, debug, _render_debug)
+    api, window = create_window(component,
+                                title=title,
+                                menu=menu,
+                                min_size=min_size,
+                                size=size,
+                                debug=debug,
+                                _render_debug=_render_debug)
     webview.start(lambda window_: start_app(api, window_), window, debug=debug)
 
 
@@ -352,10 +365,11 @@ def create_window(
         component: Component,
         title: str = None,
         menu: MenuSpecType = None,
-        min_size: Tuple[int, int] = (0, 0),
+        min_size: Tuple[int, int] = None,
+        size: Tuple[Optional[int], Optional[int]] = (None, None),
         debug: bool = None,
         _render_debug: bool = None,
-        position: Tuple[int, int] = (None, None)
+        position: Tuple[Optional[int], Optional[int]] = (None, None)
 ) -> Tuple[Api, Window]:
     """
     Creates a new window.
@@ -363,6 +377,7 @@ def create_window(
     :param title:
     :param menu:
     :param min_size:
+    :param size:
     :param position:
     :param debug: Enables right-click inspection in the GUI window.
     :param _render_debug: this option is for quasargui development.
@@ -374,9 +389,11 @@ def create_window(
         title or 'Program',
         QUASAR_GUI_INDEX_PATH,
         js_api=JsApi(debug=debug),
-        min_size=min_size,
+        min_size=min_size or (200, 100),
         x=position[0],
-        y=position[1]
+        y=position[1],
+        width=size[0] or 800,
+        height=size[1] or 600
     )
     window_api_list.append((window, api))
     if STARTED:
