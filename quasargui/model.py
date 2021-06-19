@@ -40,6 +40,9 @@ class Reactive(Renderable, Generic[T], metaclass=ABCMeta):
     def set_api(self, api: 'Api', _flush: bool = True):
         raise NotImplementedError
 
+    def remove_api(self):
+        raise NotImplementedError
+
 
 class Model(Reactive, Generic[T]):
     """
@@ -88,6 +91,7 @@ class Model(Reactive, Generic[T]):
         self.from_python = from_python or self.no_conversion
         self.api = None
         self._callbacks: List[CallbackType] = []
+        self._immediate_callbacks: List[CallbackType] = []
         self.modifiers = set()
 
     def __del__(self):
@@ -103,8 +107,15 @@ class Model(Reactive, Generic[T]):
             Model.model_dic[self.id].set_api(api, _flush)
             return
         api.set_model_data(self.id, self.path, self.from_python(self.value))
+        for cb in self._immediate_callbacks:
+            cb()
         if _flush:
             api.flush_model_data(self.id)
+
+    def remove_api(self):
+        self.api = None
+        if self.path:
+            Model.model_dic[self.id].remove_api()
 
     def __getitem__(self, item) -> 'Model':
         return Model(_id=self.id, _path=self.path + [item])
@@ -174,8 +185,15 @@ class Model(Reactive, Generic[T]):
             path = ''
         return "$root.data[" + str(self.id) + "]" + path
 
-    def add_callback(self, fun: CallbackType):
+    def add_callback(self, fun: CallbackType, immediate: bool = True):
+        """
+        :param fun:
+        :param immediate: call callback when api is added
+        :return:
+        """
         self._callbacks.append(fun)
+        if immediate:
+            self._immediate_callbacks.append(fun)
 
     @property
     def callbacks(self) -> List[CallbackType]:
@@ -319,6 +337,10 @@ class Computed(Reactive, Generic[T]):
     def set_api(self, api: 'Api', _flush: bool = True):
         if not self.props:
             self.model.set_api(api, _flush=_flush)
+
+    def remove_api(self):
+        if not self.props:
+            self.model.remove_api()
 
     def add_callback(self, fun: CallbackType):
         if self.props:

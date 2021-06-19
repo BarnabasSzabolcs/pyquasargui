@@ -31,7 +31,6 @@ except ImportError:
 if TYPE_CHECKING:
     # noinspection PyPackageRequirements
     from matplotlib.pyplot import Figure
-    from quasargui.base import Api
 
 
 class Plot(Component):
@@ -74,6 +73,7 @@ class Plot(Component):
         self.img_base64 = Model('')
         self.last_renderer = None
         super().__init__(classes=classes, styles=styles)
+        self.dependents.append(self.img_base64)
 
     def _check_imports(self):
         if self.renderer.value == 'mpld3':
@@ -133,7 +133,3 @@ class Plot(Component):
             return self._merge_vue({
                 'component': 'div'
             })
-
-    def set_api(self, api: 'Api', _flush: bool = True):
-        self.img_base64.set_api(api, _flush=_flush)
-        super().set_api(api, _flush=_flush)
