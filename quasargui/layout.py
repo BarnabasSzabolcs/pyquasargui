@@ -2,21 +2,20 @@ from typing import List, Union
 
 from quasargui.base import Component, ComponentWithModel
 from quasargui.callbacks import toggle
-from quasargui.components import Button
 from quasargui.model import Model, Reactive
+from quasargui.quasar_components import QButton
 from quasargui.tools import merge_classes, build_props
 from quasargui.typing import EventsType, ClassesType, StylesType, PropsType, ChildrenType, PropValueType
 
 
-class Layout(Component):
+class QLayout(Component):
     """
-    q-layout
     see: https://quasar.dev/layout-builder
     """
     component = 'q-layout'
 
     def __init__(self,
-                 children: List[Union['Header', 'Drawer', 'Page', 'Footer']] = None,
+                 children: List[Union['QHeader', 'QDrawer', 'QPage', 'QFooter']] = None,
                  view: str = "hHh lpR fFf",
                  props: PropsType = None,
                  events: EventsType = None
@@ -35,32 +34,32 @@ class Layout(Component):
         sandwich_menus = {}
         header = None
         for child in children:
-            if isinstance(child, Drawer):
+            if isinstance(child, QDrawer):
                 if child.menu_in_header:
                     sandwich_menus[child.props['side']] = child.model
-            if isinstance(child, Header):
+            if isinstance(child, QHeader):
                 header = child
 
         if header is not None and sandwich_menus:
-            target = header.children[0] if isinstance(header.children[0], Toolbar) else header
+            target = header.children[0] if isinstance(header.children[0], QToolbar) else header
             for side, model in sandwich_menus.items():
-                menu_btn = Button(
+                menu_btn = QButton(
                     icon='menu',
-                    classes='float-right' if side == Drawer.RIGHT else '',
+                    classes='float-right' if side == QDrawer.RIGHT else '',
                     props={'dense': True},
                     events={'click': toggle(model)}
                 )
                 target.set_children(
-                    [menu_btn, *target.children] if side == Drawer.LEFT
+                    [menu_btn, *target.children] if side == QDrawer.LEFT
                     else [*target.children, menu_btn])
         return children
     # TODO: we could have here a set_page() function that corresponds to the route's on a webpage.
 
 
-class Header(ComponentWithModel):
+class QHeader(ComponentWithModel):
     """
     q-header
-    Use it within a Layout.
+    Use it within a QLayout.
     ref. https://quasar.dev/layout/header-and-footer#qheader-api
     """
     component = 'q-header'
@@ -85,7 +84,7 @@ class Header(ComponentWithModel):
                  props: PropsType = None
                  ):
         if 1 <= len(children) <= 2 and isinstance(children[-1], str):
-            children = [Toolbar([ToolbarTitle(children)])]
+            children = [QToolbar([QToolbarTitle(children)])]
 
         props = build_props({}, props, {
             'reveal': hide_on_scroll,
@@ -96,10 +95,10 @@ class Header(ComponentWithModel):
         super().__init__(model=model, children=children, classes=classes, styles=styles, props=props)
 
 
-class Drawer(ComponentWithModel):
+class QDrawer(ComponentWithModel):
     """
     q-drawer
-    Use it within a Layout.
+    Use it within a QLayout.
     ref. https://quasar.dev/layout/drawer#qdrawer-api
     """
     component = 'q-drawer'
@@ -133,7 +132,7 @@ class Drawer(ComponentWithModel):
                  events: EventsType = None
                  ):
         """
-        :menu_in_header: if used together with Layout, it instructs to put a close menu into the header.
+        :menu_in_header: if used together with QLayout, it instructs to put a close menu into the header.
         """
         self.menu_in_header = menu_in_header
         children = children
@@ -145,10 +144,10 @@ class Drawer(ComponentWithModel):
         super().__init__(model=model, children=children, classes=classes, styles=styles, props=props, events=events)
 
 
-class Page(Component):
+class QPage(Component):
     """
     q-page wrapped in q-page-container
-    Use it within a Layout.
+    Use it within a QLayout.
     every parameter applies to the q-page.
     """
     component = 'q-page-container'
@@ -173,7 +172,7 @@ class Page(Component):
 
 class _Page(Component):
     """
-    Internal component for the Page,
+    Internal component for the QPage,
     since in quasar q-page is always wrapped into q-page-container.
     """
     component = 'q-page'
@@ -188,7 +187,7 @@ class _Page(Component):
         super().__init__(children=children, classes=classes, styles=styles, props=props, events=events)
 
 
-class Footer(ComponentWithModel):
+class QFooter(ComponentWithModel):
     """
     q-footer
     ref. https://quasar.dev/layout/header-and-footer#qfooter-api
@@ -228,17 +227,48 @@ class Footer(ComponentWithModel):
         super().__init__(model=model, children=children, classes=classes, styles=styles, props=props, events=events)
 
 
-class Toolbar(Component):
+class QToolbar(Component):
     component = 'q-toolbar'
 
 
-class ToolbarTitle(Component):
+class QToolbarTitle(Component):
     component = 'q-toolbar-title'
 
 
-class Space(Component):
+class QSpace(Component):
     component = 'q-space'
 
 
-class Avatar(Component):
-    component = 'q-avatar'
+class QBreadcrumbsElement(Component):
+    """
+    ref. https://quasar.dev/vue-components/breadcrumbs#qbreadcrumbsel-api
+    """
+    component = 'q-breadcrumbs-el'
+
+
+class QBreadcrumbs(Component):
+    """
+    ref. https://quasar.dev/vue-components/breadcrumbs#qbreadcrumbs-api
+    """
+    component = 'q-breadcrumbs'
+
+    def __init__(self,
+                 children: List[QBreadcrumbsElement] = None,
+                 classes: ClassesType = None,
+                 styles: StylesType = None,
+                 props: PropsType = None,
+                 events: EventsType = None):
+        super().__init__(
+            children=children,
+            classes=classes,
+            styles=styles,
+            props=props,
+            events=events)
+
+
+class QBar(Component):
+    """
+    ref. https://quasar.dev/vue-components/bar#qbar-api
+    """
+    component = 'q-bar'
+

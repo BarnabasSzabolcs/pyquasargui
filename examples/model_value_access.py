@@ -29,14 +29,14 @@ deep_data = deep_model['deep']['data']
 list_model = Model(['apple', 'orange'])
 list0 = list_model[0]
 
-layout = Layout([Page([
-    Input('normal:', normal_model, events={
+layout = QLayout([QPage([
+    QInput('normal:', normal_model, events={
         'keyup': lambda: layout.notify("Value is {}".format(normal_model.value))
     }),
-    Input('deep.data:', deep_data, events={
+    QInput('deep.data:', deep_data, events={
         'keyup': lambda: layout.notify("Value is {}".format(deep_data.value))
     }),
-    Input('list[0]:', list0, events={
+    QInput('list[0]:', list0, events={
         'keyup': lambda: layout.notify("Value is {}".format(list0.value))
     }),
 ])])

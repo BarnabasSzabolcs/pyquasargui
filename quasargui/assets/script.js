@@ -11,14 +11,16 @@ function registerSfc(component_name, script, style) {
   Vue.component(component_name, window[component_name])
 }
 
-function createEventCB(id) {
-  return (params) => {
-    window.pywebview.api.call_cb(id, params)
+function toCallback(cb) {
+  if(_.isNumber(cb)){ // callback id
+    return params => window.pywebview.api.call_cb(cb, params)
+  } else { // JSRaw
+    return eval(cb['$'])
   }
 }
 
 function sendLog() {
-  if (window.debug)
+  if (app._data.debug)
     window.pywebview.api.print_log(arguments)
 }
 
@@ -60,7 +62,7 @@ Vue.component('dynamic-component', {
     return this.renderTemplate(template)
   },
   methods: {
-    ref(ref){
+    ref(ref) {
       return this.$refs[ref]
     },
     calculateWithProp(computedId, props) {
@@ -135,7 +137,7 @@ Vue.component('dynamic-component', {
       return `<${d.component} ${attrs}>${children}${slots}</${d.component}>`
     },
     renderClasses(classes) {
-      return classes.length ? `class="${classes}"`: ''
+      return classes.length ? `class="${classes}"` : ''
     },
     renderProps(props) {
       return _.map(props, (prop, propName) => {
@@ -196,6 +198,11 @@ Vue.component('dynamic-component', {
     },
     renderSlots(slots) {
       return _.map(slots, (d, name) => {
+        if (name == '' || name == 'default') {
+          name = ''
+        } else {
+          name = ':' + name
+        }
         const classes = this.renderClasses(d.classes)
         const props = this.renderProps(d.props)
         const events = this.renderEvents(d.events)
@@ -205,7 +212,7 @@ Vue.component('dynamic-component', {
         const children = this.renderChildren(d.children, arg !== '')
         const slots = this.renderSlots(d.slots)
         const attrs = [classes, props, events].join(' ')
-        return `<template v-slot:${name}${arg} ${attrs}>${children}${slots}</template>`
+        return `<template v-slot${name}${arg} ${attrs}>${children}${slots}</template>`
       }).join('')
     },
     renderTemplate(template) {
@@ -220,44 +227,13 @@ Vue.component('dynamic-component', {
   }
 })
 
-Vue.component('mpld3-figure', {
-  props: ['id', 'script', 'style', 'figId'],
-  render: function(h) {
-    const script = document.createElement('script')
-    script.id = this.id + '_script'
-    script.innerHTML = this.script
-    const style = document.createElement('style')
-    style.innerHTML = this.style
-    style.id = this.id + '_style'
-    if (this.$el) {
-      this.$el.innerHTML = ''
-    }
-    setTimeout(() => {
-      var styleObj = document.getElementById(style.id)
-      if (styleObj) {
-        styleObj.remove()
-      }
-      var scriptObj = document.getElementById(script.id)
-      if (scriptObj) {
-        scriptObj.remove()
-      }
-      document.head.appendChild(style)
-      document.body.appendChild(script)
-    })
-    return h('div', {
-      attrs: {
-        id: this.figId
-      }
-    })
-  }
-})
-
 const app = new Vue({
   el: '#q-app',
   data: function() {
     return {
       mainComponentId: null,
       menuId: null,
+      debug: false,
       data: {}, // holds the Model values {id: value}
       computed: {}, // holds computed values
       componentStore: {}, // holds the Component specifications {id: descriptor}
@@ -278,7 +254,7 @@ const app = new Vue({
   },
   methods: {
     setDebug(debug) {
-      window.debug = debug
+      this.debug = debug
       if (debug) {
         setTimeout(() => {
           document.getElementById('debug').style.display = 'block'
@@ -370,18 +346,6 @@ const app = new Vue({
         node.setAttribute('href', src)
         document.head.appendChild(node)
       })
-    },
-    showNotification(params) {
-      const longTimeOut = 7000
-      defaults = {
-        type: '',
-        timeout: longTimeOut,
-        position: 'top',
-        message: '',
-        multiline: true
-      }
-      params = _.defaults(params, defaults)
-      this.$q.notify(params)
     },
     callComponentMethod({
       component_id,

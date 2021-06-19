@@ -52,7 +52,7 @@ customize = Model([
     }
 ])
 
-layout = Tree(
+layout = QTree(
     props={
         'nodes': customize,
         'node-key': 'label',
@@ -60,7 +60,7 @@ layout = Tree(
     }, children=[
         Slot('default-header', lambda prop: [
             Div(classes='row items-center', children=[
-                Icon(
+                QIcon(
                     name=Computed(lambda ic: ic or 'share', prop['node']['icon']),
                     size='28px',
                     color='orange',

@@ -1,6 +1,7 @@
 import json
 import re
-from typing import List, Tuple, Dict, Union, Callable
+import weakref
+from typing import List, Tuple, Dict, Union
 
 import webview
 from webview import Window
@@ -10,19 +11,40 @@ from quasargui.base import EventCallbacks
 from quasargui.components import Component
 from quasargui.model import Model, Computed
 from quasargui.tools import print_error
-from quasargui.typing import ValueType, PathType, MenuSpecType
+from quasargui.typing import ValueType, PathType, MenuSpecType, EventCBType
+
+
+class Plugins:
+    """
+    Extend this class to hook up your plugins, then set
+    ```
+    Api.plugins_class = YourPlugins
+    ```
+    """
+    script_sources: List[str] = []
+    style_sources: List[str] = []
+
+    def __init__(self, api: 'Api'):
+        self.api = weakref.proxy(api)
+
+    def init(self):
+        if self.script_sources:
+            self.api.import_scripts(self.script_sources)
+        if self.style_sources:
+            self.api.import_styles(self.style_sources)
 
 
 class Api:
     """
     python -> js
     """
+    plugins_class: type = Plugins
 
     def __init__(self,
                  main_component: Component,
                  menu: MenuSpecType = None,
                  debug: bool = False,
-                 render_debug: bool = False
+                 render_debug: bool = False,
                  ):
         self.main_component = main_component
         self.menu = menu
@@ -32,6 +54,7 @@ class Api:
         self.model_data_queue = []
         self.scripts_imported = set()
         self.styles_imported = set()
+        self.plugins = self.plugins_class(self)
 
     def init(self, window):
         self.window = window
@@ -41,6 +64,7 @@ class Api:
             render_debug=json.dumps(self.render_debug)
         ))
         self.set_main_component(self.main_component)
+        self.plugins.init()
 
     def set_main_component(self, component: Component):
         component.set_api(self)
@@ -99,10 +123,6 @@ class Api:
         self.styles_imported |= set(not_added)
         self.window.evaluate_js('app.addStyles({})'.format(json.dumps(not_added)))
 
-    def show_notification(self, **params: ValueType):
-        self.window.evaluate_js('app.showNotification({params})'.format(
-            params=json.dumps(params)))
-
     @property
     def is_cocoa(self):
         return self.window.gui.__name__ == 'webview.platforms.cocoa'
@@ -136,10 +156,11 @@ class Api:
             from quasargui.platforms.fallback import set_menu as set_menu_fallback
             set_menu_fallback(self, menuspec)
 
-    def set_key_shortcut(self, key: str, cb: Callable):
-        cb_id = EventCallbacks.register(cb)
-        self.window.evaluate_js('app.setKeyShortcut({key}, {cb_id})'.format(
-            key=json.dumps(key), cb_id=json.dumps(cb_id)))
+    def set_key_shortcut(self, key: str, cb: EventCBType):
+        self.window.evaluate_js('app.setKeyShortcut({key}, {cb})'.format(
+            key=json.dumps(key),
+            cb=json.dumps(EventCallbacks.render_cb(cb))
+        ))
 
     def register_sfc(self, component_name: str, vue_file_path: str):
         with open(vue_file_path, 'r') as f:
@@ -230,6 +251,7 @@ def run(
         menu: MenuSpecType = None,
         debug: bool = False,
         _render_debug: bool = False,
+        plugins = Plugins
 ):
     """
     :param component:

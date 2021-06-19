@@ -14,9 +14,9 @@ You can react to user events using callbacks. (See: simple greeter app.)
 
 ```python
 import quasargui
-from quasargui.components import Layout
+from quasargui.components import QLayout
 
-layout = Layout(children=["Hello World!"])
+layout = QLayout(children=["Hello World!"])
 quasargui.run(layout)
 ```
 
@@ -26,24 +26,26 @@ This app demonstrates how you can build up a simple form and use the form's data
 
 ```python
 import quasargui
-from quasargui import Div, Input, Button, Model
+from quasargui import Div, QInput, QButton, Model
 
 name = Model()
 
+
 def display_notification():
     layout.api.show_notification(message=f'Hello, {name.value}!')
+
 
 layout = Div(
     styles={'max-width': '30em', 'margin-left': 'auto', 'margin-right': 'auto'},
     classes='q-mt-xl text-center',
     children=[
         "What's your name?",
-        Input('Name', name),
-        Button('Submit', classes='text-primary',
-            props={'size': 'lg'},
-            events={'click': display_notification}
-        )
-])
+        QInput('Name', name),
+        QButton('Submit', classes='text-primary',
+                props={'size': 'lg'},
+                events={'click': display_notification}
+                )
+    ])
 
 quasargui.run(layout)  # Shows a window with the layout.
 ```
@@ -90,14 +92,14 @@ The GUI builds up itself from `Component`'s and `Model`'s. To understand the log
 loading = Model(False)
 def connect(): loading.value = True; print('Connect button clicked')
 
-button = Button(
+button = QButton(
     label='Connect',
     classes='q-ma-md',
     styles={'opacity': 0.8},
     props={'no-caps': True, 'loading': loading},
     events={'click': connect},
     children=[
-        Slot('loading', [Spinner(appearance='dots')])
+        Slot('loading', [QSpinner(appearance='dots')])
     ])
 ```
 In Vue, `button`'s definition corresponds to:
@@ -123,7 +125,7 @@ The common attributes of a `Component` are:
 - *children*: are list of the html children, everything that is between <q-button>...</q-button>. So, *slots* are also set here with `Slot('slot-name', [...list of children...])`. 
 
 **Convenience:** Argument order follows convenience. Some commonly used props of a component such as `label` are given a "shortcut" parameter, and even put into first position, so you don't need to type out its name.   
-Writing `Button('OK')` is the same as `Button(props={'label': 'OK'})` but more concise. 
+Writing `QButton('OK')` is the same as `QButton(props={'label': 'OK'})` but more concise. 
 
 **Type system:** All arguments are typed so you can catch most of the errors with a type-checker. This is the benefit of having props and events separated.
 
@@ -131,7 +133,7 @@ Writing `Button('OK')` is the same as `Button(props={'label': 'OK'})` but more c
 If the component *requires* JavaScript function to be used, you can resort to `JSRaw`.
 ```python
 x, y = Model(2), Model(3)
-Input(
+QInput(
     label=Computed(lambda x, y: f'{x} + {y} =', x, y), 
     props={'rules': JSRaw("[value => value>0 || 'Enter a positive number']")}
 )
@@ -160,9 +162,9 @@ For all the typical Python data-types quasargui package has a Component, designe
 
 #### Overriding defaults
 
-Some other components try and guess your intent (Drawer adds a sandwich menu button for itself, Header wraps its arguments into Toolbar&ToolbarTitle if necessary.)
+Some other components try and guess your intent (QDrawer adds a sandwich menu button for itself, QHeader wraps its arguments into QToolbar&ToolbarTitle if necessary.)
  
-However, every automatic guess and default can be overridden. Some have parameter to disable (eg. automatic sandwich menu for Drawer).
+However, every automatic guess and default can be overridden. Some have parameter to disable (eg. automatic sandwich menu for QDrawer).
 In components that have defaults, you can override default with `del YourComponent.defaults['props']['your-prop']`. 
 
 To remove a slot, add `RemoveSlot('name')` to `children`.

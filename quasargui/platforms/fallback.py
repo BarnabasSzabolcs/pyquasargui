@@ -2,7 +2,8 @@ import json
 from typing import TYPE_CHECKING
 
 from quasargui.base import Component
-from quasargui.components import Bar, Menu, QList, Button, QItem, QItemSection, Icon, Separator, Tooltip
+from quasargui.quasar_components import QButton, QItem, QItemSection, QList, QMenu, QSeparator, QTooltip, QIcon
+from quasargui.layout import QBar
 from quasargui.typing import MenuSpecType
 
 if TYPE_CHECKING:
@@ -20,8 +21,8 @@ def set_menu(api: 'Api', menuspec: MenuSpecType):
     ))
 
 
-def assemble_menu_bar(menuspec: MenuSpecType) -> Bar:
-    return Bar([
+def assemble_menu_bar(menuspec: MenuSpecType) -> QBar:
+    return QBar([
         assemble_top_menu(spec) for spec in menuspec
     ])
 
@@ -38,7 +39,7 @@ def assemble_top_menu(spec) -> Component:
         'font-weight': '400'
     }
     if 'children' in spec:
-        return Button(
+        return QButton(
             props=props,
             classes=classes,
             styles=styles,
@@ -49,7 +50,7 @@ def assemble_top_menu(spec) -> Component:
         )
     else:
         if 'key' in spec:
-            tooltip = [Tooltip([
+            tooltip = [QTooltip([
                 '(Ctrl{shift}+{key})</span>'.format(
                     shift='+Shift' if spec['key'].isupper() else '',
                     key=spec['key'].upper()
@@ -57,7 +58,7 @@ def assemble_top_menu(spec) -> Component:
             ])]
         else:
             tooltip = []
-        button = Button(
+        button = QButton(
             props=props,
             classes=classes,
             styles=styles,
@@ -73,7 +74,7 @@ def assemble_top_menu(spec) -> Component:
 def assemble_menu(menuspec: MenuSpecType, top_level: bool = False) -> Component:
     def get_item(spec):
         if not spec:
-            return Separator()
+            return QSeparator()
         elif 'children' in spec:
             return QItem(
                 props={
@@ -81,7 +82,7 @@ def assemble_menu(menuspec: MenuSpecType, top_level: bool = False) -> Component:
                 },
                 children=[
                     QItemSection([spec['title']]),
-                    QItemSection([Icon('keyboard_arrow_right')], props={'side': True}),
+                    QItemSection([QIcon('keyboard_arrow_right')], props={'side': True}),
                     assemble_menu(spec['children'])
                 ])
         else:
@@ -118,7 +119,7 @@ def assemble_menu(menuspec: MenuSpecType, top_level: bool = False) -> Component:
             'anchor': 'top end',
             'self': 'top start'
         }
-    return Menu(
+    return QMenu(
         props=props,
         children=[QList(
             props={'dense': True},

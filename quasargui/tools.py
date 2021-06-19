@@ -10,7 +10,7 @@ def flatten(lst: List[list]) -> list:
 
 def merge_classes(*args) -> str:
     if len(args) == 1:
-        return ' '.join(args[0]) if isinstance(args[0], list) else args[0]
+        return ' '.join(args[0]) if isinstance(args[0], list) else (args[0] or '')
     elif len(args) == 0:
         return ''
     else:
@@ -18,6 +18,12 @@ def merge_classes(*args) -> str:
 
 
 def build_props(defaults: dict, props: dict, specials: dict = None) -> dict:
+    """
+    :param defaults:
+    :param props: overrides defaults (always)
+    :param specials: only adds/overrides a default value if a special value is not None.
+    :return:
+    """
     my_props = {}
     my_props.update(defaults)
     props = props or {}

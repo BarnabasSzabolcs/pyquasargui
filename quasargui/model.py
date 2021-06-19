@@ -204,7 +204,7 @@ class DateTimeModel(Model[datetime.datetime]):
 class PropVar(Renderable):
     """
     PropVar is the substitution for Model when a function is passed to a Slot's children parameter,
-    instead of an array (eg. Table, Tree).
+    instead of an array (eg. Table, QTree).
     PropVar can be considered as a limited version of a Model.
     It has item accessors and can be used exactly as models, except they cannot be get/set a value directly.
 

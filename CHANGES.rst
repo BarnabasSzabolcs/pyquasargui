@@ -6,11 +6,8 @@ Planned features:
 =================
 - Dialog, Banner
 - Badge, FloatingActionButton
-- Editor
-- Range, Slider
 - Img, Video
 - LinearProgress, CircularProgress, AjaxBar (could be as Progress + options...)
-- Menu, List
 - MarkupTable (if pagination is needed then Table...)
 - Rating
 - ScrollArea
@@ -29,5 +26,7 @@ Planned features:
 - v-if, v-for, stc. as props, with Computed or Model as dynamically updated value
 - deep Model's
 - ability to add external scripts and styles
-
+- known issues:
+  - 'change' event does not fire (workaround: use Model.add_callback)
+  - Editor is not editable (no workaround)
 

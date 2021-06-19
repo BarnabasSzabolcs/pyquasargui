@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 MenuSpecType = List[Union[dict, None]]
 
-EventCBType = Union[Callable[[...], Any], 'JSRaw']
+EventCBType = Union[Callable[[...], None], 'JSRaw']
 EventsType = Dict[str, EventCBType]
 ClassesType = str
 StylesType = Dict[str, str]

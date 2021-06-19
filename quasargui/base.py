@@ -33,6 +33,17 @@ class EventCallbacks:
     def remove(cls, cb_id: int):
         del cls.callbacks[cb_id]
 
+    @classmethod
+    def render_cb(cls, cb: EventCBType):
+        return cls.register(cb) if isinstance(cb, Callable) else cb.render_as_data()
+
+    @classmethod
+    def render_events(cls, events: EventsType):
+        return {
+            event: cls.render_cb(cb)
+            for event, cb in events.items()
+        }
+
 
 class JSRaw(Renderable):
     def __init__(self, code: str):
@@ -69,11 +80,7 @@ class Component:
         self.styles = build_props(self.defaults.get('styles', {}), styles or {})
         if not hasattr(self, 'props'):
             self.props = build_props(self.defaults.get('props', {}), props or {})
-        events = events or {}
-        self._events = {
-            event: EventCallbacks.register(cb) if isinstance(cb, Callable) else cb.render_as_data()
-            for event, cb in events.items()
-        }
+        self._events = EventCallbacks.render_events(events or {})
         self._children = children or []
         self.api: Optional['Api'] = None
         # other objects that should be attached to the api when this Component is attached:
@@ -153,12 +160,6 @@ class Component:
         if _flush:
             api.flush_model_data()
 
-    def notify(self, message: str, **kwargs):
-        params = {'message': message}
-        if kwargs:
-            params.update(kwargs)
-        self.api.show_notification(**params)
-
     @property
     def children(self):
         return self._children
@@ -176,7 +177,7 @@ class Component:
             self.api.set_component(self.vue)
 
     def add_event(self, event: str, cb: EventCBType):
-        self._events[event] = EventCallbacks.register(cb) if isinstance(cb, Callable) else cb.render_as_data()
+        self._events[event] = EventCallbacks.render_cb(cb)
 
 
 class ComponentWithModel(Component):
@@ -229,6 +230,19 @@ class LabeledComponent(ComponentWithModel):
 
 
 class Slot(Component):
+    """
+    Represents a vue v-slot, to be used in children parameter of a Component.
+
+    To access scoped slots,
+    ```
+    Component(children=[
+        Slot('name', lambda prop: [... children ...])
+    ])
+    ```
+    prop is a PropVar that behaves similarly to a Model.
+
+    To access default slot, set name = 'default' (or '').
+    """
     component = 'template'
 
     def __init__(self,

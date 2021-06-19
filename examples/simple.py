@@ -8,12 +8,12 @@ def run_program():
     ))
 
 
-input_name = Input(
+input_name = QInput(
     # # uncomment these lines if you want to display notification message on change:
     # value='',
     # events={'change': run_program}
 )
-btn_submit = Button(
+btn_submit = QButton(
     label='Submit',
     classes='text-primary',
     props={'unelevated': True, 'size': 'lg'},

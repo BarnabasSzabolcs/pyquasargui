@@ -12,14 +12,14 @@ def set_loaded():
     loading.value = False
 
 
-layout = Layout([
-    Header([
-        Toolbar([ToolbarTitle([
-            Icon('ramen_dining', 'lg', classes='q-mx-md'),
+layout = QLayout([
+    QHeader([
+        QToolbar([QToolbarTitle([
+            QIcon('ramen_dining', 'lg', classes='q-mx-md'),
             'Your Program Title'
         ])])
     ]),
-    Drawer([
+    QDrawer([
         '<b>'
         'Your drawer'
         '</b>'
@@ -27,7 +27,7 @@ layout = Layout([
         'for your parameters.'
         '</div>'
     ]),
-    Drawer(side=Drawer.RIGHT, show=False, children=[
+    QDrawer(side=QDrawer.RIGHT, show=False, children=[
         '<b>'
         'Your right drawer.'
         '</b>'
@@ -35,12 +35,12 @@ layout = Layout([
         'If you delete a drawer,its sandwich menu disappears'
         '</div>'
     ]),
-    Page([
-        'Here comes the contents of your Page'
+    QPage([
+        'Here comes the contents of your QPage'
     ]),
-    Footer(show=loading, children=[
+    QFooter(show=loading, children=[
         'Here is your footer that is only displayed if the page is loading...',
-        Button('ok', events={'click': toggle(loading)})
+        QButton('ok', events={'click': toggle(loading)})
     ])
 ])
 
