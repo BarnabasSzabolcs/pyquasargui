@@ -1,6 +1,6 @@
 import json
 import re
-from typing import List, Tuple, Dict, Union, Callable
+from typing import List, Tuple, Dict, Union
 
 import webview
 from webview import Window
@@ -10,7 +10,7 @@ from quasargui.base import EventCallbacks
 from quasargui.components import Component
 from quasargui.model import Model, Computed
 from quasargui.tools import print_error
-from quasargui.typing import ValueType, PathType, MenuSpecType
+from quasargui.typing import ValueType, PathType, MenuSpecType, EventsType, EventCBType, PropsType
 
 
 class Api:
@@ -103,6 +103,12 @@ class Api:
         self.window.evaluate_js('app.showNotification({params})'.format(
             params=json.dumps(params)))
 
+    def show_dialog(self, props: PropsType, events: EventsType):
+        self.window.evaluate_js('app.showDialog({params}, {events})'.format(
+            params=json.dumps(props),
+            events=EventCallbacks.render_events(events)
+        ))
+
     @property
     def is_cocoa(self):
         return self.window.gui.__name__ == 'webview.platforms.cocoa'
@@ -136,10 +142,11 @@ class Api:
             from quasargui.platforms.fallback import set_menu as set_menu_fallback
             set_menu_fallback(self, menuspec)
 
-    def set_key_shortcut(self, key: str, cb: Callable):
-        cb_id = EventCallbacks.register(cb)
-        self.window.evaluate_js('app.setKeyShortcut({key}, {cb_id})'.format(
-            key=json.dumps(key), cb_id=json.dumps(cb_id)))
+    def set_key_shortcut(self, key: str, cb: EventCBType):
+        self.window.evaluate_js('app.setKeyShortcut({key}, {cb})'.format(
+            key=json.dumps(key),
+            cb=json.dumps(EventCallbacks.render_cb(cb))
+        ))
 
     def register_sfc(self, component_name: str, vue_file_path: str):
         with open(vue_file_path, 'r') as f:
