@@ -2,17 +2,6 @@
 Changelog
 *********
 
-Planned features:
-=================
-- Dialog, Banner
-- Badge, FloatingActionButton
-- Img, Video
-- LinearProgress, CircularProgress, AjaxBar (could be as Progress + options...)
-- MarkupTable (if pagination is needed then Table...)
-- Rating
-- ScrollArea
-- Stepper (Wizard)
-- Tabs, TabPanels
 
 
 0.1
@@ -28,5 +17,5 @@ Planned features:
 - ability to add external scripts and styles
 - known issues:
   - 'change' event does not fire (workaround: use Model.add_callback)
-  - Editor is not editable (no workaround)
+  - QEditor is not editable (no workaround)
 
