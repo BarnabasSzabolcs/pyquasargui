@@ -271,4 +271,3 @@ class QBar(Component):
     ref. https://quasar.dev/vue-components/bar#qbar-api
     """
     component = 'q-bar'
-
