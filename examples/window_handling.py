@@ -1,8 +1,8 @@
 from random import randint
 from time import sleep
 
-from quasargui import *
-from quasargui.main import create_window
+from quasargui import Model, QLayout, QHeader, QPage, QToolbar, QSpace, QButton, QInput, Rows, TrueFalse
+from quasargui.main import create_window, run
 
 
 def create_new_window():
@@ -70,7 +70,7 @@ def create_layout(title):
         ])]),
         QPage([
             Rows([
-                InputStr('Window title', title_model),
+                QInput('Window title', title_model),
                 QInput('Resize window width', width, type='number'),
                 QInput('Resize window height', height, type='number'),
                 QButton('Create new window', events={'click': create_new_window}),
@@ -83,5 +83,5 @@ def create_layout(title):
     return layout
 
 
-layout = create_layout('Main window')
-run(layout, size=(400, 500))
+main_layout = create_layout('Main window')
+run(main_layout, size=(400, 500))
