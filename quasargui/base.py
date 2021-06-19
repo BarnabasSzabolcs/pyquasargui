@@ -410,7 +410,7 @@ class SingleFileComponent(Component):
     class YourSFC(SingleFileComponent):
         vue_source = 'path/to/your.vue'
     ```
-    Note: the sfv support is limited (it does not handle imports and styles other than css).
+    **Note:** the SFC support is limited (it does not handle imports and styles other than css).
 
     If you want to import a more serious vue component,
 
@@ -425,7 +425,7 @@ class SingleFileComponent(Component):
         script_source = ['path/to/your.umd.js']
         component = 'your-other-component-name'
     ```
-    A script is only included once.
+    Any script that is included with `script_source` is only included once in the HTML source of the GUI.
     """
     vue_source: str = ''  # override this with your .vue path
     component = None

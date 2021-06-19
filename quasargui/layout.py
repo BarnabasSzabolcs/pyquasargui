@@ -1,3 +1,7 @@
+"""
+This module contains all the Quasar elements that help with the general layout of the page.
+"""
+
 from typing import List, Union
 
 from quasargui.base import Component, ComponentWithModel
