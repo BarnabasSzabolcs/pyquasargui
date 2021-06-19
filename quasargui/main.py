@@ -1,5 +1,6 @@
 import json
 import re
+import weakref
 from typing import List, Tuple, Dict, Union
 
 import webview
@@ -10,19 +11,40 @@ from quasargui.base import EventCallbacks
 from quasargui.components import Component
 from quasargui.model import Model, Computed
 from quasargui.tools import print_error
-from quasargui.typing import ValueType, PathType, MenuSpecType, EventsType, EventCBType, PropsType
+from quasargui.typing import ValueType, PathType, MenuSpecType, EventCBType
+
+
+class Plugins:
+    """
+    Extend this class to hook up your plugins, then set
+    ```
+    Api.plugins_class = YourPlugins
+    ```
+    """
+    script_sources: List[str] = []
+    style_sources: List[str] = []
+
+    def __init__(self, api: 'Api'):
+        self.api = weakref.proxy(api)
+
+    def init(self):
+        if self.script_sources:
+            self.api.import_scripts(self.script_sources)
+        if self.style_sources:
+            self.api.import_styles(self.style_sources)
 
 
 class Api:
     """
     python -> js
     """
+    plugins_class: type = Plugins
 
     def __init__(self,
                  main_component: Component,
                  menu: MenuSpecType = None,
                  debug: bool = False,
-                 render_debug: bool = False
+                 render_debug: bool = False,
                  ):
         self.main_component = main_component
         self.menu = menu
@@ -32,6 +54,7 @@ class Api:
         self.model_data_queue = []
         self.scripts_imported = set()
         self.styles_imported = set()
+        self.plugins = self.plugins_class(self)
 
     def init(self, window):
         self.window = window
@@ -41,6 +64,7 @@ class Api:
             render_debug=json.dumps(self.render_debug)
         ))
         self.set_main_component(self.main_component)
+        self.plugins.init()
 
     def set_main_component(self, component: Component):
         component.set_api(self)
@@ -98,16 +122,6 @@ class Api:
             return
         self.styles_imported |= set(not_added)
         self.window.evaluate_js('app.addStyles({})'.format(json.dumps(not_added)))
-
-    def show_notification(self, **params: ValueType):
-        self.window.evaluate_js('app.showNotification({params})'.format(
-            params=json.dumps(params)))
-
-    def show_dialog(self, props: PropsType, events: EventsType):
-        self.window.evaluate_js('app.showDialog({params}, {events})'.format(
-            params=json.dumps(props),
-            events=EventCallbacks.render_events(events)
-        ))
 
     @property
     def is_cocoa(self):
@@ -237,6 +251,7 @@ def run(
         menu: MenuSpecType = None,
         debug: bool = False,
         _render_debug: bool = False,
+        plugins = Plugins
 ):
     """
     :param component:

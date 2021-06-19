@@ -15,3 +15,4 @@ from quasargui.quasar_form import *
 from quasargui.quasar_form_improved import *
 from quasargui.layout import *
 from quasargui.model import *
+from quasargui.quasar_plugins import *

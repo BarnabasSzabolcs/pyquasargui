@@ -160,12 +160,6 @@ class Component:
         if _flush:
             api.flush_model_data()
 
-    def notify(self, message: str, **kwargs):
-        params = {'message': message}
-        if kwargs:
-            params.update(kwargs)
-        self.api.show_notification(**params)
-
     @property
     def children(self):
         return self._children

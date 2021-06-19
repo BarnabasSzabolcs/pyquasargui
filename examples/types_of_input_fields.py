@@ -4,15 +4,15 @@ import quasargui
 from quasargui import *
 
 my_date = Model(None)
-my_date.add_callback(lambda: my_date.api.show_notification(
+my_date.add_callback(lambda: my_date.api.plugins.notify(
     message='Selected date: {} ({}).'.format(my_date.value, type(my_date.value))
 ))
 my_time = Model(None)
-my_time.add_callback(lambda: my_time.api.show_notification(
+my_time.add_callback(lambda: my_time.api.plugins.notify(
     message='Selected time: {} ({}).'.format(my_time.value, type(my_time.value))
 ))
 my_datetime = DateTimeModel(dt.now())
-my_datetime.add_callback(lambda: my_datetime.api.show_notification(
+my_datetime.add_callback(lambda: my_datetime.api.plugins.notify(
     message='Selected date and time: {} ({}).'.format(my_datetime.value, type(my_datetime.value))
 ))
 

@@ -347,25 +347,6 @@ const app = new Vue({
         document.head.appendChild(node)
       })
     },
-    showNotification(params) {
-      const longTimeOut = 7000
-      defaults = {
-        type: '',
-        timeout: longTimeOut,
-        position: 'top',
-        message: '',
-        multiline: true
-      }
-      params = _.defaults(params, defaults)
-      this.$q.notify(params)
-    },
-    showDialog(params, events){
-      const dialog = this.$q.dialog(params)
-      _.each(events, (cb, name)=>{
-        const eventName = `on${name[0].toUpperCase()}${name.slice(1)}`
-        dialog[eventName](toCallback(cb))
-      })
-    },
     callComponentMethod({
       component_id,
       method
