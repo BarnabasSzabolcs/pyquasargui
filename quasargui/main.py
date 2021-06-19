@@ -143,6 +143,14 @@ class Api:
         if self._window is not None:
             self._window.evaluate_js(code)
 
+    def get_html_elements(self, selector: str) -> dict:
+        """
+        Use it only as a last resource.
+        ref. https://pywebview.flowrl.com/examples/get_elements.html
+        :param selector: css selector
+        """
+        return self._window.get_elements(selector)
+
     def set_main_component(self, component: Component):
         component.set_api(self)
         cmd = 'app.setMainComponent({component})'.format(
