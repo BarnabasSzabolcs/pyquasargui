@@ -9,7 +9,8 @@ from quasargui.main import Plugins, Api
 class QuasarPlugins(Plugins):
     script_sources = ['quasar_plugins.js']
 
-    def notify(self, **params: ValueType):
+    def notify(self, message: str, **params: ValueType):
+        params['message'] = message
         self.api.evaluate_js('quasarPlugins.notify(app, {params})'.format(params=json.dumps(params)))
 
     def dialog(self, props: PropsType, events: EventsType):

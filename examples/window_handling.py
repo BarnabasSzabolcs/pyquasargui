@@ -9,7 +9,7 @@ def create_new_window():
     layout = create_layout('New window')
     create_window(layout, position=(randint(1, 100), randint(1, 100)), size=(400, 500))
     sleep(0.5)
-    layout.api.plugins.notify(message='A brand new window!', type='positive')
+    layout.notify('A brand new window!', type='positive')
 
 
 def close_window(layout):

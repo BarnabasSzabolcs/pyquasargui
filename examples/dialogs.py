@@ -2,7 +2,7 @@ from quasargui import *
 
 
 def show_notification(message):
-    layout.api.plugins.notify(message=message, position='top-right', group=False, timeout=1500)
+    layout.notify(message=message, position='top-right', group=False, timeout=1500)
 
 
 dialog_events = {

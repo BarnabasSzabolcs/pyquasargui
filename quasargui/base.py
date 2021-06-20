@@ -191,6 +191,9 @@ class Component:
     def add_event(self, event: str, cb: EventCBType):
         self._events[event] = EventCallbacks.render_cb(cb)
 
+    def notify(self, message: str, **params):
+        self.api.plugins.notify(message, **params)
+
 
 class ComponentWithModel(Component):
     def __init__(self,
