@@ -1,6 +1,5 @@
-# Python Vue Quasar GUI
-A user-friendly package for making Python HTML-GUI desktop apps,
-without ever needing to touch JavaScript.
+# QuasarGUI
+A user-friendly package for making awesome-looking desktop apps in Python.
 
 ## Usage:
 
