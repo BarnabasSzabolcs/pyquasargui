@@ -1,8 +1,11 @@
+
+![Logo](assets/logo.png "QuasarGUI logo")
 # QuasarGUI
 
 Quasargui is a user-friendly package for making modern desktop apps in Python.
 
 Some reasons you might want to use QuasarGUI:
+
 1. It is built on a stable front-end framework, [Quasar](https://quasar.dev).
 2. It brings the advantages of Vue
 3. Still, you don't ever need to touch JavaScript code, everything is brought back to Python. 
@@ -47,32 +50,67 @@ You can see the (reference of the classes on quasar.dev)[https://quasar.dev/styl
     ![examples/simple.py screenshot](assets/screenshots/simple.png "examples/simple.py screenshot")
 
 === "Code"
-
-```python
-from quasargui import *
-
-name = Model('')
-layout = Div(
-    styles={
-        'max-width': '30em',
-        'margin-left': 'auto',
-        'margin-right': 'auto',
-    },
-    classes='q-mt-xl text-center',
-    children=[
-        "What's your name?",
-        QInput(model=name),
-        QButton('Submit', 
-                classes='text-primary',
-                props={'unelevated': True, 'size': 'lg'},
-                events={
-                    'click': lambda: layout.notify(
-                        f'Hello, {name.value}!', position='bottom')
-        })
-    ])
-```
+    ```python
+    from quasargui import *
+    
+    name = Model('')
+    layout = Div(
+        styles={
+            'max-width': '30em',
+            'margin-left': 'auto',
+            'margin-right': 'auto',
+        },
+        classes='q-mt-xl text-center',
+        children=[
+            "What's your name?",
+            QInput(model=name),
+            QButton('Submit', 
+                    classes='text-primary',
+                    props={'unelevated': True, 'size': 'lg'},
+                    events={
+                        'click': lambda: layout.notify(
+                            f'Hello, {name.value}!', position='bottom')
+            })
+        ])
+    ```
 
 ### Standard boilerplate
 
+=== "screenshot"
+    ![Quasargui menu header boilerplate](assets/screenshots/starter_header_footer_and_menu.png)
 
-
+=== "source"
+    ```python
+    """
+    This is a starter template.
+    """
+    
+    import quasargui
+    from quasargui import *
+    
+    loading = Model(True)
+    
+    layout = QLayout([
+        QHeader([
+            QToolbar([QToolbarTitle([
+                QIcon('ramen_dining', 'lg', classes='q-mx-md'),
+                'Your Program Title'
+            ])])
+        ]),
+        QDrawer([
+            '<b>Your drawer</b><div class="q-mt-md">for your parameters.</div>'
+        ]),
+        QDrawer(side=QDrawer.RIGHT, show=False, children=[
+            '<b>Your right drawer.</b> If you delete a drawer, its sandwich menu disappears'
+        ]),
+        QPage([
+            'Here comes the contents of your QPage'
+        ]),
+        QFooter(show=loading, children=[
+            'Here is your footer that is only displayed if loading.value == True',
+            QButton('ok', events={'click': toggle(loading)})
+        ])
+    ])
+    
+    quasargui.run(layout, title='Program title')
+    ```
