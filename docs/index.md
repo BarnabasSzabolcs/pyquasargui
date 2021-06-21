@@ -43,7 +43,7 @@ These examples we describe in detail.
 
 Components can be easily changed by adding a few css classes and styles.
 
-You can see the (reference of the classes on quasar.dev)[https://quasar.dev/style/spacing#introduction], for spacing, positioning, typography, visibility and breakpoints and (shadows)[https://quasar.dev/style/shadows].
+You can see the [reference of the classes on quasar.dev](https://quasar.dev/style/spacing#introduction]), for spacing, positioning, typography, visibility and breakpoints and [shadows](https://quasar.dev/style/shadows).
 
 
 === "Screenshot"
