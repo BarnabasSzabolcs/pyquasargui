@@ -40,7 +40,7 @@ class Plot(Component):
     However, if interactive=True, it can *not* be styled as it shows an interactive svg,
     created by mpld3.
 
-    "Different sizes can be created using `plt.figure(figsize=(width,height))`
+    "Different sizes can be created using ``plt.figure(figsize=(width,height))``
     where width and height are in inches."
     ref. https://stackoverflow.com/a/31843288/1031191
 

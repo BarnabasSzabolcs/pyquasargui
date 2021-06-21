@@ -17,9 +17,10 @@ from quasargui.typing import ValueType, PathType, MenuSpecType, EventCBType
 class Plugins:
     """
     Extend this class to hook up your plugins, then set
-    ```
-    Api.plugins_class = YourPlugins
-    ```
+    ::
+
+        Api.plugins_class = YourPlugins
+
     """
     script_sources: List[str] = []
     style_sources: List[str] = []
@@ -188,7 +189,7 @@ class Api:
 
     def call_component_method(self, component_id: str, method: str):
         """
-        eg. `call_component_method(12, 'validate()')`
+        eg. ``call_component_method(12, 'validate()')``
         """
         return self._window.evaluate_js('app.callComponentMethod({params})'.format(
             params=json.dumps({'component_id': component_id, 'method': method})
@@ -214,12 +215,12 @@ class Api:
 
     def set_menu(self, menuspec: Union[MenuSpecType, Dict[str, MenuSpecType]]):
         """
-        If `menuspec` is a *list* then the menu is the same for all platforms,
-        if `menuspec` is a *dict* then `menuspec` is set platform-specific.
-        (eg. `{'cocoa': [{'title': 'Cocoa menu'}], 'default': []})`  means no menu if not cocoa.)
-        :param menuspec: `[menuSpecApp, menuSpec1, menuSpec2, ...]`
-        where menuSpec is `{'title': str, 'children': [menuSpec], 'key': str, 'icon': ...}`
-        or `{'cocoa': [... menu spec for cocoa...], 'default': [... menu spec fallback ...]}`
+        If ``menuspec`` is a *list* then the menu is the same for all platforms,
+        if ``menuspec`` is a *dict* then ``menuspec`` is set platform-specific.
+        (eg. ``{'cocoa': [{'title': 'Cocoa menu'}], 'default': []})``  means no menu if not cocoa.)
+        :param menuspec: ``[menuSpecApp, menuSpec1, menuSpec2, ...]``
+        where menuSpec is ``{'title': str, 'children': [menuSpec], 'key': str, 'icon': ...}``
+        or ``{'cocoa': [... menu spec for cocoa...], 'default': [... menu spec fallback ...]}``
         :return:
         """
         if isinstance(menuspec, dict):
@@ -266,7 +267,7 @@ class Api:
             'export +default *{',
             'var {component_name} = {{template: `{template}`,'.format(
                 component_name=component_name,
-                template=template.replace('`', '\\`')
+                template=template.replace('``', '\\``')
             ),
             script)
         self._window.evaluate_js('registerSfc({component_name}, {script}, {style})'.format(
@@ -348,9 +349,9 @@ def run(
     :param localization: i18n strings for the main menu items.
         See: https://pywebview.flowrl.com/examples/localization.html
     :param component: the component to load as main component.
-    :param menu: `[menuSpec1, menuSpec2, ...]`
-        where `menuSpec` is `{'title': str, 'children': [menuSpec], 'key': str, 'icon': ...}`
-        if `menuSpec` is `None` or `{}`, a separator is displayed
+    :param menu: ``[menuSpec1, menuSpec2, ...]``
+        where ``menuSpec`` is ``{'title': str, 'children': [menuSpec], 'key': str, 'icon': ...}``
+        if ``menuSpec`` is ``None`` or ``{}``, a separator is displayed
         (See quasargui.main.Api.set_menu's menuspec)
     :param title: The title of the window.
     :param min_size:

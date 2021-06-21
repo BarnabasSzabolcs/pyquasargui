@@ -246,11 +246,12 @@ class Slot(Component):
     Represents a vue v-slot, to be used in children parameter of a Component.
 
     To access scoped slots,
-    ```
-    Component(children=[
-        Slot('name', lambda prop: [... children ...])
-    ])
-    ```
+    ::
+
+        Component(children=[
+            Slot('name', lambda prop: [... children ...])
+        ])
+
     prop is a PropVar that behaves similarly to a Model.
 
     To access default slot, set name = 'default' (or '').
@@ -409,26 +410,29 @@ def v_html(
 class SingleFileComponent(Component):
     """
     Extend this component to add your external component, written in .vue.
-    ```
-    class YourSFC(SingleFileComponent):
-        vue_source = 'path/to/your.vue'
-    ```
+    ::
+
+        class YourSFC(SingleFileComponent):
+            vue_source = 'path/to/your.vue'
+
     **Note:** the SFC support is limited (it does not handle imports and styles other than css).
 
     If you want to import a more serious vue component,
 
     1. compile your source into .umd.js
     2. create your class like the following:
-    ```
-    class YourComponentName(Component):
-        script_source = ['path/to/your.umd.js']
-        component = 'your-component-name'
 
-    class YourOtherComponentName(Component):
-        script_source = ['path/to/your.umd.js']
-        component = 'your-other-component-name'
-    ```
-    Any script that is included with `script_source` is only included once in the HTML source of the GUI.
+    ::
+
+        class YourComponentName(Component):
+            script_source = ['path/to/your.umd.js']
+            component = 'your-component-name'
+
+        class YourOtherComponentName(Component):
+            script_source = ['path/to/your.umd.js']
+            component = 'your-other-component-name'
+
+    Any script that is included with ``script_source`` is only included once in the HTML source of the GUI.
     """
     vue_source: str = ''  # override this with your .vue path
     component = None

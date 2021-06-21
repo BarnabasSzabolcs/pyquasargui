@@ -325,12 +325,13 @@ class QInnerLoading(Component):
     Must be the last element in its parent's children list.
     It fades the parent component and displays a spinner (must be set as children parameter)
     eg.
-    ```
-    Component([
-        ...
-        QInnerLoading([QSpinner()], props={'showing': Model(True)})
-    ])
-    ```
+    ::
+
+        Component([
+            ...
+            QInnerLoading([QSpinner()], props={'showing': Model(True)})
+        ])
+
     ref. https://quasar.dev/vue-components/inner-loading#qinnerloading-api
     """
     component = 'q-inner-loading'
@@ -548,9 +549,10 @@ class QSlideTransition(Component):
     """
     It visually slides up or down a component if it gets shown/hidden.
     Usage:
-    ```
-    QSlideTransition([v_show(model_visible, QImg(src=src))])
-    ```
+    ::
+
+        QSlideTransition([v_show(model_visible, QImg(src=src))])
+
     """
     component = 'q-slide-transition'
 
@@ -642,9 +644,9 @@ class QTable(Component):
     Everything about it can be customized.
 
     Scoped slots are accessible with
-    ```
-    Slot('slot-name', lambda prop: [...children...])
-    ```
+    ::
+
+        Slot('slot-name', lambda prop: [...children...])
 
     If interested in just a simple table, use QMarkupTable
     ref. https://quasar.dev/vue-components/table#qtable-api
