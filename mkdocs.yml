@@ -44,8 +44,8 @@ theme:
       toggle:
         icon: material/toggle-switch
         name: Switch to light mode
-  favicon: assets/logo.png
-  logo: assets/logo.png
+  favicon: assets/logo4.png
+  logo: assets/logo4.png
 extra_css:
   - stylesheets/extra.css
 

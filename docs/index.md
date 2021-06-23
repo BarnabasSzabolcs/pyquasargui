@@ -1,5 +1,5 @@
 
-![Logo](assets/logo.png "QuasarGUI logo")
+![Logo](assets/logo4.png "QuasarGUI logo")
 # QuasarGUI
 
 Quasargui is a user-friendly package for making modern desktop apps in Python.
@@ -81,11 +81,6 @@ You can see the [reference of the classes on quasar.dev](https://quasar.dev/styl
 
 === "source"
     ```python
-    """
-    This is a starter template.
-    """
-    
-    import quasargui
     from quasargui import *
     
     loading = Model(True)
@@ -111,6 +106,5 @@ You can see the [reference of the classes on quasar.dev](https://quasar.dev/styl
             QButton('ok', events={'click': toggle(loading)})
         ])
     ])
-    
-    quasargui.run(layout, title='Program title')
+    run(layout, title='Program title')
     ```
