@@ -7,12 +7,12 @@ def on_submit():
     validation = validation and input_name.validate()
     validation = validation and input_age.validate()
     if not accept.value:
-        accept.notify(
+        accept.api.plugins.notify(
             color='negative',
             message='You need to accept the license and terms first'
         )
     elif validation:
-        accept.notify(
+        accept.api.plugins.notify(
             icon='done',
             color='positive',
             message='Submitted'
