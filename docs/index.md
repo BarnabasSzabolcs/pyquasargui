@@ -1,8 +1,9 @@
 
 ![Logo](assets/logo4.png "QuasarGUI logo")
+
 # QuasarGUI
 
-Quasargui is a user-friendly package for making modern desktop apps in Python.
+Quasargui is a programmer-friendly package for making modern desktop apps in Python.
 
 Some reasons you might want to use QuasarGUI:
 
@@ -34,12 +35,16 @@ When we change `QInput`, `name`'s value is updated automatically. So, when we cl
 
 `Rows`, `QInput`, and `QButton` (that internally correspond to Vue components) are the widgets. We communicate with Widgets there-and-back via `Model`'s. (That is, `Model`'s are two-way bound to the window.)
 
+## Quickstart
+
+Can't wait to get started? The [quickstart guide](quickstart.md) is the fastest way to get up and running
+
 ## List of examples
 
-A range of examples can be found in the [examples directory on GitHub](https://github.com/BarnabasSzabolcs/pyquasargui/tree/develop/examples).
+A range of examples can be found in the [examples directory on GitHub][github_examples].
 These examples we describe in detail.
 
-### Styling Hello World
+## Hello World plus (styling example)
 
 Components can be easily changed by adding a few css classes and styles.
 
@@ -74,37 +79,27 @@ You can see the [reference of the classes on quasar.dev](https://quasar.dev/styl
         ])
     ```
 
-### Standard boilerplate
+## Requirements
 
-=== "screenshot"
-    ![Quasargui menu header boilerplate](assets/screenshots/starter_header_footer_and_menu.png)
+This project requires `pywebgui`.
+```
+pip install pywebgui
+``` 
+In turn, `pywebgui` uses native renderers or Qt whichever it is available. (eg. on Mac the native renderer is cocoa)
 
-=== "source"
-    ```python
-    from quasargui import *
-    
-    loading = Model(True)
-    
-    layout = QLayout([
-        QHeader([
-            QToolbar([QToolbarTitle([
-                QIcon('ramen_dining', 'lg', classes='q-mx-md'),
-                'Your Program Title'
-            ])])
-        ]),
-        QDrawer([
-            '<b>Your drawer</b><div class="q-mt-md">for your parameters.</div>'
-        ]),
-        QDrawer(side=QDrawer.RIGHT, show=False, children=[
-            '<b>Your right drawer.</b> If you delete a drawer, its sandwich menu disappears'
-        ]),
-        QPage([
-            'Here comes the contents of your QPage'
-        ]),
-        QFooter(show=loading, children=[
-            'Here is your footer that is only displayed if loading.value == True',
-            QButton('ok', events={'click': toggle(loading)})
-        ])
-    ])
-    run(layout, title='Program title')
-    ```
+## Installation
+
+```
+pip install quasargui
+```
+
+## Support
+
+[Contact me][github_me] on Github.
+
+## License
+
+Quasargui is licensed under MIT license.
+
+[github_examples]: https://github.com/BarnabasSzabolcs/pyquasargui/tree/develop/examples
+[github_me]: https://github.com/BarnabasSzabolcs/

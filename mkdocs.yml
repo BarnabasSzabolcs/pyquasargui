@@ -93,6 +93,7 @@ markdown_extensions:
 # Page tree
 nav:
   - Home: index.md
+  - Quickstart: quickstart.md
 #  - Getting started:
 #      - Installation: index.md
 #      - Examples: index.md

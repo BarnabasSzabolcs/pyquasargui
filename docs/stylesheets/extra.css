@@ -1,3 +1,10 @@
 body[data-md-color-scheme=slate]{
     background: black;
 }
+
+figure img{
+    margin: 0 auto
+}
+figcaption em{
+    font-style: normal;
+}
