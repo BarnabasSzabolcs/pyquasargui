@@ -1,4 +1,3 @@
-import quasargui
 from quasargui import *
 
 a = Model(0)
@@ -14,4 +13,4 @@ layout = Rows([
     v_if(odd, Div(['is odd'])),
 ])
 
-quasargui.run(layout)
+run(layout)

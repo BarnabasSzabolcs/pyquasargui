@@ -38,10 +38,13 @@ layout = QLayout([
     QPage([
         'Here comes the contents of your QPage'
     ]),
-    QFooter(show=loading, children=[
-        'Here is your footer that is only displayed if loading.value == True',
-        QButton('ok', events={'click': toggle(loading)})
-    ])
+    v_show(
+        loading,
+        QFooter(children=[
+            'Here is your footer that is only displayed if loading.value == True',
+            QButton('ok', events={'click': toggle(loading)})
+        ])
+    )
 ])
 
 quasargui.run(layout, title='Program title')
