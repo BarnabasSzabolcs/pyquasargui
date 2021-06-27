@@ -2,9 +2,26 @@ body[data-md-color-scheme=slate]{
     background: black;
 }
 
+
+img[src*="#screenshot"]{
+    /* margin-top: 15px; */
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 1px 3px 10px 0px #eee;
+}
+
 figure img{
-    margin: 0 auto
+    margin: 0 auto;
+    margin-top: 15px;
 }
 figcaption em{
     font-style: normal;
+}
+figcaption{
+    margin-top: 30px!important;
+    margin-bottom: 0!important;
+}
+
+.tabbed-set .highlight{
+    margin: 30px 15px;
 }

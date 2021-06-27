@@ -13,7 +13,9 @@ Now, you're ready to run our first example.
 The simplest possible window only takes 3 lines of code.
 
 === "screenshot"
-    ![The simplest window](assets/screenshots/simplest.png "The simplest window screenshot")
+    <figure>
+    ![The simplest window](assets/screenshots/simplest.png#screenshot "The simplest window screenshot")
+    </figure>
 
 === "source"
     ```python
@@ -36,13 +38,21 @@ Let's move on to a more advanced code that also can be used as a boilerplate for
 To quickly get a nice window layout, you can use the code of the window below.
 
 === "screenshot"
-    ![Quasargui menu header boilerplate](assets/screenshots/starter_header_footer_and_menu.png)
+    <figure>
+    ![Quasargui menu header boilerplate](assets/screenshots/starter_header_footer_and_menu.png#screenshot)
+    </figure>
 
 === "source"
     ```python
+    import quasargui
     from quasargui import *
     
     loading = Model(True)
+    
+    
+    def set_loaded():
+        loading.value = False
+    
     
     layout = QLayout([
         QHeader([
@@ -52,10 +62,20 @@ To quickly get a nice window layout, you can use the code of the window below.
             ])])
         ]),
         QDrawer([
-            '<b>Your drawer</b><div class="q-mt-md">for your parameters.</div>'
+            '<b>'
+            'Your drawer'
+            '</b>'
+            '<div class="q-mt-md">'
+            'for your parameters.'
+            '</div>'
         ]),
         QDrawer(side=QDrawer.RIGHT, show=False, children=[
-            '<b>Your right drawer.</b> If you delete a drawer, its sandwich menu disappears'
+            '<b>'
+            'Your right drawer.'
+            '</b>'
+            '<div class="q-mt-md">'
+            'If you delete a drawer,its sandwich menu disappears'
+            '</div>'
         ]),
         QPage([
             'Here comes the contents of your QPage'
@@ -65,9 +85,11 @@ To quickly get a nice window layout, you can use the code of the window below.
             QFooter(children=[
                 'Here is your footer that is only displayed if loading.value == True',
                 QButton('ok', events={'click': toggle(loading)})
-            ]))
+            ])
+        )
     ])
-    run(layout, title='Program title')
+    
+    quasargui.run(layout, title='Program title')
     ```
 
 The things you need to know about this window:
@@ -126,7 +148,7 @@ In components, Vue's slots can be accessed as `Slot('slot-name', [...children...
 
 === "screenshot"
     <figure>
-    ![Slots example](assets/screenshots/slots_simple.png)
+    ![Slots example](assets/screenshots/slots_simple.png#screenshot)
     <figcaption>
     The map sign of the input field is defined in a slot.
     </figcaption>
@@ -153,7 +175,7 @@ Scoped slots can be accessed a little-bit differently. Since scoped slots are me
 
 === "screenshot"
     <figure>
-    ![Scoped slots example](assets/screenshots/slots_scoped_prop_vars.png)
+    ![Scoped slots example](assets/screenshots/slots_scoped_prop_vars.png#screenshot)
     <figcaption>
     This example is the Quasargui variant of Quasar's [tree example](https://quasar.dev/vue-components/tree#customize-content) where items in the tree view have customized *default-header* and *default-body*.
     </figcaption>
@@ -252,7 +274,7 @@ To see the interactions with `Model` and `Computed`, consider the following exam
 
 === "screenshot"
     <figure>
-    ![Even or odd](assets/screenshots/even_or_odd.png)
+    ![Even or odd](assets/screenshots/even_or_odd.png#screenshot)
     <figcaption>
     If you type a number into *a* or *b*,     
     the window displays "is even" or "is odd",     
@@ -293,7 +315,7 @@ If you want to execute code when a `Model` gets a certain value, you just call `
 
 === "screenshot"
     <figure>
-    ![Accept_conditions](assets/screenshots/accept_conditions.png)
+    ![Accept_conditions](assets/screenshots/accept_conditions.png#screenshot)
     <figcaption>
     When the conditions are accepted, a notification pops up.
     </figcaption>
@@ -321,7 +343,7 @@ Events can be defined on `Components` using the `events` property at constructio
 
 === "screenshot"
     <figure>
-    ![Click event](assets/screenshots/click_event.png)
+    ![Click event](assets/screenshots/click_event.png#screenshot)
     <figcaption>
     When the user clicks the button, a notification pops up.
     </figcaption>
@@ -341,7 +363,7 @@ Quasargui offers a range of notification and dialog options, wrapping [Quasar's 
 
 === "📷 main screen"
     <figure>
-    ![Click event](assets/screenshots/dialogs.png)
+    ![Click event](assets/screenshots/dialogs.png#screenshot)
     <figcaption>
     An extensive example. To check out all the dialogs and grid menus, you can run this example if you copy-paste it into your Python prompt.
     </figcaption>
@@ -349,7 +371,7 @@ Quasargui offers a range of notification and dialog options, wrapping [Quasar's 
 
 === "📷 dark mode"
     <figure>
-    ![Click event](assets/screenshots/dialogs-dark.png)
+    ![Click event](assets/screenshots/dialogs-dark.png#screenshot)
     <figcaption>
     Dark mode can be a breeze. The switch is in the top-right corner.
     </figcaption>
@@ -357,7 +379,7 @@ Quasargui offers a range of notification and dialog options, wrapping [Quasar's 
 
 === "📷 success notification"
     <figure>
-    ![Click event](assets/screenshots/dialogs-alert.png)
+    ![Click event](assets/screenshots/dialogs-alert.png#screenshot)
     <figcaption>
     Notifications can be easily configured (use `your_component.api.plugins.notify()`, with setting keyword arguments besides message). See [Quasar documentation of options][quasardocnotifyapi]; on QuasarConfOptions you can use any option as a keyword argument to `notify()`.  
     </figcaption>
@@ -365,7 +387,7 @@ Quasargui offers a range of notification and dialog options, wrapping [Quasar's 
 
 === "📷 options dialog"
     <figure>
-    ![Click event](assets/screenshots/dialogs-options.png)
+    ![Click event](assets/screenshots/dialogs-options.png#screenshot)
     <figcaption>
     One type of dialog is options dialog. You can have a simple yes-no prompt, a string value input prompt and other custom options.
     </figcaption>
@@ -373,7 +395,7 @@ Quasargui offers a range of notification and dialog options, wrapping [Quasar's 
 
 === "📷 grid menu"
     <figure>
-    ![Click event](assets/screenshots/dialogs-grid_menu.png)
+    ![Click event](assets/screenshots/dialogs-grid_menu.png#screenshot)
     <figcaption>
     A grid menu can nicely de-clog your app.
     </figcaption>
@@ -511,7 +533,7 @@ It can be a bit of a hustle though to set the same options again and again. So, 
 
 === "screenshot"
     <figure>
-    ![Click event](assets/screenshots/defaults.png)
+    ![Click event](assets/screenshots/defaults.png#screenshot)
     <figcaption>
     An alternative styling for form elements. Check out the code to see how styles can be set.
     </figcaption>
