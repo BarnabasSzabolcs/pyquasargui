@@ -81,7 +81,7 @@ Quasargui uses Python's typing system, so if you use an IDE you can always check
 
 To make changes on the window, we use `Model`'s, like `loading` in this example. A `Model` provides "two-way binding" between your code and the GUI. This means that every change to a `Model`'s value is reflected in the GUI and every user input changes the `Model`'s value.
 
-## Comparing Vue/Quasar and Quasargui
+## Vue vs. Quasargui
 
 If you have experience with Vue, this section shows you how concepts in Vue are transferred to Quasargui.  
 The transfer from Vue is natural since under the hood Quasargui builds up a Vue/Quasar webpage and interacts with it through pywebview's api.
@@ -104,7 +104,7 @@ roughly results in
 
 So, if you look into [quasar's documentation][quasardoc], all Vue components have their `Component` counterpart in Quasargui, with the same name. As an example, `<q-button/>` corresponds to `QButton`.
 
-### From Vue components to Component parameters
+### Vue components to Component parameters
 
 Among a `Component`'s constructor's parameters,
 
@@ -120,7 +120,7 @@ Directives are defined as functions. `v_show` and other `v_*` functions correspo
 
 Any `Model` corresponds to Vue data that is defined on the Vue app. There is also `Computed` that works similar to 'computed'  in Vue.
 
-### Accessing Vue slots in Quasargui
+### Vue slots in Quasargui
 
 In components, Vue's slots can be accessed as `Slot('slot-name', [...children...])`. Since `Slot` is a `Component`, it also has props, events, styles and classes.
 
@@ -335,7 +335,7 @@ Events can be defined on `Components` using the `events` property at constructio
     run(layout)
     ```
 
-## Notifications, dialogs, dark mode, grid menu
+## Notifications, dialogs
 
 Quasargui offers a range of notification and dialog options, wrapping [Quasar's plugins][quasardocplugins]. You can access most Quasar plugins via `your_component.api.plugins` or `your_model.api.plugins`. 
 
@@ -502,7 +502,7 @@ In general, in [Quasar's plugins][quasardocplugins] documentation, if you see `n
 
 Note that not all plugins are wrapped (because many plugins do not make sense in a desktop app) and some plugins work a little bit different. Look up `QuasarPlugins` in the `Quasargui` code to see all the implemented plugins.
 
-## Customization with classes and default props
+## Custom styles, defaults
 
 Once you start working with Quasargui, you will probably want to create your own styling. Luckily, Quasar is pretty flexible, offers a range of [styling classes][quasardocclasses] (eg. `'q-mt-xl'` means margin top should be extra large) and `Q*` components have lots of props (eg. `QButton(props={'glossy': True})`).
 
@@ -601,17 +601,20 @@ There are other subtleties such as defining a menu that is specific to a certain
 If you want to dynamically change the menu, you can do that using `Api`'s `set_menu()` command.
 
 ### Minimize, fullscreen, close
-### System dialogs (eg. file dialog)
+### System dialogs 
+(eg. file dialog)
 ### Multiple windows
 
-## Basic widgets
+## Basic components
 
-### QLayout, QPage, QDrawer...
+
+### Layout components 
+QLayout, QPage, QDrawer...
 
 TODO: describe these components - and the smart automatisms - and say that a QLayout can be used with only a QPage, too.
 
-### Rows, Columns, Div
-
+### Rows and Columns
+(... and Div)
 
 
 ### Form elements
