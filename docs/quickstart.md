@@ -1,6 +1,6 @@
 # Quickstart
 
-This page takes you through concepts of Quasargui. The examples you can also use as boilerplate, so you can quickly get up and running with Quasargui.
+This page takes you through concepts of Quasargui.
 
 If you haven't yet installed Quasargui, you can install Quasargui by
     
@@ -29,7 +29,7 @@ The important parts of the code:
   3. `children` can be a list of `Component`'s and `str`'s and some other types that we'll discuss later. 
   4. The `children` strings accept html code, so simple formats such as `<i>` and `<b>` can be comfortably written directly. For more complex cases, use components such as `Link`, `Heading`, etc.
 
-Let's move on to a more advanced code that also can be used as a starter.
+Let's move on to a more advanced code that also can be used as a boilerplate for your app.
 
 ## Starter code
 
@@ -72,20 +72,21 @@ To quickly get a nice window layout, you can use the code of the window below.
 
 The things you need to know about this window:
 
-`QLayout`, `QDrawer`, etc. are all `Component`s that correspond to **Vue** components. In particular, we use [Quasar][quasardoc]'s components - hence the name Quasargui. All the components you see on the Quasar documentation page, you can use here as a components, all of them are wrapped into a `Component`.
+`QLayout`, `QDrawer`, etc. are all `Component`s that correspond to **Vue** components. In particular, we use [Quasar][quasardoc]'s professional-looking components - hence the name Quasargui. All the components you see on the Quasar documentation page, are imported into Quasargui, wrapped into `Component`'s.
 
-The first parameter of a `Component` is usually `children`. `children` comes first so you don't have to type constantly `children=`.   
-Note that `QButton`'s first parameter is *not* children but `label`, since typically you want to add a label to a button and not children (which is still possible of course...).
+The first parameter of a `Component` is `children`, so you don't have to type constantly `children=`.   
+Note that `QButton`'s first parameter is *not* children but `label` since typically you want to add a label to a button and not children (which is also still possible of course...).
 
-Quasargui's api uses python's typing system, so if you use an IDE you can check with typing system if you're using Quasargui correctly.
+Quasargui uses Python's typing system, so if you use an IDE you can always check with typing system if you're using Quasargui correctly.
 
-To make changes on the window, we use `Model`'s, like `loading`. `Model` provides a "two-way binding" between your code and the GUI which means that every change is reflected in the GUI and every user input changes the `Model`'s value.
+To make changes on the window, we use `Model`'s, like `loading` in this example. A `Model` provides "two-way binding" between your code and the GUI. This means that every change to a `Model`'s value is reflected in the GUI and every user input changes the `Model`'s value.
 
-## Vue (Quasar) vs Quasargui
+## Comparing Vue/Quasar and Quasargui
 
-Under the hood, Quasargui builds up a Vue/Quasar webpage and interacts with it through pywebview's api.
+If you have experience with Vue, this section shows you how concepts in Vue are transferred to Quasargui.  
+The transfer from Vue is natural since under the hood Quasargui builds up a Vue/Quasar webpage and interacts with it through pywebview's api.
 
-For example, 
+For example 
 ```python
 ok_label = Model('ok')
 Div(children=[
@@ -101,10 +102,13 @@ roughly results in
 </div>
 ```
 
-So, if you look into [quasar's documentation][quasardoc], `Component`'s correspond to Vue components.   
-Among a `Component` constructor's parameters,
+So, if you look into [quasar's documentation][quasardoc], all Vue components have their `Component` counterpart in Quasargui, with the same name. As an example, `<q-button/>` corresponds to `QButton`.
 
-* `children` correspond to html-style children.
+### From Vue components to Component parameters
+
+Among a `Component`'s constructor's parameters,
+
+* `children` corresponds to html-style children.
 * `props` corresponds to `props` (eg. `label="ok"`, `:label="data[1]"`),
 * `events` corresponds to Vue events (eg. `@click`)
 * `classes` corresponds to `class` attribute.
@@ -112,17 +116,21 @@ Among a `Component` constructor's parameters,
 
 Additionally, we have defined some shorthand parameters for frequently used props (such as `label` in case of QButton).
 
-Directives are defined as functions. `v_show` and other `v_*` functions correspond to `v-` directives. Only `v-model` is special, it is always accessible as the `model` parameter of a `ComponentWithModel`.
+Directives are defined as functions. `v_show` and other `v_*` functions correspond to `v-*` directives. Only `v-model` gets special treatment, it is always accessible as the `model` parameter of a `ComponentWithModel`.
 
-`Model` corresponds to Vue data that is defined on the Vue app. There is also `Computed` that works similar to `Model`.
+Any `Model` corresponds to Vue data that is defined on the Vue app. There is also `Computed` that works similar to 'computed'  in Vue.
 
-### Slots
+### Accessing Vue slots in Quasargui
 
-In components, Vue's slots can be accessed as `Slot('slot-name', [...children...])`. For example:
+In components, Vue's slots can be accessed as `Slot('slot-name', [...children...])`. Since `Slot` is a `Component`, it also has props, events, styles and classes.
 
 === "screenshot"
+    <figure>
     ![Slots example](assets/screenshots/slots_simple.png)
-
+    <figcaption>
+    The map sign of the input field is defined in a slot.
+    </figcaption>
+    </figure>
 === "source"
     ```python
     from quasargui import *
@@ -139,7 +147,9 @@ In components, Vue's slots can be accessed as `Slot('slot-name', [...children...
     run(layout, title='slots example')
     ```
 
-Scoped-slots can be accessed a little-bit differently. Since scoped slots are meant as a template, in python we express them as functions, `Slot('slot-name', lambda props: [... children...])`. Here props is a `PropVar` that behaves just like `Model`.
+#### Scoped slots
+
+Scoped slots can be accessed a little-bit differently. Since scoped slots are meant as a template, in python we express them as functions, `Slot('slot-name', lambda props: [... children...])`. In this formula `props` is a `PropVar` that behaves just like a `Model`.
 
 === "screenshot"
     <figure>
@@ -233,11 +243,11 @@ Scoped-slots can be accessed a little-bit differently. Since scoped slots are me
         ])
     
     run(layout, title='Scoped slot demo')
-
     ```
 
 ## Model and Computed
 
+In Quasargui `Model` and `Computed` enable `Component`'s to change dynamically. They are the most convenient way to handle complex user interaction.    
 To see the interactions with `Model` and `Computed`, consider the following example:
 
 === "screenshot"
@@ -245,7 +255,7 @@ To see the interactions with `Model` and `Computed`, consider the following exam
     ![Even or odd](assets/screenshots/even_or_odd.png)
     <figcaption>
     If you type a number into *a* or *b*,     
-    the window displays "is even" or "is odd"     
+    the window displays "is even" or "is odd",     
     depending on the parity of *a+b*
     </figcaption>
     </figure>
@@ -270,34 +280,325 @@ To see the interactions with `Model` and `Computed`, consider the following exam
     run(layout)
     ```
 
-In this example, `even` and `odd` are computed from the value of `a` and `b`. A `Model`'s value is automatically passed as `int`, `float`, `str`, etc. corresponding to the type of the initial value. In general, a `Model` accepts any combination of basic python types (including `list` and `dict`), but if you want to use other python classes, you'll need to write your custom logic to convert a Model's value into json-compatible values.
+In the example above `even` and `odd` are computed from the value of `a` and `b`. 
+Although a `QInput`'s model value is usually `str`, in this example it is automatically converted to `int`, since `a` and `b` has initial value of type `int`.
 
-## Default props and classes
+In general, a `Model` accepts any combination of basic python types (including `list` and `dict`). If you want to use other python classes, you'll need to write your custom logic to convert a Model's value into json-compatible values.
 
-TODO: it is easier to define defaults than to add props again and again... (code without defaults vs code with defaults)
+To access the value of a `Model` or a `Computed`, use the `.value` property. It is a read/write property for `Model`'s and read-only for `Computed`. If you want to be more explicit, you can also use `.set_value()`.
+
+### Watching changes
+
+If you want to execute code when a `Model` gets a certain value, you just call `add_callback` on that `Model`. 
+
+=== "screenshot"
+    <figure>
+    ![Accept_conditions](assets/screenshots/accept_conditions.png)
+    <figcaption>
+    When the conditions are accepted, a notification pops up.
+    </figcaption>
+    </figure>
+
+=== "source"
+    ```python
+    from quasargui import *
+    
+    def notify_if_accepted():
+        if accepted.value:
+            accepted.api.plugins.notify('Thanks for accepting!')
+    
+    accepted = Model(False)
+    accepted.add_callback(notify_if_accepted)    
+    layout = InputBool("Accept conditions", accepted)
+    run(layout)
+    ```
+
+You can add a callback anytime of course, even after a component is added to the window. 
 
 ## Events
 
-TODO: QButton click event example.
+Events can be defined on `Components` using the `events` property at construction time. Events that can be defined are specific for a `Component`. If you want to check the state of the system at the event, access your `Model` and `Computed` values.
 
-Events can be defined on `Components`
+=== "screenshot"
+    <figure>
+    ![Click event](assets/screenshots/click_event.png)
+    <figcaption>
+    When the user clicks the button, a notification pops up.
+    </figcaption>
+    </figure>
 
-## Watching for change in Models and Computed
-TODO: add_callback example
+=== "source"
+    ```python
+    from quasargui import *
+    layout = QButton('Click me', events={
+        'click': lambda: layout.api.plugins.notify("I've got clicked!")})
+    run(layout)
+    ```
 
-```python
-model.add_callback()
-```
+## Notifications, dialogs, dark mode, grid menu
 
-## Notifications and dialogs
+Quasargui offers a range of notification and dialog options, wrapping [Quasar's plugins][quasardocplugins]. You can access most Quasar plugins via `your_component.api.plugins` or `your_model.api.plugins`. 
 
-TODO: example - dialogs.py
+=== "📷 main screen"
+    <figure>
+    ![Click event](assets/screenshots/dialogs.png)
+    <figcaption>
+    An extensive example. To check out all the dialogs and grid menus, you can run this example if you copy-paste it into your Python prompt.
+    </figcaption>
+    </figure>
 
+=== "📷 dark mode"
+    <figure>
+    ![Click event](assets/screenshots/dialogs-dark.png)
+    <figcaption>
+    Dark mode can be a breeze. The switch is in the top-right corner.
+    </figcaption>
+    </figure>
+
+=== "📷 success notification"
+    <figure>
+    ![Click event](assets/screenshots/dialogs-alert.png)
+    <figcaption>
+    Notifications can be easily configured (use `your_component.api.plugins.notify()`, with setting keyword arguments besides message). See [Quasar documentation of options][quasardocnotifyapi]; on QuasarConfOptions you can use any option as a keyword argument to `notify()`.  
+    </figcaption>
+    </figure>
+
+=== "📷 options dialog"
+    <figure>
+    ![Click event](assets/screenshots/dialogs-options.png)
+    <figcaption>
+    One type of dialog is options dialog. You can have a simple yes-no prompt, a string value input prompt and other custom options.
+    </figcaption>
+    </figure>
+
+=== "📷 grid menu"
+    <figure>
+    ![Click event](assets/screenshots/dialogs-grid_menu.png)
+    <figcaption>
+    A grid menu can nicely de-clog your app.
+    </figcaption>
+    </figure>
+
+=== "⌨️ python source"
+    ```python
+    from quasargui import *
+
+
+    def show_notification(message):
+        layout.notify(message=message, position='top-right', group=False, timeout=1500)
+    
+    
+    def show_success():
+        layout.api.plugins.notify(message='This is a success!', caption='Just now', type='positive', icon='done')
+    
+    
+    dialog_events = {
+        'ok': lambda data: show_notification('OK clicked, data={}'.format(json.dumps(data))),
+        'cancel': lambda: show_notification('Cancel clicked'),
+        'dismiss': lambda: show_notification('Dialog dismissed'),
+    }
+    
+    
+    def show_alert():
+        layout.api.plugins.dialog(props={'title': 'Alert', 'message': 'Some message'}, events=dialog_events)
+    
+    
+    def show_confirm():
+        layout.api.plugins.dialog(props={
+            'title': 'Confirm',
+            'message': 'Would you like to turn on the wifi?',
+            'cancel': True,
+            'persistent': True
+        }, events=dialog_events)
+    
+    
+    def show_prompt():
+        layout.api.plugins.dialog(props={
+            'title': 'Prompt',
+            'message': 'What is your name?',
+            'prompt': {'model': '', 'type': 'text'},
+            'cancel': True,
+            'persistent': True
+        }, events=dialog_events)
+    
+    
+    def show_options():
+        layout.api.plugins.dialog(props={
+            'title': 'Options',
+            'message': 'Choose an option',
+            'options': {
+                'model': 'opt1',
+                'type': 'radio',
+                'items': [
+                    {'label': 'Option 1', 'value': 'opt1', 'color': 'secondary'},
+                    {'label': 'Option 2', 'value': 'opt2'},
+                    {'label': 'Option 3', 'value': 'opt3'}
+                ]
+            },
+            'cancel': True,
+            'persistent': True
+        }, events=dialog_events)
+    
+    
+    def show_bottom_sheet(grid: bool):
+        layout.api.plugins.bottom_sheet(props={
+            'message': 'Bottom Sheet message',
+            'grid': grid,
+            'actions': [
+                {'label': 'Drive', 'id': 'drive', 'img': 'https://cdn.quasar.dev/img/logo_drive_128px.png'},
+                {'label': 'Keep', 'id': 'keep', 'img': 'https://cdn.quasar.dev/img/logo_keep_128px.png'},
+                {'label': 'Google Hangouts', 'id': 'calendar', 'img': 'https://cdn.quasar.dev/img/logo_hangouts_128px.png'},
+                {},
+                {'label': 'Share', 'icon': 'share', 'id': 'share'},
+                {'label': 'Upload', 'icon': 'cloud_upload', 'color': 'primary', 'id': 'upload'},
+                {},
+                {'label': 'John', 'avatar': 'https://cdn.quasar.dev/img/boy-avatar.png', 'id': 'john'}
+            ]
+    
+        }, events=dialog_events)
+    
+    
+    dark_mode = Model(False)
+    dark_mode.add_callback(
+        lambda: layout.api.plugins.dark(dark_mode.value)
+    )
+    
+    layout = QLayout([
+        QHeader([QToolbar([
+            QToolbarTitle([
+                QIcon('announcement', 'lg', classes='q-mx-md'),
+                'Dialogs'
+            ]),
+            QSpace(),
+            QButton(
+                label=Computed(lambda dark: 'light mode' if dark else 'dark mode', dark_mode),
+                icon=Computed(lambda dark: 'light_mode' if dark else 'dark_mode', dark_mode),
+                props={'stretch': True},
+                events={'click': toggle(dark_mode)}
+            )
+        ])]),
+        QPage([Rows(classes='q-py-xl', children=[
+    
+            QButton('show a success notification', events={'click': show_success}),
+            QButton('show an alert', events={'click': show_alert}),
+            QButton('show a confirmation', events={'click': show_confirm}),
+            QButton('show a prompt', events={'click': show_prompt}),
+            QButton('show options', events={'click': show_options}),
+            QButton('show a grid menu', events={'click': lambda: show_bottom_sheet(grid=True)}),
+            QButton('show a list menu', events={'click': lambda: show_bottom_sheet(grid=False)}),
+    
+            Div(classes='q-mt-xl', children=[
+                'See even more examples at ',
+                Link('Quasar dialog documentation',
+                     'https://quasar.dev/quasar-plugins/dialog#predefined')])
+        ])])
+    ])
+    
+    run(layout, title='Dialogs demonstration', debug=True)
+
+    ```
+
+In general, in [Quasar's plugins][quasardocplugins] documentation, if you see `notify({options})` you can expect to write in Python `my_component.api.plugins.notify(**options)`.
+
+Note that not all plugins are wrapped (because many plugins do not make sense in a desktop app) and some plugins work a little bit different. Look up `QuasarPlugins` in the `Quasargui` code to see all the implemented plugins.
+
+## Customization with classes and default props
+
+Once you start working with Quasargui, you will probably want to create your own styling. Luckily, Quasar is pretty flexible, offers a range of [styling classes][quasardocclasses] (eg. `'q-mt-xl'` means margin top should be extra large) and `Q*` components have lots of props (eg. `QButton(props={'glossy': True})`).
+
+It can be a bit of a hustle though to set the same options again and again. So, defaults to the rescue!
+
+
+=== "screenshot"
+    <figure>
+    ![Click event](assets/screenshots/defaults.png)
+    <figcaption>
+    An alternative styling for form elements. Check out the code to see how styles can be set.
+    </figcaption>
+    </figure>
+=== "source"
+    ```python
+    from quasargui import *
+    
+    QButton.defaults['props'] = {
+        'glossy': True,
+        'color': 'orange',
+        'rounded': True
+    }
+    QInput.defaults['props'] = {
+        'outlined': True,
+        'rounded': True
+    }
+    
+    layout = Rows(classes='q-mt-lg q-gutter-md', children=[
+        Columns([QButton('one'), QButton('two'), QButton('oranje!')]),
+        QInput('me is outlined')
+    ])
+    
+    run(layout, title='We likes glossy')
+    ```
 
 ## Window access
+
+Quasargui's `run(layout)` command automatically produces a window for you. You can access this window through `layout.api` - in fact, `your_component.api` and `your_model.api` points to the same api *after* the component or the model is attached to a window. If you want to modify the window's properties, access system dialogs or create new windows, you can find these functionality as `api`'s (`quasargui.main.Api`'s) functions.
+
+So, in the following sections we'll basically walk through `quasargui.main.Api`.
+
 ### Menu
 
-TODO: example - menu.py
+Menu can be added using `run(menu=menu_definition)` where `menu_definition` can look like 
+```python
+[{
+    'title': 'Edit', 
+    'children': [
+        {'title': 'Copy', 'key': 'c', 'action': copy_cb},
+        {'title': 'Paste', 'key': 'p', 'action': paste_cb}
+    ]
+}]
+``` 
+There are other subtleties such as defining a menu that is specific to a certain operations system. These are covered in the documentation of `Api`.
+
+=== "📷 menu on mac"
+    <figure>
+    ![Example native mac menu](assets/screenshots/menu-mac.png)
+    <figcaption>
+    An example menu on Mac - check out the other screenshots for other systems.
+    </figcaption>
+    </figure>
+=== "📷 menu on other systems"
+    <figure>
+    ![Example menu under the titlebar](assets/screenshots/menu-other.png)
+    <figcaption>
+    The menu on other systems is implemented using Quasargui `Component`'s, mimicking a Windows menu.
+    </figcaption>
+    </figure>
+=== "⌨️ python source"
+    ```python
+    from quasargui import *
+    
+    menu = [
+        {'title': 'Top Action', 'action': lambda: layout.notify("Top Action"), 'key': 't'},
+        {'title': 'Custom menu 1', 'children': [
+            {'title': 'Action 1', 'action': lambda: layout.notify("Hello 1"), 'key': 'b'},
+            {'title': 'Action 2', 'action': lambda: layout.notify("Hello 2"), 'key': 'd'},
+            None,  # separator
+            {'title': 'Submenu', 'children': [
+                {'title': 'Action 3', 'action': lambda: layout.notify("Hello 3")},
+                {'title': 'Submenu 2', 'children': [
+                    {'title': 'Submenu goes forever:)', 'children': [
+                        {'title': 'Action 5', 'action': lambda: layout.notify("Hello 5")}
+                    ]},
+                    {'title': 'Action 4', 'action': lambda: layout.notify("Hello 4")}
+                ]},
+            ]},
+        ]},
+    ]
+    
+    layout = Rows([])
+    run(layout, menu=menu)
+    ```
+
+If you want to dynamically change the menu, you can do that using `Api`'s `set_menu()` command.
 
 ### Minimize, fullscreen, close
 ### System dialogs (eg. file dialog)
@@ -320,3 +621,6 @@ TODO: example - form_validation.py
 
 
 [quasardoc]: https://quasar.dev
+[quasardocplugins]: https://quasar.dev/quasar-plugins/
+[quasardocnotifyapi]: https://quasar.dev/quasar-plugins/notify#notify-api
+[quasardocclasses]: https://quasar.dev/style/spacing

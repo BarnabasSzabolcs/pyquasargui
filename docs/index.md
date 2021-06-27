@@ -37,7 +37,8 @@ When we change `QInput`, `name`'s value is updated automatically. So, when we cl
 
 ## Quickstart
 
-Can't wait to get started? The [quickstart guide](quickstart.md) is the fastest way to get up and running
+Can't wait to get started? The [quickstart guide](quickstart.md) is the fastest way to get up and running.
+If you come from a Vue background, check out the [comparison between Vue and Quasargui](quickstart.md#comparing-vuequasar-and-quasargui). 
 
 ## List of examples
 
@@ -81,7 +82,7 @@ You can see the [reference of the classes on quasar.dev](https://quasar.dev/styl
 
 ## Requirements
 
-This project requires `pywebgui`.
+This project requires `pywebgui` and Python 3.5+.
 ```
 pip install pywebgui
 ``` 
