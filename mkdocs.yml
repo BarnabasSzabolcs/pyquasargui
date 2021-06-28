@@ -94,6 +94,7 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Quickstart: quickstart.md
+  - Components: components.md
 #  - Getting started:
 #      - Installation: index.md
 #      - Examples: index.md

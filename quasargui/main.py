@@ -340,6 +340,7 @@ def run(
         size: Tuple[Optional[int], Optional[int]] = (None, None),
         position: Tuple[Optional[int], Optional[int]] = (None, None),
         frameless: bool = False,
+        resizable: bool = True,
         fullscreen: bool = False,
         localization: dict = None,
         debug: bool = False,
@@ -370,6 +371,7 @@ def run(
                                 size=size,
                                 position=position,
                                 frameless=frameless,
+                                resizable=resizable,
                                 fullscreen=fullscreen,
                                 debug=debug,
                                 _render_debug=_render_debug)
@@ -390,6 +392,7 @@ def create_window(
         size: Tuple[Optional[int], Optional[int]] = (None, None),
         position: Tuple[Optional[int], Optional[int]] = (None, None),
         frameless: bool = False,
+        resizable: bool = True,
         fullscreen: bool = False,
         debug: bool = None,
         _render_debug: bool = None,
@@ -420,6 +423,7 @@ def create_window(
         width=size[0] or 800,
         height=size[1] or 600,
         frameless=frameless,
+        resizable=resizable,
         fullscreen=fullscreen
     )
     window_api_list.append((window, api))

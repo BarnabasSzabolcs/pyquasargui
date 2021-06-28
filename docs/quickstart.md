@@ -622,27 +622,260 @@ There are other subtleties such as defining a menu that is specific to a certain
 
 If you want to dynamically change the menu, you can do that using `Api`'s `set_menu()` command.
 
-### Minimize, fullscreen, close
-### System dialogs 
-(eg. file dialog)
+### Window operations
+
+To access window operations, we use `Api`'s methods. You can access the api instance pointing to the window by a `Component` that is already mounted to a window (`your_component.api`) or a `Model` that is mounted to a window (`your_model.api`). To minimize, fullscreen or close a window, call 
+`.minimize_window()`, `.toggle_fullscreen()` or `.close_window()`. To change the title, call `.set_title('New title')`. 
+
+The standard file/folder/save dialogs can be accessed the same way - see the code of this example below.
+
+=== "screenshot"
+    <figure>
+    ![window_operations](assets/screenshots/window_operations.png#screenshot)
+    <figcaption>
+    Copy the code of this example into your Python prompt to see window properties in action.
+    </figcaption>
+    </figure>
+=== "source"
+    ```python
+    from quasargui import Model, QLayout, QHeader, QPage, QToolbar, QSpace, QButton, QInput, Rows, TrueFalse, toggle
+    from quasargui.main import run
+    
+    
+    title_model = Model('Your title goes here')
+    title_model.add_callback(
+        lambda: title_model.api.set_window_title(title_model.value),
+        immediate=True
+    )
+    is_fullscreen = Model(False)
+    width = Model(400)
+    width.add_callback(
+        lambda: width.api.resize_window((width.value, None)) if 300 <= width.value <= 1000 else None,
+        immediate=True
+    )
+    height = Model(500)
+    height.add_callback(
+        lambda: height.api.resize_window((None, height.value)) if 300 <= height.value <= 1000 else None,
+        immediate=True
+    )
+    
+    
+    def toggle_fullscreen():
+        layout.api.toggle_fullscreen()
+        is_fullscreen.value = not is_fullscreen.value
+    
+    
+    layout = QLayout([
+        QHeader([QToolbar([
+            QSpace(),
+            QButton(icon='minimize',
+                    props={'stretch': True},
+                    events={'click': lambda: layout.api.minimize_window()}),
+            QButton(icon=TrueFalse('fullscreen_exit', 'fullscreen', is_fullscreen),
+                    props={'stretch': True},
+                    events={'click': toggle_fullscreen}),
+            QButton(icon='close',
+                    props={'stretch': True},
+                    events={'click': lambda: layout.api.close_window()}),
+        ])]),
+        QPage([
+            Rows([
+                QInput('Window title', title_model),
+                QInput('Resize window width', width, type='number'),
+                QInput('Resize window height', height, type='number'),
+                QButton(
+                    'Show file dialog',
+                    events={
+                        'click': lambda: layout.notify('You chose: {}'.format(
+                            layout.api.show_open_dialog()))
+                    }),
+                QButton(
+                    'Show folder dialog',
+                    events={
+                        'click': lambda: layout.notify('You chose: {}'.format(
+                            layout.api.show_folder_dialog()))
+                    }),
+                QButton(
+                    'Show save dialog',
+                    events={
+                        'click': lambda: layout.notify('You chose: {}'.format(
+                            layout.api.show_save_dialog()))
+                    }),
+            ])
+        ])
+    ])
+    
+    run(layout, size=(400, 500))
+    ```
+
+Frameless windows are also possible.
+
+=== "screenshot"
+    <figure>
+    ![window_operations](assets/screenshots/window_frameless.png#screenshot)
+    <figcaption>
+    This toolbar is a frameless window.
+    </figcaption>
+    </figure>
+=== "source"
+    ```python
+    from quasargui import *
+    props = {'dense': True}
+    
+    QButton.defaults['props'] = {
+        'dense': True,
+        'unelevated': True
+    }
+    Columns.defaults['classes'] = ''
+    Rows.defaults['classes'] = ''
+    
+    
+    layout = QLayout(children=[
+        QPage([
+            QBar(props={'dense': True}, classes='q-pr-xs', children=[
+                QSpace(),
+                QButton(icon='minimize',
+                        props=props,
+                        events={'click': lambda: layout.api.minimize_window()}),
+                QButton(icon='close',
+                        props=props,
+                        events={'click': lambda: layout.api.close_window()}),
+            ]),
+            Rows([
+                Columns([QButton(icon='language'), QButton(icon='favorite')]),
+                Columns([QButton(icon='send'), QButton(icon='help')]),
+            ])
+        ])
+    ])
+    
+    run(layout, frameless=True, size=(64, 100), resizable=False)
+    ```
+
 ### Multiple windows
 
-## Basic components
+You can manage multiple windows. In that case the main rule of thumb is that each `Component`, `Model` and `Computed` can belong to only *one* window.    
+So, it is best to create your layout and models via a factory function.
 
+=== "screenshot"
+    <figure>
+    ![window_handling](assets/screenshots/window_handling.png)
+    <figcaption>
+    This example creates a new random-sized window when the user clicks 'create window'. Setting window title (that is a model) affects only its own window. 
+    </figcaption>
+    </figure>
+=== "source"
+    ```python
+    from random import randint
+    from time import sleep
+    
+    from quasargui import Model, QLayout, QHeader, QPage, QToolbar, QSpace, QButton, QInput, Rows, TrueFalse
+    from quasargui.main import create_window, run
+    
+    
+    def create_new_window():
+        layout = create_layout('New window')
+        create_window(layout, position=(randint(1, 100), randint(1, 100)), size=(400, 500))
+        sleep(0.5)
+        layout.notify('A brand new window!', type='positive', timeout=200000)
+    
+    
+    def close_window(layout):
+        layout.api.close_window()
+        print('The window is closed but the app still runs')
+    
+    
+    def toggle_fullscreen(layout, model):
+        model.value = not model.value
+        layout.api.toggle_fullscreen()
+    
+    
+    def create_layout(title):
+        title_model = Model(title)
+        title_model.add_callback(
+            lambda: title_model.api.set_window_title(title_model.value),
+            immediate=True
+        )
+        is_fullscreen = Model(False)
+        width = Model(400)
+        width.add_callback(
+            lambda: width.api.resize_window((width.value, None)) if 300 <= width.value <= 1000 else None,
+            immediate=True
+        )
+        height = Model(300)
+        height.add_callback(
+            lambda: height.api.resize_window((None, height.value)) if 300 <= height.value <= 1000 else None,
+            immediate=True
+        )
+    
+        layout = QLayout([
+            QHeader([QToolbar([
+                QSpace(),
+                QButton(icon='minimize',
+                        props={'stretch': True},
+                        events={'click': lambda: layout.api.minimize_window()}),
+                QButton(icon=TrueFalse('fullscreen_exit', 'fullscreen', is_fullscreen),
+                        props={'stretch': True},
+                        events={'click': lambda: toggle_fullscreen(layout, is_fullscreen)}),
+                QButton(icon='close',
+                        props={'stretch': True},
+                        events={'click': lambda: close_window(layout)}),
+            ])]),
+            QPage([
+                Rows([
+                    QInput('Window title', title_model),
+                    QInput('Resize window width', width, type='number'),
+                    QInput('Resize window height', height, type='number'),
+                    QButton('Create new window', events={'click': create_new_window}),
+               ])
+            ])
+        ])
+        return layout
+    
+    
+    main_layout = create_layout('Main window')
+    run(main_layout, size=(400, 300))
+    ```
+
+## Most important components
+
+In this part we'll go through the most important components.
+If you're interested in seeing all components, go to the [components list](components.md).
 
 ### Layout components 
-QLayout, QPage, QDrawer...
 
-TODO: describe these components - and the smart automatisms - and say that a QLayout can be used with only a QPage, too.
+The window (or `run()` function) can take any component as `component`, still it is recommended to use `QLayout` with `QHeader`, `QPage` and `QFooter` as children, and optionally `QDrawer`'s. This leads to a standard layout where you can put your most important functions into `QHeader`, as `QButton` (*'stretch'* prop is recommended). QHeader's background and foreground can be set using 'q-*' classes, using `styles={'background': '#abc', 'color': '#fff'}` or adding your own stylesheet, pushing the path of your css file to `your_component.style_sources` or calling `your_component.api.import_styles()` after your component is mounted. 
+
+Note that adding `QHeader` and `QFooter` to `QLayout` is entirely optional.
 
 ### Rows and Columns
-(... and Div)
 
+If you want the classic vertical or horizontal layout, use `Rows` or `Columns`. These result in a html "flex" layout which means that Columns will wrap automatically if the window is not wide enough.
+
+TODO: example - also handle the case when the use does not want the columns to wrap.
 
 ### Form elements
 
+You have access to a range of form elements. There are the Quasar form components (starting with Q, in `quasargui.quasar_form` module). 
+
+TODO: example - some basic list of quasar form-components in a window
+
+Also, there are form elements *by input value type*. These elements are in `quasargui.quasar_form_improved` module and are named according to the input value type, eg. `InputStr`, `InputBool`, etc. The idea is to automatically get a combination of controls that is set up correctly. You can get an apropriate appearance for your input, and later you can refine it, choosing from one of its available `appearance`. Eg. an `InputChoice` can be a radio, a series of pushable buttons, or a select dropdown. Or, if you allow multiple choices, you can get checkbox, toggles, tags input or a multi-choice select. If you don't choose one, the control is determined based on the number of available choices.
+
+TODO: example - InputChoice with different settings
+
+There's `InputTime`, `InputDate` and `InputDateTime` that are implementations of Quasar's recommendations on data-time input, with all the conversions between Python and the GUI taken care of (remember that `date`, `time` and `datetime` is a special class that is not a basic type.)
+
+TODO: example - date-time with datetime open.
+
 #### Form validation
-TODO: example - form_validation.py
+
+You can validate form components right when the user inputs a value - but for snappier action you need to add raw javascript to handle simple field validations, using `JSRaw`.
+
+TODO: example - form_validation.py (with JSRaw)
+
+You can also stick to submit-time validation, in this case you need to set up a `Model` for errors.
+
+TODO: example - submit-time validation
 
 
 [quasardoc]: https://quasar.dev
