@@ -49,6 +49,9 @@ theme:
 extra_css:
   - stylesheets/extra.css
 
+extra_javascript:
+  - js/mermaid@8.5.1.min.js
+
 # Extensions
 markdown_extensions:
   - admonition
@@ -81,11 +84,12 @@ markdown_extensions:
   - pymdownx.mark
   - pymdownx.smartsymbols
   - pymdownx.superfences:
+      preserve_tabs: true
       custom_fences:
         - name: mermaid
-          class: mermaid-experimental
-          format: !!python/name:pymdownx.superfences.fence_code_format
-  - pymdownx.tabbed
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_div_format
+  - pymdownx.tabbed:
   - pymdownx.tasklist:
       custom_checkbox: true
   - pymdownx.tilde
@@ -98,3 +102,7 @@ nav:
 #  - Getting started:
 #      - Installation: index.md
 #      - Examples: index.md
+
+plugins:
+#  - minify:
+#      minify_html: true

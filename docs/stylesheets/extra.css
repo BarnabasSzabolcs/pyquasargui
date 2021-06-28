@@ -25,3 +25,17 @@ figcaption{
 .tabbed-set .highlight{
     margin: 30px 15px;
 }
+.mermaid rect {
+    fill: #fff !important;
+    stroke: #888 !important;
+}
+.mermaid line{
+    stroke: #888 !important;
+}
+.mermaid path{
+    stroke: #333 !important;
+    fill: #333 !important;
+}
+.mermaid text{
+    fill: #000 !important;
+}
