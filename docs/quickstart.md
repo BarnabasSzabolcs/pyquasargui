@@ -533,7 +533,7 @@ It can be a bit of a hustle though to set the same options again and again. So, 
 
 === "screenshot"
     <figure>
-    ![Click event](assets/screenshots/defaults.png#screenshot)
+    ![Styling with defaults](assets/screenshots/defaults.png#screenshot)
     <figcaption>
     An alternative styling for form elements. Check out the code to see how styles can be set.
     </figcaption>
