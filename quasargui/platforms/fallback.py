@@ -22,9 +22,13 @@ def set_menu(api: 'Api', menuspec: MenuSpecType):
 
 
 def assemble_menu_bar(menuspec: MenuSpecType) -> QBar:
-    return QBar([
-        assemble_top_menu(spec) for spec in menuspec
-    ])
+    return QBar(
+        props={'dense': True},
+        classes='main-menu',
+        styles={'border-bottom': '1px solid #eee'},
+        children=[
+            assemble_top_menu(spec) for spec in menuspec
+        ])
 
 
 def assemble_top_menu(spec) -> Component:
@@ -36,7 +40,8 @@ def assemble_top_menu(spec) -> Component:
     }
     classes = 'q-pa-none'
     styles = {
-        'font-weight': '400'
+        'font-weight': '400',
+        'font-size': '13px'
     }
     if 'children' in spec:
         return QButton(
@@ -112,12 +117,12 @@ def assemble_menu(menuspec: MenuSpecType, top_level: bool = False) -> Component:
 
     if top_level:
         props = {
-            # 'offset': [0, 0]
+            'offset': [0, 1],
         }
     else:
         props = {
             'anchor': 'top end',
-            'self': 'top start'
+            'self': 'top start',
         }
     return QMenu(
         props=props,

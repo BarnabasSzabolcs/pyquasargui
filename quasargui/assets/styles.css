@@ -23,3 +23,9 @@ body{
 .row-grow{
     flex-grow: 1;
 }
+.main-menu{
+    background-color: white;
+}
+.body--dark .main-menu{
+    background-color: black;
+}

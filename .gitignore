@@ -3,3 +3,6 @@
 /venv/
 /sphinx-docs/_build/
 /site/
+.idea/
+quasargui/__pycache__/
+quasargui/platforms/__pycache__/

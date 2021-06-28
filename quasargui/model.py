@@ -277,7 +277,7 @@ class Computed(Reactive, Generic[T]):
     max_id = 0
     computed_dic: Dict[int, 'Computed'] = {}
 
-    def __init__(self, fun: Callable[[...], T], *args: Union[Reactive, PropVar]):
+    def __init__(self, fun: Callable, *args: Union[Reactive, PropVar]):
         """
         :param fun: is assumed to be an idempotent function (that its value changes only if args changes)
         :param args:

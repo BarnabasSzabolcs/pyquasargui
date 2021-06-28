@@ -9,18 +9,18 @@ from quasargui import *
 from quasargui.tools import static_vars
 
 menu = [
-    {'title': 'Top Action', 'action': lambda: layout.notify("Top Action"), 'key': 't'},
+    {'title': 'Top Action', 'action': lambda: layout.api.plugins.notify("Top Action"), 'key': 't'},
     {'title': 'Custom menu 1', 'children': [
-        {'title': 'Action 1', 'action': lambda: layout.notify("Hello 1"), 'key': 'b'},
-        {'title': 'Action 2', 'action': lambda: layout.notify("Hello 2"), 'key': 'd'},
+        {'title': 'Action 1', 'action': lambda: layout.api.plugins.notify("Hello 1"), 'key': 'b'},
+        {'title': 'Action 2', 'action': lambda: layout.api.plugins.notify("Hello 2"), 'key': 'd'},
         None,  # separator
         {'title': 'Submenu', 'children': [
-            {'title': 'Action 3', 'action': lambda: layout.notify("Hello 3")},
+            {'title': 'Action 3', 'action': lambda: layout.api.plugins.notify("Hello 3")},
             {'title': 'Submenu 2', 'children': [
                 {'title': 'Submenu goes forever:)', 'children': [
-                    {'title': 'Action 5', 'action': lambda: layout.notify("Hello 5")}
+                    {'title': 'Action 5', 'action': lambda: layout.api.plugins.notify("Hello 5")}
                 ]},
-                {'title': 'Action 4', 'action': lambda: layout.notify("Hello 4")}
+                {'title': 'Action 4', 'action': lambda: layout.api.plugins.notify("Hello 4")}
             ]},
         ]},
     ]},
@@ -29,7 +29,7 @@ menu = [
 
 @static_vars(counter=0)
 def switch_menu():
-    new_menu = [{'title': 'Alternative action', 'action': lambda: layout.notify("Alternative action")}]
+    new_menu = [{'title': 'Alternative action', 'action': lambda: layout.api.plugins.notify("Alternative action")}]
     switch_menu.counter += 1
     if switch_menu.counter % 2 == 1:
         layout.api.set_menu(new_menu)
@@ -55,4 +55,4 @@ layout = Rows(
         ])
     ])
 
-run(layout, menu=menu)
+run(layout, menu=menu, debug=True)

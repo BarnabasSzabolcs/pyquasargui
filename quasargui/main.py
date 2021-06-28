@@ -213,6 +213,14 @@ class Api:
     def is_cocoa(self):
         return self._window.gui.__name__ == 'webview.platforms.cocoa'
 
+    @property
+    def is_windows(self):
+        return self._window.gui.__name__ == 'webview.platforms.winforms'
+
+    @property
+    def is_linux(self):
+        return self._window.gui.__name__ == 'webview.platforms.gtk'
+
     def set_menu(self, menuspec: Union[MenuSpecType, Dict[str, MenuSpecType]]):
         """
         If ``menuspec`` is a *list* then the menu is the same for all platforms,
@@ -229,8 +237,12 @@ class Api:
 
             if self.is_cocoa and 'cocoa' in menuspec:
                 menuspec = menuspec['cocoa']
-            if self.is_cocoa and 'mac' in menuspec:
+            elif self.is_cocoa and 'mac' in menuspec:
                 menuspec = menuspec['mac']
+            elif self.is_windows and 'windows' in menuspec:
+                menuspec = menuspec['windows']
+            elif self.is_linux and 'linux' in menuspec:
+                menuspec = menuspec['linux']
             else:
                 menuspec = menuspec['default']
 
@@ -328,7 +340,7 @@ class JsApi:
 
 
 WINDOW, API = 0, 1
-window_api_list: List[Tuple[Window, Api]] = []
+window_api_list = []  # : List[Tuple[Window, Api]]
 STARTED = False
 
 
@@ -375,7 +387,7 @@ def run(
                                 fullscreen=fullscreen,
                                 debug=debug,
                                 _render_debug=_render_debug)
-    webview.start(lambda window_: start_app(api, window_), window, debug=debug, localization=localization or {})
+    webview.start(lambda window_: start_app(api, window_), window, debug=debug, localization=localization or {}, gui='cef')
 
 
 def start_app(api, window):
