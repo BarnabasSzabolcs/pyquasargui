@@ -337,6 +337,10 @@ If you want to execute code when a `Model` gets a certain value, you just call `
 
 You can add a callback anytime of course, even after a component is added to the window. 
 
+### Structured Models
+
+TODO: example - dictionary access to models
+
 ## Events
 
 Events can be defined on `Components` using the `events` property at construction time. Events that can be defined are specific for a `Component`. If you want to check the state of the system at the event, access your `Model` and `Computed` values.
@@ -877,6 +881,21 @@ You can also stick to submit-time validation, in this case you need to set up a 
 
 TODO: example - submit-time validation
 
+## Creating your own components
+
+TODO: example - custom component
+
+## Integration
+
+### Matplotlib integration
+
+TODO: example - matplotlib integration
+
+### Adding your own existing components
+
+TODO: example - with external js like Tags input.
+
+TODO: example - from spa-style own js.
 
 [quasardoc]: https://quasar.dev
 [quasardocplugins]: https://quasar.dev/quasar-plugins/
