@@ -104,25 +104,25 @@ Vue.component('dynamic-component', {
       }
       d.props['data-component-id'] = id.toString()
       // sendLog(JSON.stringify(d))
-      if (('value' in d.props) && !('input' in d.events)) {
-        const prop = d.props.value
-        const path = getPathJs(prop, true)
-        // The trickery with $set below is necessary 
-        // since array-valued things are not updated properly
-        // if normal 'variable=$event' is used.
-        const base = getBase(prop)
-        if ('path' in prop && prop.path.length) {
-          let last = prop.path[prop.path.length - 1]
-          if (_.isString(last)) {
-            last = `'${last}'`
-          }
-          inputEvent = `@input="$set(${base}${path}, ${last}, $event)"`
-        } else {
-          inputEvent = `@input="${base}=$event"`
-        }
-      } else {
-        inputEvent = ''
-      }
+      // if (('value' in d.props) && !('input' in d.events)) {
+      //   const prop = d.props.value
+      //   const path = getPathJs(prop, true)
+      //   // The trickery with $set below is necessary 
+      //   // since array-valued things are not updated properly
+      //   // if normal 'variable=$event' is used.
+      //   const base = getBase(prop)
+      //   if ('path' in prop && prop.path.length) {
+      //     let last = prop.path[prop.path.length - 1]
+      //     if (_.isString(last)) {
+      //       last = `'${last}'`
+      //     }
+      //     inputEvent = `@input="$set(${base}${path}, ${last}, $event)"`
+      //   } else {
+      //     inputEvent = `@input="${base}=$event"`
+      //   }
+      // } else {
+      //   inputEvent = ''
+      // }
       if ('load' in d.events && !this.loadEventFired) {
         window.pywebview.api.call_cb(d.events.load)
         this.loadEventFired = true
@@ -130,10 +130,10 @@ Vue.component('dynamic-component', {
       const classes = this.renderClasses(d.classes)
       const props = this.renderProps(d.props)
       const events = this.renderEvents(d.events)
-      const children = this.renderChildren(d.children, recursive)
+      const children = this.renderChildren(d.children, recursive || d.recursive)
       const slots = this.renderSlots(d.slots)
 
-      const attrs = [classes, props, events, inputEvent].join(' ')
+      const attrs = [classes, props, events/*, inputEvent*/].join(' ')
       return `<${d.component} ${attrs}>${children}${slots}</${d.component}>`
     },
     renderClasses(classes) {

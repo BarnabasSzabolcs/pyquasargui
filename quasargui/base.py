@@ -68,6 +68,7 @@ class Component:
     defaults = {}
     script_sources: List[str] = []
     style_sources: List[str] = []
+    render_children_immediately: bool = False
 
     def __init__(self,
                  children: ChildrenType = None,
@@ -116,7 +117,8 @@ class Component:
                              child.render_mustache() if isinstance(child, Renderable) else
                              child.vue
                              for child in children if not isinstance(child, Slot)],
-                'slots': slots
+                'slots': slots,
+                'recursive': self.render_children_immediately
             })
         except AttributeError as e:
             wrong_children = [child for child in children if
@@ -205,7 +207,7 @@ class ComponentWithModel(Component):
                  events: EventsType = None):
         self._model = model or Model(None)
         props = props or {}
-        props['value'] = self._model
+        props['v-model'] = self._model
         super().__init__(children=children,
                          classes=classes,
                          styles=styles,

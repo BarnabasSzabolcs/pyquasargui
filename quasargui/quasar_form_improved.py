@@ -256,11 +256,15 @@ class InputChoice(LabeledComponent):
             except Exception:
                 return False
 
-        single_only_appearances = {'radio', 'buttons'}
+        single_only_appearances = {'input', 'radio', 'buttons'}
         multiple_only_appearances = {'checkboxes', 'toggles', 'tags'}
+        props = props or {}
 
         if multiple is None:
             multiple = appearance in multiple_only_appearances
+
+        model = model or Model([] if multiple else '')
+        self.dependents = [model]
 
         allowed_appearances = {'auto', 'radio', 'checkboxes', 'toggles', 'buttons', 'select', 'tags'}
         if appearance not in allowed_appearances:
@@ -281,13 +285,18 @@ class InputChoice(LabeledComponent):
             if multiple:
                 appearance = (
                     'tags' if n_choices == 0 else
-                    'checkboxes' if n_choices <= 20 else
+                    'checkboxes' if n_choices <= 10 else
                     'select'
                 )
             else:
-                appearance = 'radio' if 0 < n_choices <= 5 else 'select'
+                appearance = 'radio' if 0 < n_choices <= 5 else \
+                             'input' if n_choices == 0 else \
+                             'select'
 
-        if appearance in {'radio', 'buttons', 'checkboxes', 'toggles'}:
+        if appearance == 'input':
+            self.component = 'q-input'
+            children = []
+        elif appearance in {'radio', 'buttons', 'checkboxes', 'toggles'}:
             if (isinstance(choices, list) and len(choices)
                     and isinstance(choices[0], str)):
                 choices = [{'label': choice, 'value': choice} for choice in choices]
@@ -329,22 +338,23 @@ class InputChoice(LabeledComponent):
                 {
                     'options': choices,
                     'multiple': multiple,
+                    'use-chips': multiple
                 }
             )
             children = [QSelect(label=label, model=model, props=item_props)]
         elif appearance == 'tags':
             label_props = build_props({
-                'hide-bottom-space': True
+                'hide-bottom-space': True,
             }, label_props)
             item_props = build_props({
-                'placeholder': '',
+                'placeholder': props.get('placeholder', ''),
                 'add-on-key': [13, ','],
                 # 'separators': [',']
             }, item_props)
             children = [
                 QField(label=label, model=model, props=label_props, children=[
                     Slot('control', [
-                        VueTagsInput(model=model, props=item_props)
+                        VueTagsInput(model, props=item_props)
                     ])
                 ]),
             ]

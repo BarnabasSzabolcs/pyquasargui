@@ -669,11 +669,11 @@ class QTabs(ComponentWithModel):
 
     def __init__(self,
                  model: Model,
+                 children: List['QTab'] = None,
                  classes: ClassesType = None,
                  styles: StylesType = None,
                  props: PropsType = None,
-                 events: EventsType = None,
-                 children: List['QTab'] = None):
+                 events: EventsType = None):
         super().__init__(model=model, classes=classes, styles=styles, props=props, events=events, children=children)
 
 
@@ -709,6 +709,7 @@ class QTabPanels(ComponentWithModel):
     ref. https://quasar.dev/vue-components/tab-panels#qtabpanels-api
     """
     component = 'q-tab-panels'
+    render_children_immediately = True
 
     def __init__(self,
                  model: Model,
@@ -729,11 +730,11 @@ class QTabPanel(Component):
 
     def __init__(self,
                  name: PropValueType[str],
+                 children: ChildrenType = None,
                  classes: ClassesType = None,
                  styles: StylesType = None,
                  props: PropsType = None,
-                 events: EventsType = None,
-                 children: ChildrenType = None):
+                 events: EventsType = None):
         props = build_props({}, props, {'name': name})
         super().__init__(classes=classes, styles=styles, props=props, events=events, children=children)
 
