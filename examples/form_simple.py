@@ -1,4 +1,5 @@
 from quasargui import *
+from quasargui.vue_tags_input import VueTagsInput
 
 
 def init_person():

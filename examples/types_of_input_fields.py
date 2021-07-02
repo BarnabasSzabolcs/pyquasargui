@@ -2,6 +2,7 @@ from datetime import datetime as dt
 
 import quasargui
 from quasargui import *
+from quasargui import VueTagsInput
 
 my_date = Model(None)
 my_date.add_callback(lambda: my_date.api.plugins.notify(

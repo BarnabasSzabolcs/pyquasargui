@@ -56,6 +56,20 @@ Quasargui uses Python's typing system, so if you use an IDE you can always check
 
 To make changes on the window, we use `Model`'s, like `loading` in this example. A `Model` provides "two-way binding" between your code and the GUI. This means that every change to a `Model`'s value is reflected in the GUI and every user input changes the `Model`'s value.
 
+## Debugging
+
+To get confident with any system, it is best to know how to debug it.
+With Quasargui you have an extra debugging option: if you enable `debug=True` in `run()`, you can see a browser inspector if you right-click and choose inspect. If you would lose the title bar of the window (as we observed it in Mac), you can just go to fullscreen and exit fullscreen and vois-lá, you got your titlebar back. Luckily, we haven't observed the titlebar disappear in production so far.
+
+If you want even more detailed debugging, also set `_render_debug=True` in `run()`.
+
+<figure markdown="1">
+![debug_screen](assets/screenshots/debug_screen.png#screenshot)
+<figcaption>
+If you enable `debug=True` and `_render_debug=True`, you get all the information you need (and more... therefore the underscore). 
+</figcaption>
+</figure>
+
 ## Vue vs. Quasargui
 
 If you have experience with Vue, this section shows you how concepts in Vue are transferred to Quasargui.  
@@ -361,7 +375,7 @@ So, it is best to create your layout and models via a factory function.
 
 === "screenshot"
     <figure>
-    ![window_handling](assets/screenshots/window_handling.png#screenshot)
+    ![window_handling](assets/screenshots/window_handling.png)
     <figcaption>
     This example creates a new random-sized window when the user clicks 'create window'. Setting window title (that is a model) affects only its own window. 
     </figcaption>
@@ -503,11 +517,14 @@ You can also stick to validation on submit, in this case you need to set up a `M
 
 ## Creating your own components
 
+It is usually a better idea to use a factory function if you want to create a complex component, from existing components. However, you can also create your own assembled component. In that case, set `component='div'` and in the `__init__()` method you assemble the `children` parameter so that it suits your needs, even if it is only a single component. And you can also extend an existing component.   
+
 === "screenshot"
     TODO: example - custom component
 
 === "source"
     ```python
+    
     ```
 
 ## Integration
@@ -537,20 +554,53 @@ You can also stick to validation on submit, in this case you need to set up a `M
     {!examples/matplotlib_figure.py!}
     ```
 
-### Adding your own existing components
+### Adding an existing Vue component
+
+The simplest method to add an existing Vue component is to get the *.uml.js* and its *.css*
+then its as simple as
+```python
+class VueTagsInput(ComponentWithModel):
+    component = 'vue-tags-input'
+    script_sources = ['vue-tags-input.2.1.0.js']
+    style_sources = ['vue-tags-input.css']
+```
+If a Vue component has model, extend `ComponentWithModel`, if it has even label, then `LabeledComponent`, otherwise extend `Component`. Set `component` to the component's html tag. If you look at [`VueTagsInput` in Quasargui's source](https://github.com/BarnabasSzabolcs/pyquasargui/blob/ca1bd985b350e91736db69746f3f187d38d25c9b/quasargui/quasar_form_improved.py#L637), you'll see that we've added a couple more lines. In the constructor of the component, we added some useful conveniences that make the component work more seamlessly by default. 
+
+```python
+{!quasargui/vue_tags_input.py!}
+```
+First, the actual model of *vue-tags-input* is not its *v-model* but its *tags* prop. So, we've changed that.
+Remember to add any extra model you define within the component to `self.dependents`. (The model you pass to `model` parameter gets passed to `self.dependents` automatically.) If you don't add a model to `self.dependents`, it does not get attached to the GUI and you will see weird behavior. To debug this, set `_render_debug=True` in `run()`. It is worth do do a quick test rig of your component, something like the following:
 
 === "screenshot"
-    TODO: example - with external js like Tags input.
+    <figure>
+    ![Component_test_rig](assets/screenshots/component_test_rig.png#screenshot)
+    <figcaption>
+    The test rig displays a notification each time the component's value gets modified.
+    Also, there's plenty of debug information about the state of the whole system.
+    If you right-click, you can even open up the built-in browser inspector.
+    </figcaption>
+    </figure>
 
 === "source"
     ```python
+    {!examples/component_test_rig.py!}
     ```
+    In this code, replace `VueTagsInput` with your component.
+
+#### Importing a SPA-style Vue component
 
 === "screenshot"
+    <figure>
+    ![Component_spa](assets/screenshots/component_spa.png#screenshot)
+    <figcaption>
     TODO: example - from spa-style own js.
+    </figcaption>
+    </figure>
 
 === "source"
     ```python
+    {!examples/component_spa.py!} TODO: 
     ```
 
 [quasardoc]: https://quasar.dev

@@ -9,6 +9,10 @@ img[src*="#screenshot"]{
     border-radius: 5px;
     box-shadow: 1px 3px 10px 0px #eee;
 }
+body[data-md-color-scheme=slate] img[src*="#screenshot"]{
+    box-shadow: none;
+    border: 1px solid #333;
+}
 
 figure img{
     margin: 0 auto;
