@@ -691,7 +691,7 @@ The standard file/folder/save dialogs can be accessed the same way - see the cod
                     'Show file dialog',
                     events={
                         'click': lambda: layout.notify('You chose: {}'.format(
-                            layout.api.show_open_dialog()))
+                            layout.api.show_open_file_dialog()))
                     }),
                 QButton(
                     'Show folder dialog',

@@ -764,6 +764,11 @@ class QTimelineEntry(Component):
 
 class QTooltip(Component):
     """
+    Usage:
+    ::
+
+        QButton(children=['Submit', QTooltip(['Submit button'])])
+
     reference: https://quasar.dev/vue-components/tooltip
     """
     component = 'q-tooltip'

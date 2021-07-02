@@ -121,7 +121,7 @@ class Api:
         return self._window.create_file_dialog(
             webview.SAVE_DIALOG, directory=directory, save_filename=save_filename)
 
-    def show_open_dialog(self, directory: str = '', file_types=(), allow_multiple: bool = False):
+    def show_open_file_dialog(self, directory: str = '', file_types=(), allow_multiple: bool = False):
         """
         :param directory: Initial directory
         :param file_types: Allowed file types in open file dialog. Should be a tuple of strings in the format:
