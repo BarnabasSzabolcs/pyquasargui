@@ -14,14 +14,12 @@ The simplest possible window only takes 3 lines of code.
 
 === "screenshot"
     <figure>
-    ![The simplest window](assets/screenshots/simplest.png#screenshot "The simplest window screenshot")
+    ![Hello_world_window](assets/screenshots/hello_world.png#screenshot "Hello world window screenshot")
     </figure>
 
 === "source"
-    ```python
-    from quasargui import *
-    layout = Rows(children=['This is', '<i>the simplest</i>', 'window!'])
-    run(layout, title='The simplest', size=[200, 100])
+    ```python 
+    {!examples/hello_world.py!}
     ```
 
 The important parts of the code:
@@ -44,52 +42,7 @@ To quickly get a nice window layout, you can use the code of the window below.
 
 === "source"
     ```python
-    import quasargui
-    from quasargui import *
-    
-    loading = Model(True)
-    
-    
-    def set_loaded():
-        loading.value = False
-    
-    
-    layout = QLayout([
-        QHeader([
-            QToolbar([QToolbarTitle([
-                QIcon('ramen_dining', 'lg', classes='q-mx-md'),
-                'Your Program Title'
-            ])])
-        ]),
-        QDrawer([
-            '<b>'
-            'Your drawer'
-            '</b>'
-            '<div class="q-mt-md">'
-            'for your parameters.'
-            '</div>'
-        ]),
-        QDrawer(side=QDrawer.RIGHT, show=False, children=[
-            '<b>'
-            'Your right drawer.'
-            '</b>'
-            '<div class="q-mt-md">'
-            'If you delete a drawer,its sandwich menu disappears'
-            '</div>'
-        ]),
-        QPage([
-            'Here comes the contents of your QPage'
-        ]),
-        v_show(
-            loading,
-            QFooter(children=[
-                'Here is your footer that is only displayed if loading.value == True',
-                QButton('ok', events={'click': toggle(loading)})
-            ])
-        )
-    ])
-    
-    quasargui.run(layout, title='Program title')
+    {!examples/starter_header_footer_and_menu.py!}
     ```
 
 The things you need to know about this window:
@@ -155,18 +108,7 @@ In components, Vue's slots can be accessed as `Slot('slot-name', [...children...
     </figure>
 === "source"
     ```python
-    from quasargui import *
-    
-    layout = QInput(
-        classes='q-ma-lg',
-        label='Your city',
-        children=[
-            Slot('prepend', [
-                QIcon('place')
-            ])
-        ])
-    
-    run(layout, title='slots example')
+    {!examples/slots_simple.py!}
     ```
 
 #### Scoped slots
@@ -182,89 +124,7 @@ Scoped slots can be accessed a little-bit differently. Since scoped slots are me
     </figure>
 === "source"
     ```python
-    from quasargui import *
-    
-    customize = Model([
-        {
-            'label': 'Satisfied customers',
-            'header': 'root',
-            'children': [
-                {
-                    'label': 'Good food',
-                    'icon': 'restaurant_menu',
-                    'header': 'generic',
-                    'children': [
-                        {
-                            'label': 'Quality ingredients',
-                            'header': 'generic',
-                            'body': 'story',
-                            'story': 'Lorem ipsum dolor sit amet.'
-                        },
-                        {
-                            'label': 'Good recipe',
-                            'body': 'story',
-                            'story': 'A Congressman works with his equally conniving wife to exact revenge '
-                                     'on the people who betrayed him.'
-                        }
-                    ]
-                },
-                {
-                    'label': 'Good service',
-                    'header': 'generic',
-                    'body': 'toggle',
-                    'caption': 'Why are we as consumers so captivated by stories of great customer service? '
-                               'Perhaps it is because...',
-                    'enabled': False,
-                    'children': [
-                        {'label': 'Prompt attention'},
-                        {'label': 'Professional waiter'}
-                    ]
-                },
-                {
-                    'label': 'Pleasant surroundings',
-                    'children': [
-                        {'label': 'Happy atmosphere'},
-                        {'label': 'Good table presentation', 'header': 'generic'},
-                        {'label': 'Pleasing decor'}
-                    ]
-                }
-            ]
-        }
-    ])
-    
-    layout = QTree(
-        props={
-            'nodes': customize,
-            'node-key': 'label',
-            'default-expand-all': True
-        }, children=[
-            Slot('default-header', lambda prop: [
-                Div(classes='row items-center', children=[
-                    QIcon(
-                        name=Computed(lambda ic: ic or 'share', prop['node']['icon']),
-                        size='28px',
-                        color='orange',
-                        classes='q-mr-sm'),
-                    Div(classes='text-weight-bold text-primary', children=[
-                        prop['node']['label']
-                    ])
-                ])
-            ]),
-            Slot('default-body', lambda prop: [
-                v_if(prop['node']['story'], Div([
-                    CustomComponent('span', classes='text-weight-bold', children=['This node has a story']),
-                    ': ',
-                    prop['node']['story']
-                ])),
-                v_else(
-                    CustomComponent('span', classes='text-weight-light text-black', children=[
-                        'This is some default content.'
-                    ])
-                )
-            ])
-        ])
-    
-    run(layout, title='Scoped slot demo')
+    {!examples/slots_scoped_prop_vars.py!}
     ```
 
 ## Model and Computed
@@ -284,22 +144,7 @@ To see the interactions with `Model` and `Computed`, consider the following exam
 
 === "source"
     ```python
-    from quasargui import *
-    
-    a = Model(0)
-    b = Model(0)
-    even = Computed(lambda x, y: (x+y) % 2 == 0, a, b)
-    odd = Computed(lambda x: not x, even)
-    
-    layout = Rows([
-        QInput('a', model=a),
-        '+',
-        QInput('b', model=b),
-        v_if(even, Div(['is even'])),
-        v_if(odd, Div(['is odd'])),
-    ])
-    
-    run(layout)
+    {!examples/even_or_odd.py!}
     ```
 
 In the example above `even` and `odd` are computed from the value of `a` and `b`. 
@@ -323,23 +168,28 @@ If you want to execute code when a `Model` gets a certain value, you just call `
 
 === "source"
     ```python
-    from quasargui import *
-    
-    def notify_if_accepted():
-        if accepted.value:
-            accepted.api.plugins.notify('Thanks for accepting!')
-    
-    accepted = Model(False)
-    accepted.add_callback(notify_if_accepted)    
-    layout = InputBool("Accept conditions", accepted)
-    run(layout)
+    {!examples/accept_conditions.py!}
     ```
 
 You can add a callback anytime of course, even after a component is added to the window. 
 
 ### Structured Models
 
-TODO: example - dictionary access to models
+Models can hold `int`, `str`, `bool` values, and also nested `list`'s and `dict`'s. 
+If a model is a `dict`, it can be accessed just like a normal variable:
+```python
+deep_model = Model({'deep': {'data': 'deep value'}})
+data_model = deep_model['deep']['data']  # is also a Model
+data_model.value = 'new value'
+assert deep_model.value['deep']['data'] == 'new value'  # True!
+list_model = Model(['a', 'b', 'c'])
+list_model[1].value == 'b'
+list_model[1].value = 'new'
+assert list_model.value == ['a', 'new', 'c']  # True!
+```
+Keep in mind that you can access any depth of items of a Model, with the item accessor,
+and it is going to be a Model that refers to the same value as the original model.
+Don't do `your_model.value['item'] == 'new value'` since it will not dynamically set the value in the GUI, and you'll have to manually run `your_model.update()`.
 
 ## Events
 
@@ -354,11 +204,8 @@ Events can be defined on `Components` using the `events` property at constructio
     </figure>
 
 === "source"
-    ```python
-    from quasargui import *
-    layout = QButton('Click me', events={
-        'click': lambda: layout.api.plugins.notify("I've got clicked!")})
-    run(layout)
+    ```python 
+    {!examples/click_event.py!}
     ```
 
 ## Notifications, dialogs
@@ -407,121 +254,7 @@ Quasargui offers a range of notification and dialog options, wrapping [Quasar's 
 
 === "⌨️ python source"
     ```python
-    from quasargui import *
-
-
-    def show_notification(message):
-        layout.notify(message=message, position='top-right', group=False, timeout=1500)
-    
-    
-    def show_success():
-        layout.api.plugins.notify(message='This is a success!', caption='Just now', type='positive', icon='done')
-    
-    
-    dialog_events = {
-        'ok': lambda data: show_notification('OK clicked, data={}'.format(json.dumps(data))),
-        'cancel': lambda: show_notification('Cancel clicked'),
-        'dismiss': lambda: show_notification('Dialog dismissed'),
-    }
-    
-    
-    def show_alert():
-        layout.api.plugins.dialog(props={'title': 'Alert', 'message': 'Some message'}, events=dialog_events)
-    
-    
-    def show_confirm():
-        layout.api.plugins.dialog(props={
-            'title': 'Confirm',
-            'message': 'Would you like to turn on the wifi?',
-            'cancel': True,
-            'persistent': True
-        }, events=dialog_events)
-    
-    
-    def show_prompt():
-        layout.api.plugins.dialog(props={
-            'title': 'Prompt',
-            'message': 'What is your name?',
-            'prompt': {'model': '', 'type': 'text'},
-            'cancel': True,
-            'persistent': True
-        }, events=dialog_events)
-    
-    
-    def show_options():
-        layout.api.plugins.dialog(props={
-            'title': 'Options',
-            'message': 'Choose an option',
-            'options': {
-                'model': 'opt1',
-                'type': 'radio',
-                'items': [
-                    {'label': 'Option 1', 'value': 'opt1', 'color': 'secondary'},
-                    {'label': 'Option 2', 'value': 'opt2'},
-                    {'label': 'Option 3', 'value': 'opt3'}
-                ]
-            },
-            'cancel': True,
-            'persistent': True
-        }, events=dialog_events)
-    
-    
-    def show_bottom_sheet(grid: bool):
-        layout.api.plugins.bottom_sheet(props={
-            'message': 'Bottom Sheet message',
-            'grid': grid,
-            'actions': [
-                {'label': 'Drive', 'id': 'drive', 'img': 'https://cdn.quasar.dev/img/logo_drive_128px.png'},
-                {'label': 'Keep', 'id': 'keep', 'img': 'https://cdn.quasar.dev/img/logo_keep_128px.png'},
-                {'label': 'Google Hangouts', 'id': 'calendar', 'img': 'https://cdn.quasar.dev/img/logo_hangouts_128px.png'},
-                {},
-                {'label': 'Share', 'icon': 'share', 'id': 'share'},
-                {'label': 'Upload', 'icon': 'cloud_upload', 'color': 'primary', 'id': 'upload'},
-                {},
-                {'label': 'John', 'avatar': 'https://cdn.quasar.dev/img/boy-avatar.png', 'id': 'john'}
-            ]
-    
-        }, events=dialog_events)
-    
-    
-    dark_mode = Model(False)
-    dark_mode.add_callback(
-        lambda: layout.api.plugins.dark(dark_mode.value)
-    )
-    
-    layout = QLayout([
-        QHeader([QToolbar([
-            QToolbarTitle([
-                QIcon('announcement', 'lg', classes='q-mx-md'),
-                'Dialogs'
-            ]),
-            QSpace(),
-            QButton(
-                label=Computed(lambda dark: 'light mode' if dark else 'dark mode', dark_mode),
-                icon=Computed(lambda dark: 'light_mode' if dark else 'dark_mode', dark_mode),
-                props={'stretch': True},
-                events={'click': toggle(dark_mode)}
-            )
-        ])]),
-        QPage([Rows(classes='q-py-xl', children=[
-    
-            QButton('show a success notification', events={'click': show_success}),
-            QButton('show an alert', events={'click': show_alert}),
-            QButton('show a confirmation', events={'click': show_confirm}),
-            QButton('show a prompt', events={'click': show_prompt}),
-            QButton('show options', events={'click': show_options}),
-            QButton('show a grid menu', events={'click': lambda: show_bottom_sheet(grid=True)}),
-            QButton('show a list menu', events={'click': lambda: show_bottom_sheet(grid=False)}),
-    
-            Div(classes='q-mt-xl', children=[
-                'See even more examples at ',
-                Link('Quasar dialog documentation',
-                     'https://quasar.dev/quasar-plugins/dialog#predefined')])
-        ])])
-    ])
-    
-    run(layout, title='Dialogs demonstration', debug=True)
-
+    {!examples/dialogs.py!}
     ```
 
 In general, in [Quasar's plugins][quasardocplugins] documentation, if you see `notify({options})` you can expect to write in Python `my_component.api.plugins.notify(**options)`.
@@ -544,24 +277,7 @@ It can be a bit of a hustle though to set the same options again and again. So, 
     </figure>
 === "source"
     ```python
-    from quasargui import *
-    
-    QButton.defaults['props'] = {
-        'glossy': True,
-        'color': 'orange',
-        'rounded': True
-    }
-    QInput.defaults['props'] = {
-        'outlined': True,
-        'rounded': True
-    }
-    
-    layout = Rows(classes='q-mt-lg q-gutter-md', children=[
-        Columns([QButton('one'), QButton('two'), QButton('oranje!')]),
-        QInput('me is outlined')
-    ])
-    
-    run(layout, title='We likes glossy')
+    {!examples/defaults.py!}
     ```
 
 ## Window access
@@ -600,28 +316,7 @@ There are other subtleties such as defining a menu that is specific to a certain
     </figure>
 === "⌨️ python source"
     ```python
-    from quasargui import *
-    
-    menu = [
-        {'title': 'Top Action', 'action': lambda: layout.notify("Top Action"), 'key': 't'},
-        {'title': 'Custom menu 1', 'children': [
-            {'title': 'Action 1', 'action': lambda: layout.notify("Hello 1"), 'key': 'b'},
-            {'title': 'Action 2', 'action': lambda: layout.notify("Hello 2"), 'key': 'd'},
-            None,  # separator
-            {'title': 'Submenu', 'children': [
-                {'title': 'Action 3', 'action': lambda: layout.notify("Hello 3")},
-                {'title': 'Submenu 2', 'children': [
-                    {'title': 'Submenu goes forever:)', 'children': [
-                        {'title': 'Action 5', 'action': lambda: layout.notify("Hello 5")}
-                    ]},
-                    {'title': 'Action 4', 'action': lambda: layout.notify("Hello 4")}
-                ]},
-            ]},
-        ]},
-    ]
-    
-    layout = Rows([])
-    run(layout, menu=menu)
+    {!examples/menu.py!}
     ```
 
 If you want to dynamically change the menu, you can do that using `Api`'s `set_menu()` command.
@@ -642,74 +337,7 @@ The standard file/folder/save dialogs can be accessed the same way - see the cod
     </figure>
 === "source"
     ```python
-    from quasargui import Model, QLayout, QHeader, QPage, QToolbar, QSpace, QButton, QInput, Rows, TrueFalse, toggle
-    from quasargui.main import run
-    
-    
-    title_model = Model('Your title goes here')
-    title_model.add_callback(
-        lambda: title_model.api.set_window_title(title_model.value),
-        immediate=True
-    )
-    is_fullscreen = Model(False)
-    width = Model(400)
-    width.add_callback(
-        lambda: width.api.resize_window((width.value, None)) if 300 <= width.value <= 1000 else None,
-        immediate=True
-    )
-    height = Model(500)
-    height.add_callback(
-        lambda: height.api.resize_window((None, height.value)) if 300 <= height.value <= 1000 else None,
-        immediate=True
-    )
-    
-    
-    def toggle_fullscreen():
-        layout.api.toggle_fullscreen()
-        is_fullscreen.value = not is_fullscreen.value
-    
-    
-    layout = QLayout([
-        QHeader([QToolbar([
-            QSpace(),
-            QButton(icon='minimize',
-                    props={'stretch': True},
-                    events={'click': lambda: layout.api.minimize_window()}),
-            QButton(icon=TrueFalse('fullscreen_exit', 'fullscreen', is_fullscreen),
-                    props={'stretch': True},
-                    events={'click': toggle_fullscreen}),
-            QButton(icon='close',
-                    props={'stretch': True},
-                    events={'click': lambda: layout.api.close_window()}),
-        ])]),
-        QPage([
-            Rows([
-                QInput('Window title', title_model),
-                QInput('Resize window width', width, type='number'),
-                QInput('Resize window height', height, type='number'),
-                QButton(
-                    'Show file dialog',
-                    events={
-                        'click': lambda: layout.notify('You chose: {}'.format(
-                            layout.api.show_open_file_dialog()))
-                    }),
-                QButton(
-                    'Show folder dialog',
-                    events={
-                        'click': lambda: layout.notify('You chose: {}'.format(
-                            layout.api.show_folder_dialog()))
-                    }),
-                QButton(
-                    'Show save dialog',
-                    events={
-                        'click': lambda: layout.notify('You chose: {}'.format(
-                            layout.api.show_save_dialog()))
-                    }),
-            ])
-        ])
-    ])
-    
-    run(layout, size=(400, 500))
+    {!examples/window_operations.py!}
     ```
 
 Frameless windows are also possible.
@@ -723,36 +351,7 @@ Frameless windows are also possible.
     </figure>
 === "source"
     ```python
-    from quasargui import *
-    props = {'dense': True}
-    
-    QButton.defaults['props'] = {
-        'dense': True,
-        'unelevated': True
-    }
-    Columns.defaults['classes'] = ''
-    Rows.defaults['classes'] = ''
-    
-    
-    layout = QLayout(children=[
-        QPage([
-            QBar(props={'dense': True}, classes='q-pr-xs', children=[
-                QSpace(),
-                QButton(icon='minimize',
-                        props=props,
-                        events={'click': lambda: layout.api.minimize_window()}),
-                QButton(icon='close',
-                        props=props,
-                        events={'click': lambda: layout.api.close_window()}),
-            ]),
-            Rows([
-                Columns([QButton(icon='language'), QButton(icon='favorite')]),
-                Columns([QButton(icon='send'), QButton(icon='help')]),
-            ])
-        ])
-    ])
-    
-    run(layout, frameless=True, size=(64, 100), resizable=False)
+    {!examples/window_frameless.py!}
     ```
 
 ### Multiple windows
@@ -769,75 +368,7 @@ So, it is best to create your layout and models via a factory function.
     </figure>
 === "source"
     ```python
-    from random import randint
-    from time import sleep
-    
-    from quasargui import Model, QLayout, QHeader, QPage, QToolbar, QSpace, QButton, QInput, Rows, TrueFalse
-    from quasargui.main import create_window, run
-    
-    
-    def create_new_window():
-        layout = create_layout('New window')
-        create_window(layout, position=(randint(1, 100), randint(1, 100)), size=(400, 500))
-        sleep(0.5)
-        layout.notify('A brand new window!', type='positive', timeout=200000)
-    
-    
-    def close_window(layout):
-        layout.api.close_window()
-        print('The window is closed but the app still runs')
-    
-    
-    def toggle_fullscreen(layout, model):
-        model.value = not model.value
-        layout.api.toggle_fullscreen()
-    
-    
-    def create_layout(title):
-        title_model = Model(title)
-        title_model.add_callback(
-            lambda: title_model.api.set_window_title(title_model.value),
-            immediate=True
-        )
-        is_fullscreen = Model(False)
-        width = Model(400)
-        width.add_callback(
-            lambda: width.api.resize_window((width.value, None)) if 300 <= width.value <= 1000 else None,
-            immediate=True
-        )
-        height = Model(300)
-        height.add_callback(
-            lambda: height.api.resize_window((None, height.value)) if 300 <= height.value <= 1000 else None,
-            immediate=True
-        )
-    
-        layout = QLayout([
-            QHeader([QToolbar([
-                QSpace(),
-                QButton(icon='minimize',
-                        props={'stretch': True},
-                        events={'click': lambda: layout.api.minimize_window()}),
-                QButton(icon=TrueFalse('fullscreen_exit', 'fullscreen', is_fullscreen),
-                        props={'stretch': True},
-                        events={'click': lambda: toggle_fullscreen(layout, is_fullscreen)}),
-                QButton(icon='close',
-                        props={'stretch': True},
-                        events={'click': lambda: close_window(layout)}),
-            ])]),
-            QPage([
-                Rows([
-                    QInput('Window title', title_model),
-                    QInput('Resize window width', width, type='number'),
-                    QInput('Resize window height', height, type='number'),
-                    QButton('Create new window', events={'click': create_new_window}),
-               ])
-            ])
-        ])
-        return layout
-    
-    
-    main_layout = create_layout('Main window')
-    run(main_layout, size=(400, 300))
+    {!examples/window_handling.py!}
     ```
 
 ## Most important components
@@ -855,7 +386,19 @@ Note that adding `QHeader` and `QFooter` to `QLayout` is entirely optional.
 
 If you want the classic vertical or horizontal layout, use `Rows` or `Columns`. These result in a html "flex" layout which means that Columns will wrap automatically if the window is not wide enough.
 
-TODO: example - also handle the case when the use does not want the columns to wrap.
+=== "screenshot"
+    <figure>
+    ![columns_and_rows](assets/screenshots/columns_and_rows.png)
+    <figcaption>
+    Columns and rows can be assembled using `Columns` and `Rows` component.
+    </figcaption>
+    </figure>
+
+=== "source"
+    ```python
+    {!examples/columns_and_rows.py!}
+    ```
+Note that columns don't grow naturally, for even spacing you need to set 'col-grow', also with `Rows` you need to set 'row-grow' for even alignment. 
 
 ### Form elements
 

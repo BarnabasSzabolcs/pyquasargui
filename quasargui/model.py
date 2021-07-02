@@ -155,6 +155,9 @@ class Model(Reactive, Generic[T]):
         if self.value == value:
             return
         _set_value(value)
+        self.update(_jsapi)
+
+    def update(self, _jsapi=False):
         if self.api is not None and not _jsapi:
             self.api.set_model_data(self.id, self.path, self.from_python(self._value))
         for callback in self._callbacks:
