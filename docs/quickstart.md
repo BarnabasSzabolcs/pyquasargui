@@ -361,7 +361,7 @@ So, it is best to create your layout and models via a factory function.
 
 === "screenshot"
     <figure>
-    ![window_handling](assets/screenshots/window_handling.png)
+    ![window_handling](assets/screenshots/window_handling.png#screenshot)
     <figcaption>
     This example creates a new random-sized window when the user clicks 'create window'. Setting window title (that is a model) affects only its own window. 
     </figcaption>
@@ -388,7 +388,7 @@ If you want the classic vertical or horizontal layout, use `Rows` or `Columns`. 
 
 === "screenshot"
     <figure>
-    ![columns_and_rows](assets/screenshots/columns_and_rows.png)
+    ![columns_and_rows](assets/screenshots/columns_and_rows.png#screenshot)
     <figcaption>
     Columns and rows can be assembled using `Columns` and `Rows` component.
     </figcaption>
@@ -405,19 +405,41 @@ Note that columns don't grow naturally, for even spacing you need to set 'col-gr
 You have access to a range of form elements. There are the Quasar form components (starting with Q, in `quasargui.quasar_form` module). 
 
 === "screenshot"
-    TODO: example - some basic list of quasar form-components in a window
+    <figure>
+    ![Form_simple](assets/screenshots/form_simple.png#screenshot)
+    <figcaption>
+    Some basic list of quasar form-components in a window
+    </figcaption>
+    </figure>
 
 === "source"
     ```python
+    {!examples/form_simple.py!}
     ```
 
 Also, there are form elements *by input value type*. These elements are in `quasargui.quasar_form_improved` module and are named according to the input value type, eg. `InputStr`, `InputBool`, etc. The idea is to automatically get a combination of controls that is set up correctly. You can get an apropriate appearance for your input, and later you can refine it, choosing from one of its available `appearance`. Eg. an `InputChoice` can be a radio, a series of pushable buttons, or a select dropdown. Or, if you allow multiple choices, you can get checkbox, toggles, tags input or a multi-choice select. If you don't choose one, the control is determined based on the number of available choices.
 
-=== "screenshot"
-    TODO: example - InputChoice with different settings
+=== "📷 single choice appearances"
+    <figure>
+    ![Form_input_choice-single](assets/screenshots/form_input_choice-single.png#screenshot)
+    <figcaption>
+    InputChoice with different single-choice appearance settings.
+    If the appearance is not set, it will automatically choose an appearance based on the number of choices 
+    </figcaption>
+    </figure>
 
-=== "source"
+=== "📷 multiple choice appearances"
+    <figure>
+    ![Form_input_choice-multiple](assets/screenshots/form_input_choice-multiple.png#screenshot)
+    <figcaption>
+    InputChoice with different multi-choice appearance settings.
+    If the appearance is not set, it will automatically choose an appearance based on the number of choices
+    </figcaption>
+    </figure>
+
+=== "⌨️ source"
     ```python
+    {!examples/form_input_choice.py!}
     ```
 
 There's `InputTime`, `InputDate` and `InputDateTime` that are implementations of Quasar's recommendations on data-time input, with all the conversions between Python and the GUI taken care of (remember that `date`, `time` and `datetime` is a special class that is not a basic type.)
@@ -433,14 +455,28 @@ There's `InputTime`, `InputDate` and `InputDateTime` that are implementations of
 
 You can validate form components right when the user inputs a value - but for snappier action you need to add raw javascript to handle simple field validations, using `JSRaw`.
 
-=== "screenshot"
-    TODO: example - form_validation.py (with JSRaw)
+=== "📷 form with field error"
+    <figure>
+    ![Form_validation-field](assets/screenshots/form_validation-field.png#screenshot)
+    <figcaption>
+    When the user fails to fill username, it gets into error state.
+    </figcaption>
+    </figure>
 
-=== "source"
+=== "📷 form with error after submission"
+    <figure>
+    ![Form_validation-submit](assets/screenshots/form_validation-submit.png#screenshot)
+    <figcaption>
+    When the user clicks submit, and there's error with the form data, a notification pops up.
+    </figcaption>
+    </figure>
+
+=== "⌨️ source"
     ```python
+    {!examples/form_validation.py!}
     ```
 
-You can also stick to submit-time validation, in this case you need to set up a `Model` for errors.
+You can also stick to validation on submit, in this case you need to set up a `Model` for errors.
 
 === "screenshot"
     TODO: example - submit-time validation
