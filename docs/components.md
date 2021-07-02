@@ -8,18 +8,29 @@ The components are all wrapped (almost) uniformly into Quarasgui `Component`'s.
 
 If a component has a model, then it is usually wrapped into a `ComponentWithModel`. If a component is a form component (or makes sense for it to have a label), then it is wrapped into a `LabeledComponent`. `LabeledComponent` is a `ComponentWithModel` which is a `Component`.  
 
-=== "diagram"
-    ```mermaid
-    classDiagram
-        LabeledComponent <|-- ComponentWithModel
-        ComponentWithModel <|-- Component
-        class LabeledComponent{
-        -label
-        }
-        class ComponentWithModel{
-        +model
-        }
-    ```
+<figure>
+```mermaid
+classDiagram
+    QButton <|-- LabeledComponent
+    QInput <|-- LabeledComponent
+    QSelect <|-- LabeledComponent
+    LabeledComponent <|-- ComponentWithModel
+    VueTagsInput <|-- ComponentWithModel
+    QTabs <|-- ComponentWithModel
+    QKnob <|-- ComponentWithModel
+    ComponentWithModel <|-- Component
+    Rows <|-- Component
+    Div <|-- Component
+    QLayout <|-- Component
+    class LabeledComponent{
+    -label
+    }
+    class ComponentWithModel{
+    +model
+    }
+```
+<figcaption class="mt-none">Component inheritance with example components.</figcaption>
+</figure>
 
 Components are configured at initialization and if you want dynamic behavior, initialize them with `Model` values. Eg. 
 ```python
