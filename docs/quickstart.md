@@ -404,41 +404,86 @@ Note that columns don't grow naturally, for even spacing you need to set 'col-gr
 
 You have access to a range of form elements. There are the Quasar form components (starting with Q, in `quasargui.quasar_form` module). 
 
-TODO: example - some basic list of quasar form-components in a window
+=== "screenshot"
+    TODO: example - some basic list of quasar form-components in a window
+
+=== "source"
+    ```python
+    ```
 
 Also, there are form elements *by input value type*. These elements are in `quasargui.quasar_form_improved` module and are named according to the input value type, eg. `InputStr`, `InputBool`, etc. The idea is to automatically get a combination of controls that is set up correctly. You can get an apropriate appearance for your input, and later you can refine it, choosing from one of its available `appearance`. Eg. an `InputChoice` can be a radio, a series of pushable buttons, or a select dropdown. Or, if you allow multiple choices, you can get checkbox, toggles, tags input or a multi-choice select. If you don't choose one, the control is determined based on the number of available choices.
 
-TODO: example - InputChoice with different settings
+=== "screenshot"
+    TODO: example - InputChoice with different settings
+
+=== "source"
+    ```python
+    ```
 
 There's `InputTime`, `InputDate` and `InputDateTime` that are implementations of Quasar's recommendations on data-time input, with all the conversions between Python and the GUI taken care of (remember that `date`, `time` and `datetime` is a special class that is not a basic type.)
 
-TODO: example - date-time with datetime open.
+=== "screenshot"
+    TODO: example - date-time with datetime open.
+
+=== "source"
+    ```python
+    ```
 
 #### Form validation
 
 You can validate form components right when the user inputs a value - but for snappier action you need to add raw javascript to handle simple field validations, using `JSRaw`.
 
-TODO: example - form_validation.py (with JSRaw)
+=== "screenshot"
+    TODO: example - form_validation.py (with JSRaw)
+
+=== "source"
+    ```python
+    ```
 
 You can also stick to submit-time validation, in this case you need to set up a `Model` for errors.
 
-TODO: example - submit-time validation
+=== "screenshot"
+    TODO: example - submit-time validation
+
+=== "source"
+    ```python
+    ```
 
 ## Creating your own components
 
-TODO: example - custom component
+=== "screenshot"
+    TODO: example - custom component
+
+=== "source"
+    ```python
+    ```
 
 ## Integration
 
 ### Matplotlib integration
 
-TODO: example - matplotlib integration
+=== "screenshot"
+    TODO: example - matplotlib integration
+
+=== "source"
+    ```python
+    ```
 
 ### Adding your own existing components
 
-TODO: example - with external js like Tags input.
+=== "screenshot"
+    TODO: example - with external js like Tags input.
 
-TODO: example - from spa-style own js.
+=== "source"
+    ```python
+    ```
+
+=== "screenshot"
+    TODO: example - from spa-style own js.
+
+=== "source"
+    ```python
+    ```
 
 [quasardoc]: https://quasar.dev
 [quasardocplugins]: https://quasar.dev/quasar-plugins/
