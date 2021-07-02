@@ -437,18 +437,40 @@ Also, there are form elements *by input value type*. These elements are in `quas
     </figcaption>
     </figure>
 
-=== "⌨️ source"
+=== "⌨️ python source"
     ```python
     {!examples/form_input_choice.py!}
     ```
 
 There's `InputTime`, `InputDate` and `InputDateTime` that are implementations of Quasar's recommendations on data-time input, with all the conversions between Python and the GUI taken care of (remember that `date`, `time` and `datetime` is a special class that is not a basic type.)
 
-=== "screenshot"
-    TODO: example - date-time with datetime open.
+=== "📷 datetime inputs"
+    <figure>
+    ![Form_datetime](assets/screenshots/form_datetime.png#screenshot)
+    <figcaption>
+    Datetime inputs look similar to `QInput`. The user can enter the date or time via keyboard and with help of popups, clicking on the side icons.
+    </figcaption>
+    </figure>    
 
-=== "source"
+=== "📷 time popup"
+    <figure>
+    ![Form_datetime-time](assets/screenshots/form_datetime-time.png#screenshot)
+    <figcaption>
+    When the user click on the clock symbol, a time picker pops up.
+    </figcaption>
+    </figure>    
+
+=== "📷 date popup"
+    <figure>
+    ![Form_datetime-date](assets/screenshots/form_datetime-date.png#screenshot)
+    <figcaption>
+    When the user click on the calendar symbol, a date picker pops up.
+    </figcaption>
+    </figure>    
+
+=== "⌨️ python source"
     ```python
+    {!examples/form_datetime.py!}
     ```
 
 #### Form validation
@@ -471,19 +493,13 @@ You can validate form components right when the user inputs a value - but for sn
     </figcaption>
     </figure>
 
-=== "⌨️ source"
+=== "⌨️ python source"
     ```python
     {!examples/form_validation.py!}
     ```
 
 You can also stick to validation on submit, in this case you need to set up a `Model` for errors.
 
-=== "screenshot"
-    TODO: example - submit-time validation
-
-=== "source"
-    ```python
-    ```
 
 ## Creating your own components
 
@@ -498,11 +514,27 @@ You can also stick to validation on submit, in this case you need to set up a `M
 
 ### Matplotlib integration
 
-=== "screenshot"
-    TODO: example - matplotlib integration
+=== "📷 png figure output"
+    <figure>
+    ![Matplotlib_figure-png](assets/screenshots/matplotlib_figure-png.png#screenshot)
+    <figcaption>
+    Quick financial simulation with matplotlib. 
+    This window makes it possible to quickly check out the model for different parameters.
+    </figcaption>
+    </figure>
 
-=== "source"
+=== "📷 interactive figure - zoomed in"
+    <figure>
+    ![Matplotlib_figure-interactive](assets/screenshots/matplotlib_figure-interactive.png#screenshot)
+    <figcaption>
+    Quick financial simulation with matplotlib. 
+    This window makes it possible to quickly check out the model for different parameters.
+    </figcaption>
+    </figure>
+
+=== "⌨️ python source"
     ```python
+    {!examples/matplotlib_figure.py!}
     ```
 
 ### Adding your own existing components
