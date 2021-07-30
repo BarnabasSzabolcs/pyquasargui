@@ -332,8 +332,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#hello-world-plus-styling-example" class="md-nav__link">
-    Hello World plus (styling example)
+  <a href="#hello-world-with-styling" class="md-nav__link">
+    Hello World with styling
   </a>
   
 </li>
@@ -451,8 +451,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#hello-world-plus-styling-example" class="md-nav__link">
-    Hello World plus (styling example)
+  <a href="#hello-world-with-styling" class="md-nav__link">
+    Hello World with styling
   </a>
   
 </li>
@@ -500,12 +500,12 @@
                 
                 <p><img alt="Logo" src="assets/screenshots/docs_index.png" title="QuasarGUI demo window" /></p>
 <h1 id="quasargui">QuasarGUI<a class="headerlink" href="#quasargui" title="Permanent link">&para;</a></h1>
-<p>Quasargui is a programmer-friendly package for making modern desktop apps in Python.</p>
-<p>Some reasons you might want to use QuasarGUI:</p>
+<p>Quasargui ports Quasar to make modern GUI apps in Python.</p>
+<p>You may want to use QuasarGUI because</p>
 <ol>
-<li>It is built on a stable front-end framework, <a href="https://quasar.dev">Quasar</a>.</li>
-<li>It brings the advantages of Vue</li>
-<li>Still, you don't ever need to touch JavaScript code, everything is brought back to Python. </li>
+<li>it uses a stable framework, <a href="https://quasar.dev">Quasar</a>.</li>
+<li>you can enjoy two-way binding,</li>
+<li>still, your code stays Python-only. </li>
 </ol>
 <h2 id="hello-world-example">Hello World example<a class="headerlink" href="#hello-world-example" title="Permanent link">&para;</a></h2>
 <p><div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">quasargui</span> <span class="kn">import</span> <span class="o">*</span>
@@ -520,18 +520,18 @@
 <span class="p">])</span>
 <span class="n">run</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Hello World program&#39;</span><span class="p">)</span>
 </code></pre></div>
-If we fill in "World" and click "Submit", this program outputs</p>
+If you type "World" and click "Submit", this program outputs</p>
 <p><img alt="Hello World screenshot" src="assets/screenshots/quasar-gui-hello-world-screenshot.png" title="Hello World screenshot" /></p>
-<p>Let's break it down how it works.  <br />
-When we change <code>QInput</code>, <code>name</code>'s value is updated automatically. So, when we click on <code>QButton</code>, the callback function calls the window-wide fully-customizable <code>notify</code> with the correct name, <code>'World'</code>. </p>
-<p><code>Rows</code>, <code>QInput</code>, and <code>QButton</code> (that internally correspond to Vue components) are the widgets. We communicate with Widgets there-and-back via <code>Model</code>'s. (That is, <code>Model</code>'s are two-way bound to the window.)</p>
+<p>How does this work?   <br />
+When you change <code>QInput</code>, <code>name</code>'s value gets updated automatically. So, when you click on <code>QButton</code>, <code>layout.notify</code> is called with the correct name, <code>'World'</code>. </p>
+<p><code>Rows</code>, <code>QInput</code>, and <code>QButton</code> are rendered as Vue components and HTML elements. You can communicate with components via <code>Model</code>'s. <code>Model</code>'s are two-way bound to the window.</p>
 <h2 id="quickstart">Quickstart<a class="headerlink" href="#quickstart" title="Permanent link">&para;</a></h2>
-<p>Can't wait to get started? The <a href="quickstart/">quickstart guide</a> is the fastest way to get up and running.
+<p>Can't wait to get started? Read the <em><a href="quickstart/">quickstart guide</a></em>.
 If you come from a Vue background, check out the <a href="quickstart/#comparing-vuequasar-and-quasargui">comparison between Vue and Quasargui</a>. </p>
 <h2 id="list-of-examples">List of examples<a class="headerlink" href="#list-of-examples" title="Permanent link">&para;</a></h2>
 <p>A range of examples can be found in the <a href="https://github.com/BarnabasSzabolcs/pyquasargui/tree/develop/examples">examples directory on GitHub</a>.
 These examples we describe in detail.</p>
-<h2 id="hello-world-plus-styling-example">Hello World plus (styling example)<a class="headerlink" href="#hello-world-plus-styling-example" title="Permanent link">&para;</a></h2>
+<h2 id="hello-world-with-styling">Hello World with styling<a class="headerlink" href="#hello-world-with-styling" title="Permanent link">&para;</a></h2>
 <p>Components can be easily changed by adding a few css classes and styles.</p>
 <p>You can see the <a href="https://quasar.dev/style/spacing#introduction]">reference of the classes on quasar.dev</a>, for spacing, positioning, typography, visibility and breakpoints and <a href="https://quasar.dev/style/shadows">shadows</a>.</p>
 <div class="tabbed-set" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><label for="__tabbed_1_1">Screenshot</label><div class="tabbed-content">
