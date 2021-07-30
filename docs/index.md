@@ -3,13 +3,13 @@
 
 # QuasarGUI
 
-Quasargui is a programmer-friendly package for making modern desktop apps in Python.
+Quasargui ports Quasar to make modern GUI apps in Python.
 
-Some reasons you might want to use QuasarGUI:
+You may want to use QuasarGUI because
 
-1. It is built on a stable front-end framework, [Quasar](https://quasar.dev).
-2. It brings the advantages of Vue
-3. Still, you don't ever need to touch JavaScript code, everything is brought back to Python. 
+1. it uses a stable framework, [Quasar](https://quasar.dev).
+2. you can enjoy two-way binding,
+3. still, your code stays Python-only. 
 
 ## Hello World example
 
@@ -26,18 +26,18 @@ layout = Rows([
 ])
 run(layout, title='Hello World program')
 ```
-If we fill in "World" and click "Submit", this program outputs
+If you type "World" and click "Submit", this program outputs
 
 ![Hello World screenshot](assets/screenshots/quasar-gui-hello-world-screenshot.png "Hello World screenshot")
 
-Let's break it down how it works.    
-When we change `QInput`, `name`'s value is updated automatically. So, when we click on `QButton`, the callback function calls the window-wide fully-customizable `notify` with the correct name, `'World'`. 
+How does this work?     
+When you change `QInput`, `name`'s value gets updated automatically. So, when you click on `QButton`, `layout.notify` is called with the correct name, `'World'`. 
 
-`Rows`, `QInput`, and `QButton` (that internally correspond to Vue components) are the widgets. We communicate with Widgets there-and-back via `Model`'s. (That is, `Model`'s are two-way bound to the window.)
+`Rows`, `QInput`, and `QButton` are rendered as Vue components and HTML elements. You can communicate with components via `Model`'s. `Model`'s are two-way bound to the window.
 
 ## Quickstart
 
-Can't wait to get started? The [quickstart guide](quickstart.md) is the fastest way to get up and running.
+Can't wait to get started? Read the *[quickstart guide](quickstart.md)*.
 If you come from a Vue background, check out the [comparison between Vue and Quasargui](quickstart.md#comparing-vuequasar-and-quasargui). 
 
 ## List of examples
@@ -45,7 +45,7 @@ If you come from a Vue background, check out the [comparison between Vue and Qua
 A range of examples can be found in the [examples directory on GitHub][github_examples].
 These examples we describe in detail.
 
-## Hello World plus (styling example)
+## Hello World with styling
 
 Components can be easily changed by adding a few css classes and styles.
 
