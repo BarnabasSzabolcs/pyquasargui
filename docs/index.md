@@ -1,5 +1,5 @@
 
-![Logo](assets/logo4.png "QuasarGUI logo")
+![Logo](assets/screenshots/docs_index.png "QuasarGUI demo window")
 
 # QuasarGUI
 

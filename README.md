@@ -20,7 +20,7 @@ You can react to user events using callbacks. (See: simple greeter app.)
 import quasargui
 from quasargui import *
 
-layout = QLayout(children=["Hello World!"])
+layout = QLayout(["Hello World!"])
 quasargui.run(layout)
 ```
 
