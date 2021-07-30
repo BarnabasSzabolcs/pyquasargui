@@ -88,6 +88,14 @@ pip install pywebgui
 ``` 
 In turn, `pywebgui` uses native renderers or Qt whichever it is available. (eg. on Mac the native renderer is cocoa)
 
+### System compatibility:
+
+ - It runs flawlessly on Mac, 10.13.6+ (High Sierra or newer).
+ - Linux compatibility: unknown, it depends on `cefpython3`'s and `pywebview`'s linux compatibility.
+ - Windows compatibility: compatible with Windows 7 but on Windows 10 `pywebview` did not work (2021-07-30).
+
+We plan to replace pywebview dependency with `cefpython3` and `wxPython WebView`.
+
 ## Installation
 
 ```

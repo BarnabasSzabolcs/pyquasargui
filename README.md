@@ -6,6 +6,12 @@ A user-friendly package for making awesome-looking desktop apps in Python.
 
 Read the [full documentation](https://barnabasszabolcs.github.io/pyquasargui/quickstart/) here.
 
+## Compatibility:
+
+ - It runs flawlessly on Mac, 10.13.6+ (High Sierra or newer).
+ - Linux compatibility: unknown, it depends on `cefpython3`'s and `pywebview`'s linux compatibility.
+ - Windows compatibility: compatible with Windows 7, on Windows 10 `pywebview` did not work (2021-07-30).
+
 ## Usage:
 
 This GUI library creates a window with a html view, in which Quasar Vue system is running. But don't worry, you can build up everything in python.
@@ -69,6 +75,7 @@ From Quasar's page
 
 Dynamic props (on Quasar's page it is in ":prop" format) can be added using `Model`:
 ```python
+from quasargui import *
 my_value = Model('my str')
 props={'string-prop': my_value}
 ```
@@ -97,6 +104,7 @@ Quasargui package closely follows the structure of Quasar, and you can also easi
 
 The GUI builds up itself from `Component`'s and `Model`'s. To understand the logic of all components, let's examine a typical component.
 ```python
+from quasargui import *
 loading = Model(False)
 def connect(): loading.value = True; print('Connect button clicked')
 
@@ -140,6 +148,7 @@ Writing `QButton('OK')` is the same as `QButton(props={'label': 'OK'})` but more
 **Formulas**: If there's a formula in a Vue attribute, you need to use `Computed`.
 If the component *requires* JavaScript function to be used, you can resort to `JSRaw`.
 ```python
+from quasargui import *
 x, y = Model(2), Model(3)
 QInput(
     label=Computed(lambda x, y: f'{x} + {y} =', x, y), 
@@ -152,6 +161,7 @@ Additionally, **prop modifiers** are simply put after the prop name as in Vue.
 
 **Computed values:** `Model` and `Computed` work like an excel sheet, where `Model` is the normal data, `Computed` are the formulas. Everytime a `Model` changes, it updates all its dependent `Computed` values. You can also hook into `Model`'s changes by adding a callback:
 ```python
+from quasargui import *
 model = Model()
 model.add_callback(lambda: print('model changed'))
 ```
