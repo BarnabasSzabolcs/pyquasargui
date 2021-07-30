@@ -4,6 +4,8 @@
 #QuasarGUI
 A user-friendly package for making awesome-looking desktop apps in Python.
 
+Read the [full documentation](https://barnabasszabolcs.github.io/pyquasargui/quickstart/) here.
+
 ## Usage:
 
 This GUI library creates a window with a html view, in which Quasar Vue system is running. But don't worry, you can build up everything in python.
@@ -174,3 +176,8 @@ However, every automatic guess and default can be overridden. Some have paramete
 In components that have defaults, you can override default with `del YourComponent.defaults['props']['your-prop']`. 
 
 To remove a slot, add `RemoveSlot('name')` to `children`.
+
+
+## Detailed documentation
+
+Read the [full documentation](https://barnabasszabolcs.github.io/pyquasargui/quickstart/) here.
