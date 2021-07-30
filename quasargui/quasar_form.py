@@ -27,8 +27,10 @@ class QInput(ComponentWithModel):
             'type': type,
         })
         if props.get('type', '') == 'number':
-            model = model or Model('')
+            model = model or Model(0)
             model.modifiers.add('number')
+        elif props.get('type', '') in {'', 'text'}:
+            model = model or Model('')
         used_slots = {slot.name for slot in children or []}
         bottom_slots = {'error', 'hint', 'counter'}
         bottom_slots_used = used_slots & bottom_slots

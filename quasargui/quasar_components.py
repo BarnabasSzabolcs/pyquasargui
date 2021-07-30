@@ -325,12 +325,13 @@ class QInnerLoading(Component):
     Must be the last element in its parent's children list.
     It fades the parent component and displays a spinner (must be set as children parameter)
     eg.
-    ```
-    Component([
-        ...
-        QInnerLoading([QSpinner()], props={'showing': Model(True)})
-    ])
-    ```
+    ::
+
+        Component([
+            ...
+            QInnerLoading([QSpinner()], props={'showing': Model(True)})
+        ])
+
     ref. https://quasar.dev/vue-components/inner-loading#qinnerloading-api
     """
     component = 'q-inner-loading'
@@ -548,9 +549,10 @@ class QSlideTransition(Component):
     """
     It visually slides up or down a component if it gets shown/hidden.
     Usage:
-    ```
-    QSlideTransition([v_show(model_visible, QImg(src=src))])
-    ```
+    ::
+
+        QSlideTransition([v_show(model_visible, QImg(src=src))])
+
     """
     component = 'q-slide-transition'
 
@@ -642,9 +644,9 @@ class QTable(Component):
     Everything about it can be customized.
 
     Scoped slots are accessible with
-    ```
-    Slot('slot-name', lambda prop: [...children...])
-    ```
+    ::
+
+        Slot('slot-name', lambda prop: [...children...])
 
     If interested in just a simple table, use QMarkupTable
     ref. https://quasar.dev/vue-components/table#qtable-api
@@ -667,11 +669,11 @@ class QTabs(ComponentWithModel):
 
     def __init__(self,
                  model: Model,
+                 children: List['QTab'] = None,
                  classes: ClassesType = None,
                  styles: StylesType = None,
                  props: PropsType = None,
-                 events: EventsType = None,
-                 children: List['QTab'] = None):
+                 events: EventsType = None):
         super().__init__(model=model, classes=classes, styles=styles, props=props, events=events, children=children)
 
 
@@ -707,6 +709,7 @@ class QTabPanels(ComponentWithModel):
     ref. https://quasar.dev/vue-components/tab-panels#qtabpanels-api
     """
     component = 'q-tab-panels'
+    render_children_immediately = True
 
     def __init__(self,
                  model: Model,
@@ -727,11 +730,11 @@ class QTabPanel(Component):
 
     def __init__(self,
                  name: PropValueType[str],
+                 children: ChildrenType = None,
                  classes: ClassesType = None,
                  styles: StylesType = None,
                  props: PropsType = None,
-                 events: EventsType = None,
-                 children: ChildrenType = None):
+                 events: EventsType = None):
         props = build_props({}, props, {'name': name})
         super().__init__(classes=classes, styles=styles, props=props, events=events, children=children)
 
@@ -762,6 +765,11 @@ class QTimelineEntry(Component):
 
 class QTooltip(Component):
     """
+    Usage:
+    ::
+
+        QButton(children=['Submit', QTooltip(['Submit button'])])
+
     reference: https://quasar.dev/vue-components/tooltip
     """
     component = 'q-tooltip'

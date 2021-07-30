@@ -17,9 +17,10 @@ from quasargui.typing import ValueType, PathType, MenuSpecType, EventCBType
 class Plugins:
     """
     Extend this class to hook up your plugins, then set
-    ```
-    Api.plugins_class = YourPlugins
-    ```
+    ::
+
+        Api.plugins_class = YourPlugins
+
     """
     script_sources: List[str] = []
     style_sources: List[str] = []
@@ -120,7 +121,7 @@ class Api:
         return self._window.create_file_dialog(
             webview.SAVE_DIALOG, directory=directory, save_filename=save_filename)
 
-    def show_open_dialog(self, directory: str = '', file_types=(), allow_multiple: bool = False):
+    def show_open_file_dialog(self, directory: str = '', file_types=(), allow_multiple: bool = False):
         """
         :param directory: Initial directory
         :param file_types: Allowed file types in open file dialog. Should be a tuple of strings in the format:
@@ -188,7 +189,7 @@ class Api:
 
     def call_component_method(self, component_id: str, method: str):
         """
-        eg. call_component_method(12, 'validate()')
+        eg. ``call_component_method(12, 'validate()')``
         """
         return self._window.evaluate_js('app.callComponentMethod({params})'.format(
             params=json.dumps({'component_id': component_id, 'method': method})
@@ -214,12 +215,12 @@ class Api:
 
     def set_menu(self, menuspec: Union[MenuSpecType, Dict[str, MenuSpecType]]):
         """
-        If menuspec is a list then the menu is the same for all platforms,
-        if menuspec is a dict then menuspec is set platform-specific.
-        (eg. {'cocoa': [{'title': 'Cocoa menu'}], 'default': []})  # no menu if not cocoa.
-        :param menuspec: [menuSpecApp, menuSpec1, menuSpec2, ...]
-            where menuSpec is {'title': str, 'children': [menuSpec], 'key': str, 'icon': ...}
-            or {'cocoa': [... menu spec for cocoa...], 'default': [... menu spec fallback ...]}
+        If ``menuspec`` is a *list* then the menu is the same for all platforms,
+        if ``menuspec`` is a *dict* then ``menuspec`` is set platform-specific.
+        (eg. ``{'cocoa': [{'title': 'Cocoa menu'}], 'default': []})``  means no menu if not cocoa.)
+        :param menuspec: ``[menuSpecApp, menuSpec1, menuSpec2, ...]``
+        where menuSpec is ``{'title': str, 'children': [menuSpec], 'key': str, 'icon': ...}``
+        or ``{'cocoa': [... menu spec for cocoa...], 'default': [... menu spec fallback ...]}``
         :return:
         """
         if isinstance(menuspec, dict):
@@ -266,7 +267,7 @@ class Api:
             'export +default *{',
             'var {component_name} = {{template: `{template}`,'.format(
                 component_name=component_name,
-                template=template.replace('`', '\\`')
+                template=template.replace('``', '\\``')
             ),
             script)
         self._window.evaluate_js('registerSfc({component_name}, {script}, {style})'.format(
@@ -339,6 +340,7 @@ def run(
         size: Tuple[Optional[int], Optional[int]] = (None, None),
         position: Tuple[Optional[int], Optional[int]] = (None, None),
         frameless: bool = False,
+        resizable: bool = True,
         fullscreen: bool = False,
         localization: dict = None,
         debug: bool = False,
@@ -346,12 +348,12 @@ def run(
 ):
     """
     :param localization: i18n strings for the main menu items.
-            See: https://pywebview.flowrl.com/examples/localization.html
+        See: https://pywebview.flowrl.com/examples/localization.html
     :param component: the component to load as main component.
-    :param menu: [menuSpec1, menuSpec2, ...]
-            where menuSpec is {'title': str, 'children': [menuSpec], 'key': str, 'icon': ...}
-            if menuSpec is None or {}, a separator is displayed
-            (See quasargui.main.Api.set_menu's menuspec)
+    :param menu: ``[menuSpec1, menuSpec2, ...]``
+        where ``menuSpec`` is ``{'title': str, 'children': [menuSpec], 'key': str, 'icon': ...}``
+        if ``menuSpec`` is ``None`` or ``{}``, a separator is displayed
+        (See quasargui.main.Api.set_menu's menuspec)
     :param title: The title of the window.
     :param min_size:
     :param size:
@@ -360,7 +362,7 @@ def run(
     :param fullscreen:
     :param debug: Enables right-click inspection in the GUI window.
     :param _render_debug: this option is for quasargui development.
-    It displays all the rendering in python's standard output.
+        It displays all the rendering in python's standard output.
     """
     api, window = create_window(component,
                                 title=title,
@@ -369,6 +371,7 @@ def run(
                                 size=size,
                                 position=position,
                                 frameless=frameless,
+                                resizable=resizable,
                                 fullscreen=fullscreen,
                                 debug=debug,
                                 _render_debug=_render_debug)
@@ -389,6 +392,7 @@ def create_window(
         size: Tuple[Optional[int], Optional[int]] = (None, None),
         position: Tuple[Optional[int], Optional[int]] = (None, None),
         frameless: bool = False,
+        resizable: bool = True,
         fullscreen: bool = False,
         debug: bool = None,
         _render_debug: bool = None,
@@ -419,6 +423,7 @@ def create_window(
         width=size[0] or 800,
         height=size[1] or 600,
         frameless=frameless,
+        resizable=resizable,
         fullscreen=fullscreen
     )
     window_api_list.append((window, api))

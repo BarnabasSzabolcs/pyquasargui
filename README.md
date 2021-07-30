@@ -1,6 +1,8 @@
-# Python Vue Quasar GUI
-A user-friendly package for making Python HTML-GUI desktop apps,
-without ever needing to touch JavaScript.
+
+![demo](docs/assets/screenshots/readme_demo.png)
+
+#QuasarGUI
+A user-friendly package for making awesome-looking desktop apps in Python.
 
 ## Usage:
 
@@ -12,17 +14,21 @@ You can react to user events using callbacks. (See: simple greeter app.)
 
 ###Hello world
 
-```python
-import quasargui
-from quasargui.components import QLayout
+![readme_helloworld](docs/assets/screenshots/readme_helloworld.png)
 
-layout = QLayout(children=["Hello World!"])
+```python3
+import quasargui
+from quasargui import *
+
+layout = QLayout(["Hello World!"])
 quasargui.run(layout)
 ```
 
 ###Simple greeter app
 
 This app demonstrates how you can build up a simple form and use the form's data to run your code.
+
+![readme_greeter](docs/assets/screenshots/readme_greeter.png)
 
 ```python
 import quasargui
@@ -32,12 +38,12 @@ name = Model()
 
 
 def display_notification():
-    layout.api.show_notification(message=f'Hello, {name.value}!')
+    layout.api.plugins.notify(message=f'Hello, {name.value}!')
 
 
 layout = Div(
     styles={'max-width': '30em', 'margin-left': 'auto', 'margin-right': 'auto'},
-    classes='q-mt-xl text-center',
+    classes='q-mt-xl q-pt-lg text-center',
     children=[
         "What's your name?",
         QInput('Name', name),

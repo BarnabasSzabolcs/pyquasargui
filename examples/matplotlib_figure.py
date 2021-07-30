@@ -1,7 +1,7 @@
 """
 Coin-flip stock market price simulator
 
-this example requires matplotlib and mpld3
+This example requires matplotlib and mpld3
 """
 import math
 import random
@@ -10,7 +10,6 @@ import time
 # noinspection PyPackageRequirements, PyUnresolvedReferences
 import matplotlib.pyplot as plt
 
-import quasargui
 from quasargui import *
 from quasargui.plot import Plot
 
@@ -116,4 +115,4 @@ layout = QLayout(events={'load': redraw_plot}, children=[
     )
 ])
 
-quasargui.run(layout)
+run(layout)

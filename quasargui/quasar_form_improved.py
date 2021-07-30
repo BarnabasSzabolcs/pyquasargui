@@ -18,6 +18,7 @@ from quasargui.quasar_form import (
     QTimePicker, QDatePicker, QColorPicker)
 from quasargui.tools import build_props, merge_classes
 from quasargui.typing import ClassesType, StylesType, PropsType, EventsType
+from quasargui.vue_tags_input import VueTagsInput
 
 
 class InputStr(QInput):
@@ -256,11 +257,15 @@ class InputChoice(LabeledComponent):
             except Exception:
                 return False
 
-        single_only_appearances = {'radio', 'buttons'}
+        single_only_appearances = {'input', 'radio', 'buttons'}
         multiple_only_appearances = {'checkboxes', 'toggles', 'tags'}
+        props = props or {}
 
         if multiple is None:
             multiple = appearance in multiple_only_appearances
+
+        model = model or Model([] if multiple else '')
+        self.dependents = [model]
 
         allowed_appearances = {'auto', 'radio', 'checkboxes', 'toggles', 'buttons', 'select', 'tags'}
         if appearance not in allowed_appearances:
@@ -281,13 +286,18 @@ class InputChoice(LabeledComponent):
             if multiple:
                 appearance = (
                     'tags' if n_choices == 0 else
-                    'checkboxes' if n_choices <= 20 else
+                    'checkboxes' if n_choices <= 10 else
                     'select'
                 )
             else:
-                appearance = 'radio' if 0 < n_choices <= 5 else 'select'
+                appearance = 'radio' if 0 < n_choices <= 5 else \
+                             'input' if n_choices == 0 else \
+                             'select'
 
-        if appearance in {'radio', 'buttons', 'checkboxes', 'toggles'}:
+        if appearance == 'input':
+            self.component = 'q-input'
+            children = []
+        elif appearance in {'radio', 'buttons', 'checkboxes', 'toggles'}:
             if (isinstance(choices, list) and len(choices)
                     and isinstance(choices[0], str)):
                 choices = [{'label': choice, 'value': choice} for choice in choices]
@@ -329,22 +339,23 @@ class InputChoice(LabeledComponent):
                 {
                     'options': choices,
                     'multiple': multiple,
+                    'use-chips': multiple
                 }
             )
             children = [QSelect(label=label, model=model, props=item_props)]
         elif appearance == 'tags':
             label_props = build_props({
-                'hide-bottom-space': True
+                'hide-bottom-space': True,
             }, label_props)
             item_props = build_props({
-                'placeholder': '',
+                'placeholder': props.get('placeholder', ''),
                 'add-on-key': [13, ','],
                 # 'separators': [',']
             }, item_props)
             children = [
                 QField(label=label, model=model, props=label_props, children=[
                     Slot('control', [
-                        VueTagsInput(model=model, props=item_props)
+                        VueTagsInput(model, props=item_props)
                     ])
                 ]),
             ]
@@ -632,33 +643,3 @@ class InputColor(_InputWithPicker):
     @staticmethod
     def _to_python(s):
         return s
-
-
-class VueTagsInput(ComponentWithModel):
-    """
-    see http://www.vue-tags-input.com/#/examples/hooks
-    Note that model points to 'tags' property,
-    'v-model' can be accessed via self.current_tag.
-    """
-    component = 'vue-tags-input'
-    script_sources = ['vue-tags-input.2.1.0.js']
-    style_sources = ['vue-tags-input.css']
-
-    def __init__(self,
-                 model: Model = None,
-                 classes: ClassesType = None,
-                 styles: StylesType = None,
-                 props: PropsType = None):
-        props = build_props({}, props, {
-            'tags': model or Model([])
-        })
-        events = {
-            'tags-changed': lambda new_tags: model.set_value(new_tags)
-        }
-        self.current_tag = Model('')
-        super().__init__(
-            model=self.current_tag,
-            props=props,
-            classes=classes,
-            styles=styles,
-            events=events)

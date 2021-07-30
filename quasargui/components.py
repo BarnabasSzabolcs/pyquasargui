@@ -111,7 +111,7 @@ class Link(Component):
     """
     This is not a Quasar component, but it is definitely useful.
     Use this component to point to external links.
-    eg. Link('google', 'google.com', children=[QIcon('open_in_new')])
+    eg. ``Link('google', 'google.com', children=[QIcon('open_in_new')])``
     """
     component = 'a'
     defaults = {

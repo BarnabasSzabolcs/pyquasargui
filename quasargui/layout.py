@@ -1,3 +1,7 @@
+"""
+This module contains all the Quasar elements that help with the general layout of the page.
+"""
+
 from typing import List, Union
 
 from quasargui.base import Component, ComponentWithModel
@@ -200,7 +204,7 @@ class QFooter(ComponentWithModel):
             'bordered': True,
             'show': True,
         },
-        'classes': 'bg-white text-black'
+        'classes': 'bg-white text-black q-px-sm'
     }
 
     def __init__(self,
@@ -214,14 +218,12 @@ class QFooter(ComponentWithModel):
                  props: PropsType = None,
                  events: EventsType = None
                  ):
-        children = children
         props = build_props(self.defaults['props'], props, {
             'reveal': hide_on_scroll,
             'elevated': elevated,
             'bordered': bordered,
             'show': show,
         })
-        classes = merge_classes(self.defaults['classes'], classes or '')
         show = props['show']
         model = show if isinstance(show, Reactive) else Model(show)
         super().__init__(model=model, children=children, classes=classes, styles=styles, props=props, events=events)

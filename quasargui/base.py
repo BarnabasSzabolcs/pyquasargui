@@ -68,6 +68,7 @@ class Component:
     defaults = {}
     script_sources: List[str] = []
     style_sources: List[str] = []
+    render_children_immediately: bool = False
 
     def __init__(self,
                  children: ChildrenType = None,
@@ -116,7 +117,8 @@ class Component:
                              child.render_mustache() if isinstance(child, Renderable) else
                              child.vue
                              for child in children if not isinstance(child, Slot)],
-                'slots': slots
+                'slots': slots,
+                'recursive': self.render_children_immediately
             })
         except AttributeError as e:
             wrong_children = [child for child in children if
@@ -191,6 +193,9 @@ class Component:
     def add_event(self, event: str, cb: EventCBType):
         self._events[event] = EventCallbacks.render_cb(cb)
 
+    def notify(self, message: str, **params):
+        self.api.plugins.notify(message, **params)
+
 
 class ComponentWithModel(Component):
     def __init__(self,
@@ -202,7 +207,7 @@ class ComponentWithModel(Component):
                  events: EventsType = None):
         self._model = model or Model(None)
         props = props or {}
-        props['value'] = self._model
+        props['v-model'] = self._model
         super().__init__(children=children,
                          classes=classes,
                          styles=styles,
@@ -243,11 +248,12 @@ class Slot(Component):
     Represents a vue v-slot, to be used in children parameter of a Component.
 
     To access scoped slots,
-    ```
-    Component(children=[
-        Slot('name', lambda prop: [... children ...])
-    ])
-    ```
+    ::
+
+        Component(children=[
+            Slot('name', lambda prop: [... children ...])
+        ])
+
     prop is a PropVar that behaves similarly to a Model.
 
     To access default slot, set name = 'default' (or '').
@@ -406,26 +412,29 @@ def v_html(
 class SingleFileComponent(Component):
     """
     Extend this component to add your external component, written in .vue.
-    ```
-    class YourSFC(SingleFileComponent):
-        vue_source = 'path/to/your.vue'
-    ```
-    Note: the sfv support is limited (it does not handle imports and styles other than css).
+    ::
+
+        class YourSFC(SingleFileComponent):
+            vue_source = 'path/to/your.vue'
+
+    **Note:** the SFC support is limited (it does not handle imports and styles other than css).
 
     If you want to import a more serious vue component,
 
     1. compile your source into .umd.js
     2. create your class like the following:
-    ```
-    class YourComponentName(Component):
-        script_source = ['path/to/your.umd.js']
-        component = 'your-component-name'
 
-    class YourOtherComponentName(Component):
-        script_source = ['path/to/your.umd.js']
-        component = 'your-other-component-name'
-    ```
-    A script is only included once.
+    ::
+
+        class YourComponentName(Component):
+            script_source = ['path/to/your.umd.js']
+            component = 'your-component-name'
+
+        class YourOtherComponentName(Component):
+            script_source = ['path/to/your.umd.js']
+            component = 'your-other-component-name'
+
+    Any script that is included with ``script_source`` is only included once in the HTML source of the GUI.
     """
     vue_source: str = ''  # override this with your .vue path
     component = None

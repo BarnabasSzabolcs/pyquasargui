@@ -1,3 +1,7 @@
+"""
+Hello World example
+"""
+
 import quasargui
 from quasargui import *
 
@@ -14,7 +18,7 @@ input_name = QInput(
     # events={'change': run_program}
 )
 btn_submit = QButton(
-    label='Submit',
+    'Submit',
     classes='text-primary',
     props={'unelevated': True, 'size': 'lg'},
     events={'click': run_program})
@@ -32,4 +36,4 @@ layout = Div(
         btn_submit])
 
 
-quasargui.run(layout)
+quasargui.run(layout, size=(500, 300))

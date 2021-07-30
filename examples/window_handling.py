@@ -9,7 +9,7 @@ def create_new_window():
     layout = create_layout('New window')
     create_window(layout, position=(randint(1, 100), randint(1, 100)), size=(400, 500))
     sleep(0.5)
-    layout.api.plugins.notify(message='A brand new window!', type='positive')
+    layout.notify('A brand new window!', type='positive', timeout=200000)
 
 
 def close_window(layout):
@@ -20,21 +20,6 @@ def close_window(layout):
 def toggle_fullscreen(layout, model):
     model.value = not model.value
     layout.api.toggle_fullscreen()
-
-
-def save_dialog(api):
-    result = api.show_save_dialog()
-    api.plugins.notify(message='Result: {}'.format(result))
-
-
-def open_dialog(api):
-    result = api.show_open_dialog()
-    api.plugins.notify(message='Result: {}'.format(result))
-
-
-def folder_dialog(api):
-    result = api.show_folder_dialog()
-    api.plugins.notify(message='Result: {}'.format(result))
 
 
 def create_layout(title):
@@ -49,7 +34,7 @@ def create_layout(title):
         lambda: width.api.resize_window((width.value, None)) if 300 <= width.value <= 1000 else None,
         immediate=True
     )
-    height = Model(500)
+    height = Model(300)
     height.add_callback(
         lambda: height.api.resize_window((None, height.value)) if 300 <= height.value <= 1000 else None,
         immediate=True
@@ -74,14 +59,11 @@ def create_layout(title):
                 QInput('Resize window width', width, type='number'),
                 QInput('Resize window height', height, type='number'),
                 QButton('Create new window', events={'click': create_new_window}),
-                QButton('Open file dialog', events={'click': lambda: open_dialog(layout.api)}),
-                QButton('Open folder dialog', events={'click': lambda: folder_dialog(layout.api)}),
-                QButton('Open save dialog', events={'click': lambda: save_dialog(layout.api)}),
-            ])
+           ])
         ])
     ])
     return layout
 
 
 main_layout = create_layout('Main window')
-run(main_layout, size=(400, 500))
+run(main_layout, size=(400, 300))

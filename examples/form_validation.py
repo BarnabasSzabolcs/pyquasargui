@@ -9,7 +9,8 @@ def on_submit():
     if not accept.value:
         accept.api.plugins.notify(
             color='negative',
-            message='You need to accept the license and terms first'
+            message='You need to accept the license and terms first',
+            icon='report_problem'
         )
     elif validation:
         accept.api.plugins.notify(
@@ -71,4 +72,4 @@ layout = QLayout([
     QPage([validate_on_submit])
 ])
 
-quasargui.run(layout, debug=True)
+quasargui.run(layout, 'Form validation demo', size=(600, 550))

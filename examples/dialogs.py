@@ -2,7 +2,11 @@ from quasargui import *
 
 
 def show_notification(message):
-    layout.api.plugins.notify(message=message, position='top-right', group=False, timeout=1500)
+    layout.notify(message=message, position='top-right', group=False, timeout=1500)
+
+
+def show_success():
+    layout.api.plugins.notify(message='This is a success!', caption='Just now', type='positive', icon='done')
 
 
 dialog_events = {
@@ -92,6 +96,7 @@ layout = QLayout([
     ])]),
     QPage([Rows(classes='q-py-xl', children=[
 
+        QButton('show a success notification', events={'click': show_success}),
         QButton('show an alert', events={'click': show_alert}),
         QButton('show a confirmation', events={'click': show_confirm}),
         QButton('show a prompt', events={'click': show_prompt}),
@@ -99,7 +104,7 @@ layout = QLayout([
         QButton('show a grid menu', events={'click': lambda: show_bottom_sheet(grid=True)}),
         QButton('show a list menu', events={'click': lambda: show_bottom_sheet(grid=False)}),
 
-        Div(classes='q-my-xl', children=[
+        Div(classes='q-mt-xl', children=[
             'See even more examples at ',
             Link('Quasar dialog documentation',
                  'https://quasar.dev/quasar-plugins/dialog#predefined')])

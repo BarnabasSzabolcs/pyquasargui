@@ -1,2 +1,5 @@
-node_modules
-requirements.txt
+/node_modules/
+/requirements.txt
+/venv/
+/sphinx-docs/_build/
+/site/
