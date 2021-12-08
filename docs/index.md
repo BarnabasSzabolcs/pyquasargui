@@ -105,6 +105,7 @@ pip install quasargui
 ## Support
 
 [Contact me][github_me] on Github.
+**Repository:** [github_repo] 
 
 ## License
 
@@ -112,3 +113,4 @@ Quasargui is licensed under MIT license.
 
 [github_examples]: https://github.com/BarnabasSzabolcs/pyquasargui/tree/develop/examples
 [github_me]: https://github.com/BarnabasSzabolcs/
+[github_repo]: https://github.com/BarnabasSzabolcs/pyquasargui/
