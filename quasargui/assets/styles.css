@@ -1,0 +1,31 @@
+body{
+    min-width: 0;
+}
+.text-xl{
+    font-size: 25px;
+}
+.text-lg{
+    font-size: 20px;
+}
+.text-md{
+    font-size: 16px;
+}
+.text-sm{
+    font-size: 12px;
+}
+.text-xs{
+    font-size: 10px;
+}
+.easyread{
+    max-width: 30em;
+    margin: 0 auto;
+}
+.row-grow{
+    flex-grow: 1;
+}
+.main-menu{
+    background-color: white;
+}
+.body--dark .main-menu{
+    background-color: black;
+}

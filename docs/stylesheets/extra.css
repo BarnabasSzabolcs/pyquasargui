@@ -1,0 +1,56 @@
+body[data-md-color-scheme=slate]{
+    background: black;
+}
+
+
+img[src*="#screenshot"]{
+    /* margin-top: 15px; */
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 1px 3px 10px 0px #eee;
+}
+body[data-md-color-scheme=slate] img[src*="#screenshot"]{
+    box-shadow: none;
+    border: 1px solid #333;
+}
+
+figure img{
+    margin: 0 auto;
+    margin-top: 15px;
+}
+figcaption em{
+    font-style: normal;
+}
+.md-typeset figcaption{
+    margin-top: 30px;
+    margin-bottom: 0;
+}
+
+.tabbed-set .highlight{
+    margin: 30px 15px;
+}
+.mermaid rect {
+    fill: none !important;
+    stroke: #888 !important;
+}
+/*.mermaid line{
+    stroke: #888 !important;
+}
+.mermaid path.relation{
+    stroke: #333 !important;
+}*/
+.mermaid text{
+    fill: #000 !important;
+}
+.mermaid{
+    filter: saturate(0) brightness(0.7) contrast(1.5);
+}
+.mermaid [id*="-ComponentWithModel-"] rect,
+.mermaid [id*="-Component-"] rect,
+.mermaid [id*="-LabeledComponent-"] rect{
+    fill: #fff !important;
+}
+.mermaid+figcaption{
+    margin-top: 0;
+    margin-bottom: 30px;
+}

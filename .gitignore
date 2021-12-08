@@ -1,0 +1,10 @@
+/node_modules/
+/requirements.txt
+/venv/
+/sphinx-docs/_build/
+/site/
+.idea/
+quasargui/__pycache__/
+quasargui/platforms/__pycache__/
+dist
+quasargui.egg-info

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Program</title>
+  <link href="material-icons.css" rel="stylesheet" type="text/css" />
+  <link href="quasar.min.css" rel="stylesheet" type="text/css" />
+  <link href="styles.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+  <div id="q-app">
+    <dynamic-component :id="menuId" v-if="menuId"></dynamic-component>
+    <dynamic-component :id="mainComponentId" v-if="mainComponentId"></dynamic-component>
+    <div v-if="debug" style="display:none" id="debug">
+      <b>main component id:</b> {{ mainComponentId }}<br>
+      <b>menu component id:</b> {{ menuId }}<br>
+      <b>data:</b>
+      <div v-for="(value, data_id) of data">
+        {{ data_id }}: {{ value }}
+      </div>
+      <b>components:</b>
+      <div v-for="(value, component_id) of componentStore">
+        {{ component_id }}: {{ value }}
+      </div>
+    </div>
+  </div>
+  <script src="lodash.min.js"></script>
+  <script src="vue.min.js"></script>
+  <script src="quasar.umd.min.js"></script>
+  <script src="script.js"></script>
+</body>
+
+</html>

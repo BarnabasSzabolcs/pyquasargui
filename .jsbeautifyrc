@@ -1,0 +1,7 @@
+{
+  "indent_size": 2,
+  "space_in_paren": false,
+  "space_after_anon_function": false,
+  "wrap_attributes": "preserve",
+  "wrap_attributes_indent_size": 4
+}
