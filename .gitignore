@@ -6,3 +6,5 @@
 .idea/
 quasargui/__pycache__/
 quasargui/platforms/__pycache__/
+dist
+quasargui.egg-info
