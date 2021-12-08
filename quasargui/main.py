@@ -439,6 +439,8 @@ def create_window(
         fullscreen=fullscreen
     )
     window_api_list.append((window, api))
+    window.closing += lambda: api.close_window(False)  # True would hang the app
+    
     if STARTED:
         api.init(window)
     return api, window
